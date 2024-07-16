@@ -118,6 +118,12 @@ IF (BUILD_TESTS)
     )
 ENDIF (BUILD_TESTS)
 
+IF (BUILD_EXAMPLES)
+    SUBDIRS (
+        examples
+    )
+ENDIF (BUILD_EXAMPLES)
+
 if(DEBUG_DEPENDENCIES)
     function(print_target_properties target)
         MESSAGE("${target} properties:")
