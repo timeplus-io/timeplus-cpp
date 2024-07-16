@@ -163,7 +163,7 @@ class ArrayType : public Type {
 public:
     explicit ArrayType(TypeRef item_type);
 
-    std::string GetName() const { return std::string("Array(") + item_type_->GetName() + ")"; }
+    std::string GetName() const { return std::string("array(") + item_type_->GetName() + ")"; }
 
     /// Type of array's elements.
     inline TypeRef GetItemType() const { return item_type_; }

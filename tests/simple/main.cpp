@@ -28,7 +28,7 @@ inline void ArrayExample(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_array (arr Array(UInt64))");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_array (arr array(uint64)) ENGINE = Memory");
 
     auto arr = std::make_shared<ColumnArray>(std::make_shared<ColumnUInt64>());
 
@@ -61,14 +61,14 @@ inline void ArrayExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_array");
+    client.Execute("DROP TEMPORARY STREAM test_array");
 }
 
 inline void MultiArrayExample(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_multiarray (arr Array(Array(UInt64)))");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_multiarray (arr array(array(uint64))) ENGINE = Memory");
 
     auto arr = std::make_shared<ColumnArray>(std::make_shared<ColumnUInt64>());
 
@@ -101,14 +101,14 @@ inline void MultiArrayExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_multiarray");
+    client.Execute("DROP TEMPORARY STREAM test_multiarray");
 }
 
 inline void DateExample(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_date (d DateTime, dz DateTime('Europe/Moscow'))");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_date (d datetime, dz datetime('Europe/Moscow')) ENGINE = Memory");
 
     auto d = std::make_shared<ColumnDateTime>();
     auto dz = std::make_shared<ColumnDateTime>();
@@ -135,14 +135,15 @@ inline void DateExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_date");
+    client.Execute("DROP TEMPORARY STREAM test_date");
 }
 
 inline void DateTime64Example(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_datetime64 (dt64 DateTime64(6))");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_datetime64 (dt64 DateTime64(6)) ENGINE = Memory");
+    
 
     auto d = std::make_shared<ColumnDateTime64>(6);
     d->Append(std::time(nullptr) * 1000000 + 123456);
@@ -165,14 +166,14 @@ inline void DateTime64Example(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_datetime64");
+    client.Execute("DROP TEMPORARY STREAM test_datetime64");
 }
 
 inline void DecimalExample(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_decimal (d Decimal64(4))");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_decimal (d Decimal64(4)) ENGINE = Memory");
 
     auto d = std::make_shared<ColumnDecimal>(18, 4);
     d->Append(21111);
@@ -188,7 +189,7 @@ inline void DecimalExample(Client& client) {
         }
     );
 
-    client.Select("SELECT toDecimal32(2, 4) AS x", [](const Block& block)
+    client.Select("SELECT to_decimal32(2, 4) AS x", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col = block[0]->As<ColumnDecimal>();
@@ -198,12 +199,12 @@ inline void DecimalExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_decimal");
+    client.Execute("DROP TEMPORARY STREAM test_decimal");
 }
 
 inline void GenericExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_client (id UInt64, name String)");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_client (id uint64, name string) ENGINE = Memory");
 
     /// Insert some values.
     {
@@ -231,12 +232,12 @@ inline void GenericExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_client");
+    client.Execute("DROP TEMPORARY STREAM test_client");
 }
 
 inline void NullableExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_client (id Nullable(UInt64), date Nullable(Date))");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_client (id nullable(uint64), date nullable(date)) ENGINE = Memory");
 
     /// Insert some values.
     {
@@ -295,7 +296,7 @@ inline void NullableExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_client");
+    client.Execute("DROP TEMPORARY STREAM test_client");
 }
 
 inline void NumbersExample(Client& client) {
@@ -320,7 +321,7 @@ inline void NumbersExample(Client& client) {
 
 inline void CancelableExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_client (x UInt64)");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_client (x uint64) ENGINE = Memory");
 
     /// Insert a few blocks.
     for (unsigned j = 0; j < 10; j++) {
@@ -345,15 +346,15 @@ inline void CancelableExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_client");
+    client.Execute("DROP TEMPORARY STREAM test_client");
 }
 
 inline void ExecptionExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_exceptions (id UInt64, name String)");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_exceptions (id uint64, name string) ENGINE = Memory");
     /// Expect failing on table creation.
     try {
-        client.Execute("CREATE TEMPORARY TABLE test_exceptions (id UInt64, name String)");
+        client.Execute("CREATE TEMPORARY STREAM test_exceptions (id uint64, name string) ENGINE = Memory");
     } catch (const ServerException& e) {
         if (e.GetCode() == ErrorCodes::TABLE_ALREADY_EXISTS) {
             // OK
@@ -363,12 +364,12 @@ inline void ExecptionExample(Client& client) {
     }
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_exceptions");
+    client.Execute("DROP TEMPORARY STREAM test_exceptions");
 }
 
 inline void EnumExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_enums (id UInt64, e Enum8('One' = 1, 'Two' = 2))");
+     client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_enums (id uint64, e enum8('One' = 1, 'Two' = 2)) ENGINE = Memory");
 
     /// Insert some values.
     {
@@ -404,7 +405,7 @@ inline void EnumExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_enums");
+    client.Execute("DROP TEMPORARY STREAM test_enums");
 }
 
 inline void SelectNull(Client& client) {
@@ -418,7 +419,7 @@ inline void SelectNull(Client& client) {
 
 inline void ShowTables(Client& client) {
     /// Select values inserted in the previous step.
-    client.Select("SHOW TABLES", [](const Block& block)
+    client.Select("SHOW STREAMS", [](const Block& block)
         {
             for (size_t i = 0; i < block.GetRowCount(); ++i) {
                 std::cout << (*block[0]->As<ColumnString>())[i] << "\n";
@@ -429,7 +430,7 @@ inline void ShowTables(Client& client) {
 
 inline void IPExample(Client &client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_ips (id UInt64, v4 IPv4, v6 IPv6)");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_ips (id uint64, v4 ipv4, v6 ipv6) ENGINE = Memory");
 
     /// Insert some values.
     {
@@ -474,7 +475,7 @@ inline void IPExample(Client &client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY TABLE test_ips");
+    client.Execute("DROP TEMPORARY STREAM test_ips");
 }
 
 static void RunTests(Client& client) {
@@ -494,18 +495,46 @@ static void RunTests(Client& client) {
     ShowTables(client);
 }
 
-int main() {
+// int main() {
+//     try {
+//         const auto localHostEndpoint = ClientOptions()
+//                 .SetHost(   getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
+//                 .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
+//                 .SetEndpoints({   {"asasdasd", 9000}
+//                                  ,{"localhost"}
+//                                  ,{"noalocalhost", 9000}
+//                                })
+//                 .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
+//                 .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
+//                 .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+
+//         {
+//             Client client(ClientOptions(localHostEndpoint)
+//                     .SetPingBeforeQuery(true));
+//             RunTests(client);
+//             std::cout << "current endpoint : " <<  client.GetCurrentEndpoint().value().host << "\n";
+//         }
+
+//         {
+//             Client client(ClientOptions(localHostEndpoint)
+//                     .SetPingBeforeQuery(true)
+//                     .SetCompressionMethod(CompressionMethod::LZ4));
+//             RunTests(client);
+//         }
+//     } catch (const std::exception& e) {
+//         std::cerr << "exception : " << e.what() << std::endl;
+//     }
+
+//     return 0;
+// }
+
+int main()
+{
+    /// Initialize client connection.
     try {
         const auto localHostEndpoint = ClientOptions()
                 .SetHost(   getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-                .SetEndpoints({   {"asasdasd", 9000}
-                                 ,{"localhost"}
-                                 ,{"noalocalhost", 9000}
-                               })
-                .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-                .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-                .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+                .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"));
 
         {
             Client client(ClientOptions(localHostEndpoint)
@@ -514,15 +543,51 @@ int main() {
             std::cout << "current endpoint : " <<  client.GetCurrentEndpoint().value().host << "\n";
         }
 
-        {
-            Client client(ClientOptions(localHostEndpoint)
-                    .SetPingBeforeQuery(true)
-                    .SetCompressionMethod(CompressionMethod::LZ4));
-            RunTests(client);
-        }
+        // {
+        //     Client client(ClientOptions(localHostEndpoint)
+        //             .SetPingBeforeQuery(true)
+        //             .SetCompressionMethod(CompressionMethod::LZ4));
+        //     RunTests(client);
+        // }
     } catch (const std::exception& e) {
         std::cerr << "exception : " << e.what() << std::endl;
     }
+
+
+    // Client client(ClientOptions().SetHost("localhost").SetPort(8463));
+    // /// Create a table.
+    // client.Execute("CREATE STREAM IF NOT EXISTS default.numbers (id uint64, name string) ENGINE = Memory");
+
+    // /// Insert some values.
+    // {
+    //     Block block;
+
+    //     auto id = std::make_shared<ColumnUInt64>();
+    //     id->Append(1);
+    //     id->Append(7);
+
+    //     auto name = std::make_shared<ColumnString>();
+    //     name->Append("one");
+    //     name->Append("seven");
+
+    //     block.AppendColumn("id"  , id);
+    //     block.AppendColumn("name", name);
+
+    //     client.Insert("default.numbers", block);
+    // }
+
+    // /// Select values inserted in the previous step.
+    // client.Select("SELECT id, name FROM default.numbers", [] (const Block& block)
+    //     {
+    //         for (size_t i = 0; i < block.GetRowCount(); ++i) {
+    //             std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
+    //                       << block[1]->As<ColumnString>()->At(i) << "\n";
+    //         }
+    //     }
+    // );
+
+    // /// Delete table.
+    // client.Execute("DROP STREAM default.numbers");
 
     return 0;
 }

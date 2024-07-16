@@ -40,7 +40,7 @@ int main()
     );
 
     /// Delete table.
-    // client.Execute("DROP STREAM default.numbers");
+    client.Execute("DROP STREAM default.numbers");
 
     return 0;
 }
