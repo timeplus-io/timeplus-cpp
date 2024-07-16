@@ -6,10 +6,10 @@ using namespace clickhouse;
 int main()
 {
     /// Initialize client connection.
-    Client client(ClientOptions().SetHost("localhost"));
+    Client client(ClientOptions().SetHost("localhost").SetPort(8463));
 
     /// Create a table.
-    client.Execute("CREATE TABLE IF NOT EXISTS default.numbers (id UInt64, name String) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS default.numbers (id uint64, name string) ENGINE = Memory");
 
     /// Insert some values.
     {
@@ -40,7 +40,7 @@ int main()
     );
 
     /// Delete table.
-    client.Execute("DROP TABLE default.numbers");
+    // client.Execute("DROP STREAM default.numbers");
 
     return 0;
 }

@@ -9,6 +9,7 @@ INCLUDE (version)
 
 OPTION (BUILD_BENCHMARK "Build benchmark" OFF)
 OPTION (BUILD_TESTS "Build tests" OFF)
+OPTION (BUILD_EXAMPLES "Build examples" ON)
 OPTION (BUILD_SHARED_LIBS "Build shared libs" OFF)
 OPTION (WITH_OPENSSL "Use OpenSSL for TLS connections" OFF)
 OPTION (WITH_SYSTEM_ABSEIL "Use system ABSEIL" OFF)

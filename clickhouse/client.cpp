@@ -12,6 +12,7 @@
 #include <system_error>
 #include <vector>
 #include <sstream>
+#include <iostream>
 
 #if defined(WITH_OPENSSL)
 #include "base/sslsocket.h"
@@ -795,6 +796,12 @@ void Client::Impl::SendQuery(const Query& query) {
         }
     }
 
+    /// start by Jax
+    WireFormat::WriteUInt64(*output_, uint64_t(0));//:value
+    WireFormat::WriteUInt64(*output_, uint64_t(0));//:count_participating_replicas
+    WireFormat::WriteUInt64(*output_, uint64_t(0));//:number_of_current_replica
+    /// end by Jax
+
     /// Per query settings
     if (server_info_.revision >= DBMS_MIN_REVISION_WITH_SETTINGS_SERIALIZED_AS_STRINGS) {
         for(const auto& [name, field] : query.GetQuerySettings()) {
@@ -817,6 +824,11 @@ void Client::Impl::SendQuery(const Query& query) {
     WireFormat::WriteUInt64(*output_, Stages::Complete);
     WireFormat::WriteUInt64(*output_, compression_);
     WireFormat::WriteString(*output_, query.GetText());
+
+    /// start by Jax
+    std::cout<<"query.GetText(): "<<query.GetText()<<std::endl;
+    /// end by Jax
+
     // Send empty block as marker of
     // end of data
     SendData(Block());

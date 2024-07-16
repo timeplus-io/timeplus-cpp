@@ -249,7 +249,7 @@ class FixedStringType : public Type {
 public:
     explicit FixedStringType(size_t n);
 
-    std::string GetName() const { return std::string("FixedString(") + std::to_string(size_) + ")"; }
+    std::string GetName() const { return std::string("fixed_string(") + std::to_string(size_) + ")"; }
 
     inline size_t GetSize() const { return size_; }
 
@@ -261,7 +261,7 @@ class NullableType : public Type {
 public:
     explicit NullableType(TypeRef nested_type);
 
-    std::string GetName() const { return std::string("Nullable(") + nested_type_->GetName() + ")"; }
+    std::string GetName() const { return std::string("nullable(") + nested_type_->GetName() + ")"; }
 
     /// Type of nested nullable element.
     TypeRef GetNestedType() const { return nested_type_; }
@@ -288,7 +288,7 @@ public:
     explicit LowCardinalityType(TypeRef nested_type);
     ~LowCardinalityType();
 
-    std::string GetName() const { return std::string("LowCardinality(") + nested_type_->GetName() + ")"; }
+    std::string GetName() const { return std::string("lowcardinality(") + nested_type_->GetName() + ")"; }
 
     /// Type of nested nullable element.
     TypeRef GetNestedType() const { return nested_type_; }

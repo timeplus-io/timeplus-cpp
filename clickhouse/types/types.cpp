@@ -15,42 +15,42 @@ Type::Type(const Code code)
 
 const char* Type::TypeName(Type::Code code) {
     switch (code) {
-        case Type::Code::Void:           return "Void";
-        case Type::Code::Int8:           return "Int8";
-        case Type::Code::Int16:          return "Int16";
-        case Type::Code::Int32:          return "Int32";
-        case Type::Code::Int64:          return "Int64";
-        case Type::Code::UInt8:          return "UInt8";
-        case Type::Code::UInt16:         return "UInt16";
-        case Type::Code::UInt32:         return "UInt32";
-        case Type::Code::UInt64:         return "UInt64";
-        case Type::Code::Float32:        return "Float32";
-        case Type::Code::Float64:        return "Float64";
-        case Type::Code::String:         return "String";
-        case Type::Code::FixedString:    return "FixedString";
-        case Type::Code::DateTime:       return "DateTime";
-        case Type::Code::Date:           return "Date";
-        case Type::Code::Array:          return "Array";
-        case Type::Code::Nullable:       return "Nullable";
-        case Type::Code::Tuple:          return "Tuple";
-        case Type::Code::Enum8:          return "Enum8";
-        case Type::Code::Enum16:         return "Enum16";
-        case Type::Code::UUID:           return "UUID";
-        case Type::Code::IPv4:           return "IPv4";
-        case Type::Code::IPv6:           return "IPv6";
-        case Type::Code::Int128:         return "Int128";
-        case Type::Code::Decimal:        return "Decimal";
-        case Type::Code::Decimal32:      return "Decimal32";
-        case Type::Code::Decimal64:      return "Decimal64";
-        case Type::Code::Decimal128:     return "Decimal128";
-        case Type::Code::LowCardinality: return "LowCardinality";
-        case Type::Code::DateTime64:     return "DateTime64";
-        case Type::Code::Date32:         return "Date32";
-        case Type::Code::Map:            return "Map";
-        case Type::Code::Point:          return "Point";
-        case Type::Code::Ring:           return "Ring";
-        case Type::Code::Polygon:        return "Polygon";
-        case Type::Code::MultiPolygon:   return "MultiPolygon";
+        case Type::Code::Void:           return "void";
+        case Type::Code::Int8:           return "int8";
+        case Type::Code::Int16:          return "int16";
+        case Type::Code::Int32:          return "int32";
+        case Type::Code::Int64:          return "int64";
+        case Type::Code::UInt8:          return "uint8";
+        case Type::Code::UInt16:         return "uint16";
+        case Type::Code::UInt32:         return "uint32";
+        case Type::Code::UInt64:         return "uint64";
+        case Type::Code::Float32:        return "float32";
+        case Type::Code::Float64:        return "float64";
+        case Type::Code::String:         return "string";
+        case Type::Code::FixedString:    return "fixed_string";
+        case Type::Code::DateTime:       return "datetime";
+        case Type::Code::Date:           return "date";
+        case Type::Code::Array:          return "array";
+        case Type::Code::Nullable:       return "nullable";
+        case Type::Code::Tuple:          return "tuple";
+        case Type::Code::Enum8:          return "enum8";
+        case Type::Code::Enum16:         return "enum16";
+        case Type::Code::UUID:           return "uuid";
+        case Type::Code::IPv4:           return "ipv4";
+        case Type::Code::IPv6:           return "ipv6";
+        case Type::Code::Int128:         return "int128";
+        case Type::Code::Decimal:        return "decimal";
+        case Type::Code::Decimal32:      return "decimal32";
+        case Type::Code::Decimal64:      return "decimal64";
+        case Type::Code::Decimal128:     return "decimal128";
+        case Type::Code::LowCardinality: return "lowcardinality";
+        case Type::Code::DateTime64:     return "datetime64";
+        case Type::Code::Date32:         return "date32";
+        case Type::Code::Map:            return "map";
+        case Type::Code::Point:          return "point";
+        case Type::Code::Ring:           return "ring";
+        case Type::Code::Polygon:        return "polygon";
+        case Type::Code::MultiPolygon:   return "multipolygon";
     }
 
     return "Unknown type";
@@ -278,13 +278,13 @@ DecimalType::DecimalType(size_t precision, size_t scale)
 std::string DecimalType::GetName() const {
     switch (GetCode()) {
         case Decimal:
-            return "Decimal(" + std::to_string(precision_) + "," + std::to_string(scale_) + ")";
+            return "decimal(" + std::to_string(precision_) + "," + std::to_string(scale_) + ")";
         case Decimal32:
-            return "Decimal32(" + std::to_string(scale_) + ")";
+            return "decimal32(" + std::to_string(scale_) + ")";
         case Decimal64:
-            return "Decimal64(" + std::to_string(scale_) + ")";
+            return "decimal64(" + std::to_string(scale_) + ")";
         case Decimal128:
-            return "Decimal128(" + std::to_string(scale_) + ")";
+            return "decimal128(" + std::to_string(scale_) + ")";
         default:
             /// XXX: NOT REACHED!
             return "";
@@ -304,9 +304,9 @@ std::string EnumType::GetName() const {
     std::string result;
 
     if (GetCode() == Enum8) {
-        result = "Enum8(";
+        result = "enum8(";
     } else {
-        result = "Enum16(";
+        result = "enum16(";
     }
 
     for (auto ei = value_to_name_.begin(); ei != value_to_name_.end();) {
@@ -369,7 +369,7 @@ DateTimeType::DateTimeType(std::string timezone)
 }
 
 std::string DateTimeType::GetName() const {
-    std::string datetime_representation = "DateTime";
+    std::string datetime_representation = "datetime";
     const auto & timezone = Timezone();
     if (!timezone.empty())
         datetime_representation += "('" + timezone + "')";
@@ -383,14 +383,14 @@ DateTime64Type::DateTime64Type(size_t precision, std::string timezone)
     : Type(DateTime64), details::TypeWithTimeZoneMixin(std::move(timezone)), precision_(precision) {
 
     if (precision_ > 18) {
-        throw ValidationError("DateTime64 precision is > 18");
+        throw ValidationError("datetime64 precision is > 18");
     }
 }
 
 std::string DateTime64Type::GetName() const {
     std::string datetime64_representation;
     datetime64_representation.reserve(14);
-    datetime64_representation += "DateTime64(";
+    datetime64_representation += "datetime64(";
     datetime64_representation += std::to_string(precision_);
 
     const auto & timezone = Timezone();
@@ -425,7 +425,7 @@ LowCardinalityType::~LowCardinalityType() {
 }
 
 std::string TupleType::GetName() const {
-    std::string result("Tuple(");
+    std::string result("tuple(");
 
     if (!item_types_.empty()) {
         result += item_types_[0]->GetName();
@@ -448,7 +448,7 @@ MapType::MapType(TypeRef key_type, TypeRef value_type)
 }
 
 std::string MapType::GetName() const {
-    return std::string("Map(") + key_type_->GetName() + ", " +value_type_->GetName() + ")";
+    return std::string("map(") + key_type_->GetName() + ", " +value_type_->GetName() + ")";
 }
 
 }  // namespace clickhouse

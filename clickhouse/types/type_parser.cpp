@@ -27,44 +27,44 @@ bool TypeAst::operator==(const TypeAst & other) const {
 }
 
 static const std::unordered_map<std::string, Type::Code> kTypeCode = {
-    { "Void",        Type::Void },
-    { "Int8",        Type::Int8 },
-    { "Int16",       Type::Int16 },
-    { "Int32",       Type::Int32 },
-    { "Int64",       Type::Int64 },
-    { "Bool",        Type::UInt8 },
-    { "UInt8",       Type::UInt8 },
-    { "UInt16",      Type::UInt16 },
-    { "UInt32",      Type::UInt32 },
-    { "UInt64",      Type::UInt64 },
-    { "Float32",     Type::Float32 },
-    { "Float64",     Type::Float64 },
-    { "String",      Type::String },
-    { "FixedString", Type::FixedString },
-    { "DateTime",    Type::DateTime },
-    { "DateTime64",  Type::DateTime64 },
-    { "Date",        Type::Date },
-    { "Date32",      Type::Date32 },
-    { "Array",       Type::Array },
-    { "Nullable",    Type::Nullable },
-    { "Tuple",       Type::Tuple },
-    { "Enum8",       Type::Enum8 },
-    { "Enum16",      Type::Enum16 },
-    { "UUID",        Type::UUID },
-    { "IPv4",        Type::IPv4 },
-    { "IPv6",        Type::IPv6 },
-    { "Int128",      Type::Int128 },
-//    { "UInt128",      Type::UInt128 },
-    { "Decimal",     Type::Decimal },
-    { "Decimal32",   Type::Decimal32 },
-    { "Decimal64",   Type::Decimal64 },
-    { "Decimal128",  Type::Decimal128 },
-    { "LowCardinality", Type::LowCardinality },
-    { "Map",         Type::Map },
-    { "Point",       Type::Point },
-    { "Ring",        Type::Ring },
-    { "Polygon",     Type::Polygon },
-    { "MultiPolygon", Type::MultiPolygon },
+    { "void",        Type::Void },
+    { "int8",        Type::Int8 },
+    { "int16",       Type::Int16 },
+    { "int32",       Type::Int32 },
+    { "int64",       Type::Int64 },
+    { "bool",        Type::UInt8 },
+    { "uint8",       Type::UInt8 },
+    { "uint16",      Type::UInt16 },
+    { "uint32",      Type::UInt32 },
+    { "uint64",      Type::UInt64 },
+    { "float32",     Type::Float32 },
+    { "float64",     Type::Float64 },
+    { "string",      Type::String },
+    { "fixed_string", Type::FixedString },
+    { "datetime",    Type::DateTime },
+    { "datetime64",  Type::DateTime64 },
+    { "date",        Type::Date },
+    { "date32",      Type::Date32 },
+    { "array",       Type::Array },
+    { "nullable",    Type::Nullable },
+    { "tuple",       Type::Tuple },
+    { "enum8",       Type::Enum8 },
+    { "enum16",      Type::Enum16 },
+    { "uuid",        Type::UUID },
+    { "ipv4",        Type::IPv4 },
+    { "ipv6",        Type::IPv6 },
+    { "int128",      Type::Int128 },
+//    { "uint128",      Type::UInt128 },
+    { "decimal",     Type::Decimal },
+    { "decimal32",   Type::Decimal32 },
+    { "decimal64",   Type::Decimal64 },
+    { "decimal128",  Type::Decimal128 },
+    { "lowcardinality", Type::LowCardinality },
+    { "map",         Type::Map },
+    { "point",       Type::Point },
+    { "ring",        Type::Ring },
+    { "polygon",     Type::Polygon },
+    { "multipolygon", Type::MultiPolygon },
 };
 
 template <typename L, typename R>
@@ -90,35 +90,35 @@ static Type::Code GetTypeCode(const std::string& name) {
 }
 
 static TypeAst::Meta GetTypeMeta(const StringView& name) {
-    if (name == "Array") {
+    if (name == "array") {
         return TypeAst::Array;
     }
 
-    if (name == "Null") {
+    if (name == "null") {
         return TypeAst::Null;
     }
 
-    if (name == "Nullable") {
+    if (name == "nullable") {
         return TypeAst::Nullable;
     }
 
-    if (name == "Tuple") {
+    if (name == "tuple") {
         return TypeAst::Tuple;
     }
 
-    if (name == "Enum8" || name == "Enum16") {
+    if (name == "enum8" || name == "enum16") {
         return TypeAst::Enum;
     }
 
-    if (name == "LowCardinality") {
+    if (name == "lowcardinality") {
         return TypeAst::LowCardinality;
     }
 
-    if (name == "SimpleAggregateFunction") {
+    if (name == "simpleaggregatefunction") {
         return TypeAst::SimpleAggregateFunction;
     }
 
-    if (name == "Map") {
+    if (name == "map") {
         return TypeAst::Map;
     }
 
