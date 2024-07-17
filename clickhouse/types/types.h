@@ -1,6 +1,7 @@
 #pragma once
 
 #include "absl/numeric/int128.h"
+#include "clickhouse/base/wide_integer.h"
 
 #include <atomic>
 #include <map>
@@ -13,6 +14,10 @@ namespace clickhouse {
 
 using Int128 = absl::int128;
 using Int64 = int64_t;
+
+using UInt128 = wide::integer<128, unsigned>;
+using Int256 = wide::integer<256, signed>;
+using UInt256 = wide::integer<256, unsigned>;
 
 using TypeRef = std::shared_ptr<class Type>;
 
@@ -54,7 +59,10 @@ public:
         Point,
         Ring,
         Polygon,
-        MultiPolygon
+        MultiPolygon,
+        UInt128,
+        Int256,
+        UInt256
     };
 
     using EnumItem = std::pair<std::string /* name */, int16_t /* value */>;
@@ -288,7 +296,7 @@ public:
     explicit LowCardinalityType(TypeRef nested_type);
     ~LowCardinalityType();
 
-    std::string GetName() const { return std::string("lowcardinality(") + nested_type_->GetName() + ")"; }
+    std::string GetName() const { return std::string("low_cardinality(") + nested_type_->GetName() + ")"; }
 
     /// Type of nested nullable element.
     TypeRef GetNestedType() const { return nested_type_; }
@@ -340,6 +348,11 @@ inline TypeRef Type::CreateSimple<Int128>() {
 }
 
 template <>
+inline TypeRef Type::CreateSimple<Int256>() {
+    return TypeRef(new Type(Int256));
+}
+
+template <>
 inline TypeRef Type::CreateSimple<uint8_t>() {
     return TypeRef(new Type(UInt8));
 }
@@ -357,6 +370,16 @@ inline TypeRef Type::CreateSimple<uint32_t>() {
 template <>
 inline TypeRef Type::CreateSimple<uint64_t>() {
     return TypeRef(new Type(UInt64));
+}
+
+template <>
+inline TypeRef Type::CreateSimple<UInt128>() {
+    return TypeRef(new Type(UInt128));
+}
+
+template <>
+inline TypeRef Type::CreateSimple<UInt256>() {
+    return TypeRef(new Type(UInt256));
 }
 
 template <>

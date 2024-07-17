@@ -2,6 +2,10 @@
 
 #include "column.h"
 #include "absl/numeric/int128.h"
+#include "clickhouse/base/wide_integer.h"
+#include "clickhouse/base/wide_integer_to_string.h"
+
+
 
 namespace clickhouse {
 
@@ -69,16 +73,24 @@ private:
 using Int128 = absl::int128;
 using Int64 = int64_t;
 
+using UInt128 = wide::integer<128, unsigned>;
+using Int256 = wide::integer<256, signed>;
+using UInt256 = wide::integer<256, unsigned>;
+
+
 using ColumnUInt8   = ColumnVector<uint8_t>;
 using ColumnUInt16  = ColumnVector<uint16_t>;
 using ColumnUInt32  = ColumnVector<uint32_t>;
 using ColumnUInt64  = ColumnVector<uint64_t>;
+using ColumnUInt128  = ColumnVector<UInt128>;
+using ColumnUInt256  = ColumnVector<UInt256>;
 
 using ColumnInt8    = ColumnVector<int8_t>;
 using ColumnInt16   = ColumnVector<int16_t>;
 using ColumnInt32   = ColumnVector<int32_t>;
 using ColumnInt64   = ColumnVector<int64_t>;
 using ColumnInt128  = ColumnVector<Int128>;
+using ColumnInt256  = ColumnVector<Int256>;
 
 using ColumnFloat32 = ColumnVector<float>;
 using ColumnFloat64 = ColumnVector<double>;

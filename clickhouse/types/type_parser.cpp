@@ -54,17 +54,19 @@ static const std::unordered_map<std::string, Type::Code> kTypeCode = {
     { "ipv4",        Type::IPv4 },
     { "ipv6",        Type::IPv6 },
     { "int128",      Type::Int128 },
-//    { "uint128",      Type::UInt128 },
+    { "uint128",     Type::UInt128 },
+    { "int256",      Type::Int256 },
+    { "uint256",     Type::UInt256 },
     { "decimal",     Type::Decimal },
     { "decimal32",   Type::Decimal32 },
     { "decimal64",   Type::Decimal64 },
     { "decimal128",  Type::Decimal128 },
-    { "lowcardinality", Type::LowCardinality },
+    { "low_cardinality", Type::LowCardinality },
     { "map",         Type::Map },
     { "point",       Type::Point },
     { "ring",        Type::Ring },
     { "polygon",     Type::Polygon },
-    { "multipolygon", Type::MultiPolygon },
+    { "multi_polygon", Type::MultiPolygon },
 };
 
 template <typename L, typename R>
@@ -110,7 +112,7 @@ static TypeAst::Meta GetTypeMeta(const StringView& name) {
         return TypeAst::Enum;
     }
 
-    if (name == "lowcardinality") {
+    if (name == "low_cardinality") {
         return TypeAst::LowCardinality;
     }
 

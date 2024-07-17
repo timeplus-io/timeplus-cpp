@@ -22,8 +22,10 @@ ColumnUUID::ColumnUUID(ColumnRef data)
 }
 
 void ColumnUUID::Append(const UUID& value) {
-    data_->Append(value.first);
-    data_->Append(value.second);
+    // data_->Append(value.first);
+    // data_->Append(value.second);
+    data_->Append(value.items[0]);
+    data_->Append(value.items[1]);
 }
 
 void ColumnUUID::Clear() {
@@ -31,7 +33,7 @@ void ColumnUUID::Clear() {
 }
 
 const UUID ColumnUUID::At(size_t n) const {
-    return UUID(data_->At(n * 2), data_->At(n * 2 + 1));
+    return UUID({data_->At(n * 2), data_->At(n * 2 + 1)});
 }
 
 void ColumnUUID::Reserve(size_t new_cap) {

@@ -43,14 +43,17 @@ const char* Type::TypeName(Type::Code code) {
         case Type::Code::Decimal32:      return "decimal32";
         case Type::Code::Decimal64:      return "decimal64";
         case Type::Code::Decimal128:     return "decimal128";
-        case Type::Code::LowCardinality: return "lowcardinality";
+        case Type::Code::LowCardinality: return "low_cardinality";
         case Type::Code::DateTime64:     return "datetime64";
         case Type::Code::Date32:         return "date32";
         case Type::Code::Map:            return "map";
         case Type::Code::Point:          return "point";
         case Type::Code::Ring:           return "ring";
         case Type::Code::Polygon:        return "polygon";
-        case Type::Code::MultiPolygon:   return "multipolygon";
+        case Type::Code::MultiPolygon:   return "multi_polygon";
+        case Type::Code::UInt128:        return "uint128";
+        case Type::Code::Int256:         return "int256";
+        case Type::Code::UInt256:        return "uint256";
     }
 
     return "Unknown type";
@@ -80,6 +83,9 @@ std::string Type::GetName() const {
         case Ring:
         case Polygon:
         case MultiPolygon:
+        case UInt128:
+        case Int256:
+        case UInt256:
             return TypeName(code_);
         case FixedString:
             return As<FixedStringType>()->GetName();
@@ -137,7 +143,10 @@ uint64_t Type::GetTypeUniqueId() const {
         case Point:
         case Ring:
         case Polygon:
-        case MultiPolygon:
+        case MultiPolygon:        
+        case UInt128:
+        case Int256:
+        case UInt256:
             // For simple types, unique ID is the same as Type::Code
             return code_;
 
