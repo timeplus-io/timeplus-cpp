@@ -342,7 +342,7 @@ std::string ToString(const clickhouse::UUID& v) {
     std::string result(36, 0);
     // ffff ff ff ss ssssss
     const int count = std::snprintf(result.data(), result.size() + 1, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.12" PRIx64,
-                                    v.first >> 32, (v.first >> 16) & 0xffff, v.first & 0xffff, v.second >> 48, v.second & 0xffffffffffff);
+                                    v.items[0] >> 32, (v.items[0] >> 16) & 0xffff, v.items[0] & 0xffff, v.items[1] >> 48, v.items[1] & 0xffffffffffff);
     if (count != 36) {
         throw std::runtime_error("Error while converting UUID to string");
     }
