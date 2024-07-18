@@ -24,11 +24,481 @@ inline void PrintBlock(const Block& block) {
     std::cout << std::endl << block;
 }
 
-inline void ArrayExample(Client& client) {
+std::shared_ptr<ColumnArray> buildTestColumn(const std::vector<std::vector<std::string>>& rows) {
+    auto arrayColumn = std::make_shared<ColumnArray>(std::make_shared<ColumnLowCardinalityT<ColumnString>>());
+
+    for (const auto& row : rows) {
+        auto column = std::make_shared<ColumnLowCardinalityT<ColumnString>>();
+
+        for (const auto& string : row) {
+            column->Append(string);
+        }
+
+        arrayColumn->AppendAsColumn(column);
+    }
+
+    return arrayColumn;
+}
+
+
+inline void testIntType(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_array (arr array(uint64)) ENGINE = Memory");
+    client.Execute(
+        "CREATE TEMPORARY STREAM IF NOT EXISTS test_int (bo bool, i8 int8, i16 int16, i32 int32, i64 int64, i128 int128, i256 int256, ui8 uint8, ui16 uint16, ui32 uint32, ui64 uint64, ui128 uint128, ui256 uint256) ENGINE = Memory"
+    );
+
+    auto bo = std::make_shared<ColumnUInt8>();
+    auto i8 = std::make_shared<ColumnInt8>();
+    auto i16 = std::make_shared<ColumnInt16>();
+    auto i32 = std::make_shared<ColumnInt32>();
+    auto i64 = std::make_shared<ColumnInt64>();
+    auto i128 = std::make_shared<ColumnInt128>();
+    auto i256 = std::make_shared<ColumnInt256>();
+
+    bo->Append(false);
+    i8->Append(1);
+    i16->Append(2);
+    i32->Append(3);
+    i64->Append(4);
+    i128->Append(5);
+    i256->Append(6);
+
+    b.AppendColumn("bo", bo);
+    b.AppendColumn("i8", i8);
+    b.AppendColumn("i16", i16);
+    b.AppendColumn("i32", i32);
+    b.AppendColumn("i64", i64);
+    b.AppendColumn("i128", i128);
+    b.AppendColumn("i256", i256);
+
+    auto ui8 = std::make_shared<ColumnUInt8>();
+    auto ui16 = std::make_shared<ColumnUInt16>();
+    auto ui32 = std::make_shared<ColumnUInt32>();
+    auto ui64 = std::make_shared<ColumnUInt64>();
+    auto ui128 = std::make_shared<ColumnUInt128>();
+    auto ui256 = std::make_shared<ColumnUInt256>();
+    ui8->Append(7);
+    ui16->Append(8);
+    ui32->Append(9);
+    ui64->Append(10);
+    ui128->Append(11);
+    ui256->Append(12);
+
+
+    b.AppendColumn("ui8", ui8);
+    b.AppendColumn("ui16", ui16);
+    b.AppendColumn("ui32", ui32);
+    b.AppendColumn("ui64", ui64);
+    b.AppendColumn("ui128", ui128);
+    b.AppendColumn("ui256", ui256);
+
+
+    client.Insert("test_int", b);
+
+    // client.Select("SELECT * FROM test_int", [](const Block& block)
+    //     {
+    //         std::cout << PrettyPrintBlock{block} << std::endl;
+    //     }
+    // );
+
+    client.Select("SELECT bo, i8, i16, i32, i64, i128, i256, ui8, ui16, ui32, ui64, ui128, ui256 FROM test_int", [](const Block& block)
+        {
+            // for (size_t i = 0; i < block.GetRowCount(); ++i) {
+            //     std::cout << (*block[0]->As<ColumnUInt8>())[i] << " "
+            //                 << (*block[1]->As<ColumnInt8>())[i] << " "
+            //                 << (*block[2]->As<ColumnInt16>())[i] << " "
+            //                 << (*block[3]->As<ColumnInt32>())[i] << " " 
+            //                 << (*block[4]->As<ColumnInt64>())[i] << " "
+            //                 << (*block[5]->As<ColumnInt128>())[i] << " "
+            //                 << (*block[6]->As<ColumnInt256>())[i] << " "
+            //                 << (*block[7]->As<ColumnUInt8>())[i] << " "
+            //                 << (*block[8]->As<ColumnUInt16>())[i] << " "
+            //                 << (*block[9]->As<ColumnUInt32>())[i] << " " 
+            //                 << (*block[10]->As<ColumnUInt64>())[i] << " "
+            //                 << (*block[11]->As<ColumnUInt128>())[i] << " "
+            //                 << (*block[12]->As<ColumnUInt256>())[i] << "\n";
+            // }
+            std::cout << PrettyPrintBlock{block} << std::endl;
+        }
+    );
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_int");
+}
+
+inline void testDateType(Client& client) {
+    Block b;
+
+    /// Create a table.
+    client.Execute("CREATE STREAM IF NOT EXISTS test_date (d date, d32 date32)");
+
+    auto d = std::make_shared<ColumnDate>();
+    auto d32 = std::make_shared<ColumnDate32>();
+    d->Append(std::time(nullptr));
+    d32->Append(std::time(nullptr));
+    b.AppendColumn("d", d);
+    b.AppendColumn("d32", d32);
+    client.Insert("test_date", b);
+
+    client.Select("SELECT d, d32 FROM test_date", [](const Block& block)
+        {
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+
+                auto print_value = [&](const auto& col) {
+                    std::time_t t = col->At(c);
+                    std::cerr << std::asctime(std::localtime(&t));
+                    std::cerr << col->Timezone() << std::endl;
+                };
+
+                print_value(block[0]->As<ColumnDateTime>());
+                print_value(block[1]->As<ColumnDateTime>());
+            }
+        }
+    );
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_date");
+}
+
+inline void testDateTimeType(Client& client) {
+    Block b;
+
+    /// Create a table.
+    client.Execute("CREATE STREAM IF NOT EXISTS test_datetime (dt32 datetime, dt64 DateTime64(6))");
+    
+    auto dt32 = std::make_shared<ColumnDateTime>();
+    auto dt64 = std::make_shared<ColumnDateTime64>(6);
+    dt32->Append(std::time(nullptr));
+    dt64->Append(std::time(nullptr) * 1000000 + 123456);
+
+    b.AppendColumn("dt32", dt32);
+    b.AppendColumn("dt64", dt64);
+
+    client.Insert("test_datetime", b);
+
+    client.Select("SELECT dt32, dt64 FROM test_datetime", [](const Block& block)
+        {
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto print_value = [&](const auto& col) {
+                    std::time_t t = col->At(c);
+                    std::cerr << std::asctime(std::localtime(&t));
+                    std::cerr << col->Timezone() << std::endl;
+                };
+
+                print_value(block[0]->As<ColumnDateTime>());
+                print_value(block[1]->As<ColumnDateTime64>());
+
+            }
+        }
+    );
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_datetime");
+}
+
+inline void testDecimalType(Client& client) {
+    Block b;
+
+    /// Create a table.
+    client.Execute(
+        "CREATE TABLE IF NOT EXISTS "
+        "test_cpp_decimal (id UInt64, d1 Decimal(9, 4), d2 Decimal(18, 9), d3 Decimal(38, 19), "
+        "                         d4 Decimal32(4), d5 Decimal64(9), d6 Decimal128(19)) ");
+
+
+    auto id = std::make_shared<ColumnUInt64>();
+    auto d1 = std::make_shared<ColumnDecimal>(9, 4);
+    auto d2 = std::make_shared<ColumnDecimal>(18, 9);
+    auto d3 = std::make_shared<ColumnDecimal>(38, 19);
+    auto d4 = std::make_shared<ColumnDecimal>(9, 4);
+    auto d5 = std::make_shared<ColumnDecimal>(18, 9);
+    auto d6 = std::make_shared<ColumnDecimal>(38, 19);
+
+    EXPECT_THROW(
+        d1->Append("1234567890123456789012345678901234567890"),
+        std::runtime_error
+    );
+    EXPECT_THROW(
+        d1->Append("123456789012345678901234567890123456.7890"),
+        std::runtime_error
+    );
+    EXPECT_THROW(
+        d1->Append("-1234567890123456789012345678901234567890"),
+        std::runtime_error
+    );
+    EXPECT_THROW(
+        d1->Append("12345678901234567890123456789012345678a"),
+        std::runtime_error
+    );
+    EXPECT_THROW(
+        d1->Append("12345678901234567890123456789012345678-"),
+        std::runtime_error
+    );
+    EXPECT_THROW(
+        d1->Append("1234.12.1234"),
+        std::runtime_error
+    );
+
+    id->Append(1);
+    d1->Append(123456789);
+    d2->Append(123456789012345678);
+    d3->Append(1234567890123456789);
+    d4->Append(123456789);
+    d5->Append(123456789012345678);
+    d6->Append(1234567890123456789);
+
+    id->Append(2);
+    d1->Append(999999999);
+    d2->Append(999999999999999999);
+    d3->Append(999999999999999999);
+    d4->Append(999999999);
+    d5->Append(999999999999999999);
+    d6->Append(999999999999999999);
+
+    id->Append(3);
+    d1->Append(-999999999);
+    d2->Append(-999999999999999999);
+    d3->Append(-999999999999999999);
+    d4->Append(-999999999);
+    d5->Append(-999999999999999999);
+    d6->Append(-999999999999999999);
+
+    // Check strings with decimal point
+    id->Append(4);
+    d1->Append("12345.6789");
+    d2->Append("123456789.012345678");
+    d3->Append("1234567890123456789.0123456789012345678");
+    d4->Append("12345.6789");
+    d5->Append("123456789.012345678");
+    d6->Append("1234567890123456789.0123456789012345678");
+
+    // Check strings with minus sign and without decimal point
+    id->Append(5);
+    d1->Append("-12345.6789");
+    d2->Append("-123456789012345678");
+    d3->Append("-12345678901234567890123456789012345678");
+    d4->Append("-12345.6789");
+    d5->Append("-123456789012345678");
+    d6->Append("-12345678901234567890123456789012345678");
+
+    id->Append(6);
+    d1->Append("12345.678");
+    d2->Append("123456789.0123456789");
+    d3->Append("1234567890123456789.0123456789012345678");
+    d4->Append("12345.6789");
+    d5->Append("123456789.012345678");
+    d6->Append("1234567890123456789.0123456789012345678");
+
+    b.AppendColumn("id", id);
+    b.AppendColumn("d1", d1);
+    b.AppendColumn("d2", d2);
+    b.AppendColumn("d3", d3);
+    b.AppendColumn("d4", d4);
+    b.AppendColumn("d5", d5);
+    b.AppendColumn("d6", d6);
+
+
+
+    client.Insert("test_cpp_decimal", b);
+
+    client.Select("SELECT * FROM test_cpp_decimal", [](const Block& block)
+        {
+            std::cout << PrettyPrintBlock{block} << std::endl;
+        }
+    );
+
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_cpp_decimal");
+}
+
+inline void testEnumType(Client& client) {
+    /// Create a table.
+     client.Execute("CREATE STREAM IF NOT EXISTS test_enums (id uint64, e1 enum8('One' = 1, 'Two' = 2)), e2 enum16('A' = 1, 'B' = 2))");
+
+    /// Insert some values.
+    {
+        Block block;
+
+        auto id = std::make_shared<ColumnUInt64>();
+        id->Append(1);
+        id->Append(2);
+
+        auto e1 = std::make_shared<ColumnEnum8>(Type::CreateEnum8({{"One", 1}, {"Two", 2}}));
+        e1->Append(1);
+        e1->Append("Two");
+
+        auto e2 = std::make_shared<ColumnEnum8>(Type::CreateEnum16({{"A", 1}, {"B", 2}}));
+        e2->Append("A");
+        e2->Append("B");
+
+        block.AppendColumn("id", id);
+        block.AppendColumn("e1", e1);
+        block.AppendColumn("e2", e2);
+
+        client.Insert("test_enums", block);
+    }
+
+    /// Select values inserted in the previous step.
+    client.Select("SELECT id, e1, e2 FROM test_enums", [](const Block& block)
+        {
+            for (Block::Iterator bi(block); bi.IsValid(); bi.Next()) {
+                std::cout << bi.Name() << " ";
+            }
+            std::cout << std::endl;
+
+            for (size_t i = 0; i < block.GetRowCount(); ++i) {
+                std::cout << (*block[0]->As<ColumnUInt64>())[i] << " "
+                          << (*block[1]->As<ColumnEnum8>()).NameAt(i) << " "
+                          << (*block[2]->As<ColumnEnum16>()).NameAt(i) << "\n";
+            }
+        }
+    );
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_enums");
+}
+
+inline void testFloatType(Client& client) {
+    /// Create a table.
+     client.Execute("CREATE STREAM IF NOT EXISTS test_float (f32 float32, f64 float64)");
+
+    /// Insert some values.
+    {
+        Block block;
+
+        auto f32 = std::make_shared<ColumnFloat32>();
+        f32->Append(1.000001);
+        f32->Append(9999.99999999);
+
+        auto f64 = std::make_shared<ColumnFloat64>();
+        f64->Append(1.000000000000000000001);
+        f64->Append(999999999999999999.999999999999999999);
+
+        block.AppendColumn("f32", f32);
+        block.AppendColumn("f64", f64);
+
+        client.Insert("test_float", block);
+    }
+
+    /// Select values inserted in the previous step.
+    client.Select("SELECT f32, f64 FROM test_float", [](const Block& block)
+        {
+            // for (Block::Iterator bi(block); bi.IsValid(); bi.Next()) {
+            //     std::cout << bi.Name() << " ";
+            // }
+            // std::cout << std::endl;
+
+            // for (size_t i = 0; i < block.GetRowCount(); ++i) {
+            //     std::cout << (*block[0]->As<ColumnFloat32>())[i] << " "
+            //               << (*block[1]->As<ColumnFloat64>())(i) << "\n";
+            // }
+            std::cout << PrettyPrintBlock{block} << std::endl;
+        }
+    );
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_float");
+}
+
+inline void testIPType(Client & client) {
+    /// Create a table.
+    // client.Execute("CREATE STREAM IF NOT EXISTS test_ips (id uint64, v4 ipv4, v6 ipv6)");
+
+    /// Insert some values.
+    {
+        Block block;
+
+        auto id = std::make_shared<ColumnUInt64>();
+        id->Append(1);
+        id->Append(2);
+        id->Append(3);
+
+        auto v4 = std::make_shared<ColumnIPv4>();
+        v4->Append("127.0.0.1");
+        v4->Append(3585395774);
+        v4->Append(0);
+
+        auto v6 = std::make_shared<ColumnIPv6>();
+        v6->Append("::1");
+        v6->Append("aa::ff");
+        v6->Append("fe80::86ba:ef31:f2d8:7e8b");
+
+        block.AppendColumn("id", id);
+        block.AppendColumn("v4", v4);
+        block.AppendColumn("v6", v6);
+
+        client.Insert("test_ips", block);
+    }
+
+    /// Select values inserted in the previous step.
+        client.Select("SELECT id, v4, v6 FROM test_ips", [&](const Block& block)
+        {
+
+            // for (Block::Iterator bi(block); bi.IsValid(); bi.Next()) {
+            //     std::cout << bi.Name() << " ";
+            // }
+            // std::cout << std::endl;
+
+            for (size_t i = 0; i < block.GetRowCount(); ++i) {
+                std::cout << (*block[0]->As<ColumnUInt64>())[i] << " "
+                          << (*block[1]->As<ColumnIPv4>()).AsString(i) << " (" << (*block[1]->As<ColumnIPv4>())[i].s_addr << ") "
+                          << (*block[2]->As<ColumnIPv6>()).AsString(i) << "\n";
+            }
+
+        }
+    );
+
+    /// Delete table.
+    client.Execute("DROP STREAM test_ips");
+}
+
+// inline void testStringType(Client &client){
+
+// }
+
+inline void testLowCardinalityType(Client& client) {
+    /// test tuple
+    Block block;
+    const auto testData = std::vector<std::vector<std::string>> {
+        { "aa", "bb" },
+        { "cc"},
+        { "dd" },
+        { "aa", "ee"}
+    };  
+
+    auto column = buildTestColumn(testData);
+
+    block.AppendColumn("arr", column);
+
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS array_lc");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS array_lc (arr array(low_cardinality(string))) ENGINE = Memory");
+    client.Insert("array_lc", block);
+
+    client.Select("SELECT * FROM array_lc", [&](const Block& bl) {
+    for (size_t c = 0; c < bl.GetRowCount(); ++c) {
+        auto col = bl[0]->As<ColumnArray>()->GetAsColumn(c);
+        for (size_t i = 0; i < col->Size(); ++i) {
+            if (auto string_column = col->As<ColumnString>()) {
+                const auto ts = string_column->At(i);
+                std::cout<< ts <<std::endl;
+            } else if (auto lc_string_column = col->As<ColumnLowCardinalityT<ColumnString>>()) {
+                const auto ts = lc_string_column->At(i);
+                std::cout<< ts <<std::endl;
+            } 
+            
+        }
+    }
+    });
+}
+
+inline void testArrayType(Client& client) {
+    Block b;
+
+    /// Create a table.
+    client.Execute("CREATE STREAM IF NOT EXISTS test_array (arr array(uint64))");
 
     auto arr = std::make_shared<ColumnArray>(std::make_shared<ColumnUInt64>());
 
@@ -61,14 +531,14 @@ inline void ArrayExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_array");
+    client.Execute("DROP STREAM test_array");
 }
 
-inline void MultiArrayExample(Client& client) {
+inline void testMultitesArrayType(Client& client) {
     Block b;
 
     /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_multiarray (arr array(array(uint64))) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_multiarray (arr array(array(uint64)))");
 
     auto arr = std::make_shared<ColumnArray>(std::make_shared<ColumnUInt64>());
 
@@ -101,110 +571,68 @@ inline void MultiArrayExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_multiarray");
+    client.Execute("DROP TREAM test_multiarray");
 }
 
-inline void DateExample(Client& client) {
-    Block b;
+inline void testTupletType(Client& client) {
+    /// test tuple
+    Block block;
+    auto tupls = std::make_shared<ColumnTuple>(std::vector<ColumnRef>{
+        std::make_shared<ColumnUInt64>(),
+        std::make_shared<ColumnString>()});
 
-    /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_date (d datetime, dz datetime('Europe/Moscow')) ENGINE = Memory");
 
-    auto d = std::make_shared<ColumnDateTime>();
-    auto dz = std::make_shared<ColumnDateTime>();
-    d->Append(std::time(nullptr));
-    dz->Append(std::time(nullptr));
-    b.AppendColumn("d", d);
-    b.AppendColumn("dz", dz);
-    client.Insert("test_date", b);
+    auto val = tupls->CloneEmpty()->As<ColumnTuple>();
 
-    client.Select("SELECT d, dz FROM test_date", [](const Block& block)
-        {
-            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+    (*val)[0]->AsStrict<ColumnUInt64>()->Append(1);
+    (*val)[1]->AsStrict<ColumnString>()->Append("123");
 
-                auto print_value = [&](const auto& col) {
-                    std::time_t t = col->At(c);
-                    std::cerr << std::asctime(std::localtime(&t));
-                    std::cerr << col->Timezone() << std::endl;
-                };
+    (*val)[0]->AsStrict<ColumnUInt64>()->Append(2);
+    (*val)[1]->AsStrict<ColumnString>()->Append("def");
 
-                print_value(block[0]->As<ColumnDateTime>());
-                print_value(block[1]->As<ColumnDateTime>());
-            }
-        }
-    );
 
-    /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_date");
+    block.AppendColumn("tup", tupls);
+
+    client.Execute("DROP STREAM IF EXISTS test_tuple");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_tuple (tup tuple(uint64, string))");
+    client.Insert("test_tuple", block);
+
+    // client.Select("SELECT * FROM test_tuple", [&](const Block& bl){
+    //     // std::cout<<bl.GetColumnName(0)<<std::endl;
+    // });
 }
 
-inline void DateTime64Example(Client& client) {
-    Block b;
+inline void testMapType(Client& client) {
+    /// test tuple
+    Block block;
+    auto m1 = std::make_shared<ColumnMapT<ColumnUInt64, ColumnString>>(
+    std::make_shared<ColumnUInt64>(),
+    std::make_shared<ColumnString>());
 
-    /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_datetime64 (dt64 DateTime64(6)) ENGINE = Memory");
+    std::map<uint64_t, std::string> val;
+    val[0] = "123";
+    val[1] = "abc";
+
+    (*m1).Append(val);
+
+    block.AppendColumn("m1",m1);
     
+    client.Execute("DROP STREAM IF EXISTS test_map");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_map (m1 map(uint64, string))");
+    client.Insert("test_map", block);
 
-    auto d = std::make_shared<ColumnDateTime64>(6);
-    d->Append(std::time(nullptr) * 1000000 + 123456);
-
-    b.AppendColumn("dt64", d);
-    client.Insert("test_datetime64", b);
-
-    client.Select("SELECT dt64 FROM test_datetime64", [](const Block& block)
-        {
-            for (size_t c = 0; c < block.GetRowCount(); ++c) {
-                auto col = block[0]->As<ColumnDateTime64>();
-                uint64_t t = col->As<ColumnDateTime64>()->At(c);
-
-                std::time_t ct = t / 1000000;
-                uint64_t us = t % 1000000;
-                std::cerr << "ctime: " << std::asctime(std::localtime(&ct));
-                std::cerr << "us: " << us << std::endl;
-            }
-        }
-    );
-
-    /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_datetime64");
+    // client.Select("SELECT * FROM test_map", [&](const Block& bl){
+    //     // std::cout<<bl.GetColumnName(0)<<std::endl;
+    // });
 }
 
-inline void DecimalExample(Client& client) {
-    Block b;
+// inline void testNestedType(Client& client) {
 
-    /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_decimal (d Decimal64(4)) ENGINE = Memory");
-
-    auto d = std::make_shared<ColumnDecimal>(18, 4);
-    d->Append(21111);
-    b.AppendColumn("d", d);
-    client.Insert("test_decimal", b);
-
-    client.Select("SELECT d FROM test_decimal", [](const Block& block)
-        {
-            for (size_t c = 0; c < block.GetRowCount(); ++c) {
-                auto col = block[0]->As<ColumnDecimal>();
-                cout << (int)col->At(c) << endl;
-            }
-        }
-    );
-
-    client.Select("SELECT to_decimal32(2, 4) AS x", [](const Block& block)
-        {
-            for (size_t c = 0; c < block.GetRowCount(); ++c) {
-                auto col = block[0]->As<ColumnDecimal>();
-                cout << (int)col->At(c) << endl;
-            }
-        }
-    );
-
-    /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_decimal");
-}
+// }
 
 inline void GenericExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_client (id uint64, name string) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_client (id uint64, name string)");
 
     /// Insert some values.
     {
@@ -232,12 +660,12 @@ inline void GenericExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_client");
+    client.Execute("DROP STREAM test_client");
 }
 
 inline void NullableExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_client (id nullable(uint64), date nullable(date)) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_client (id nullable(uint64), date nullable(date))");
 
     /// Insert some values.
     {
@@ -296,7 +724,7 @@ inline void NullableExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_client");
+    client.Execute("DROP STREAM test_client");
 }
 
 inline void NumbersExample(Client& client) {
@@ -321,7 +749,7 @@ inline void NumbersExample(Client& client) {
 
 inline void CancelableExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_client (x uint64) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_client (x uint64)");
 
     /// Insert a few blocks.
     for (unsigned j = 0; j < 10; j++) {
@@ -346,15 +774,15 @@ inline void CancelableExample(Client& client) {
     );
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_client");
+    client.Execute("DROP STREAM test_client");
 }
 
 inline void ExecptionExample(Client& client) {
     /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_exceptions (id uint64, name string) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_exceptions (id uint64, name string)");
     /// Expect failing on table creation.
     try {
-        client.Execute("CREATE TEMPORARY STREAM test_exceptions (id uint64, name string) ENGINE = Memory");
+        client.Execute("CREATE STREAM test_exceptions (id uint64, name string)");
     } catch (const ServerException& e) {
         if (e.GetCode() == ErrorCodes::TABLE_ALREADY_EXISTS) {
             // OK
@@ -364,48 +792,7 @@ inline void ExecptionExample(Client& client) {
     }
 
     /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_exceptions");
-}
-
-inline void EnumExample(Client& client) {
-    /// Create a table.
-     client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_enums (id uint64, e enum8('One' = 1, 'Two' = 2)) ENGINE = Memory");
-
-    /// Insert some values.
-    {
-        Block block;
-
-        auto id = std::make_shared<ColumnUInt64>();
-        id->Append(1);
-        id->Append(2);
-
-        auto e = std::make_shared<ColumnEnum8>(Type::CreateEnum8({{"One", 1}, {"Two", 2}}));
-        e->Append(1);
-        e->Append("Two");
-
-        block.AppendColumn("id", id);
-        block.AppendColumn("e", e);
-
-        client.Insert("test_enums", block);
-    }
-
-    /// Select values inserted in the previous step.
-    client.Select("SELECT id, e FROM test_enums", [](const Block& block)
-        {
-            for (Block::Iterator bi(block); bi.IsValid(); bi.Next()) {
-                std::cout << bi.Name() << " ";
-            }
-            std::cout << std::endl;
-
-            for (size_t i = 0; i < block.GetRowCount(); ++i) {
-                std::cout << (*block[0]->As<ColumnUInt64>())[i] << " "
-                          << (*block[1]->As<ColumnEnum8>()).NameAt(i) << "\n";
-            }
-        }
-    );
-
-    /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_enums");
+    client.Execute("DROP STREAM test_exceptions");
 }
 
 inline void SelectNull(Client& client) {
@@ -428,71 +815,24 @@ inline void ShowTables(Client& client) {
     );
 }
 
-inline void IPExample(Client &client) {
-    /// Create a table.
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_ips (id uint64, v4 ipv4, v6 ipv6) ENGINE = Memory");
-
-    /// Insert some values.
-    {
-        Block block;
-
-        auto id = std::make_shared<ColumnUInt64>();
-        id->Append(1);
-        id->Append(2);
-        id->Append(3);
-
-        auto v4 = std::make_shared<ColumnIPv4>();
-        v4->Append("127.0.0.1");
-        v4->Append(3585395774);
-        v4->Append(0);
-
-        auto v6 = std::make_shared<ColumnIPv6>();
-        v6->Append("::1");
-        v6->Append("aa::ff");
-        v6->Append("fe80::86ba:ef31:f2d8:7e8b");
-
-        block.AppendColumn("id", id);
-        block.AppendColumn("v4", v4);
-        block.AppendColumn("v6", v6);
-
-        client.Insert("test_ips", block);
-    }
-
-    /// Select values inserted in the previous step.
-    client.Select("SELECT id, v4, v6 FROM test_ips", [](const Block& block)
-        {
-            for (Block::Iterator bi(block); bi.IsValid(); bi.Next()) {
-                std::cout << bi.Name() << " ";
-            }
-            std::cout << std::endl;
-
-            for (size_t i = 0; i < block.GetRowCount(); ++i) {
-                std::cout << (*block[0]->As<ColumnUInt64>())[i] << " "
-                          << (*block[1]->As<ColumnIPv4>()).AsString(i) << " (" << (*block[1]->As<ColumnIPv4>())[i].s_addr << ") "
-                          << (*block[2]->As<ColumnIPv6>()).AsString(i) << "\n";
-            }
-        }
-    );
-
-    /// Delete table.
-    client.Execute("DROP TEMPORARY STREAM test_ips");
-}
 
 static void RunTests(Client& client) {
-    ArrayExample(client);
-    CancelableExample(client);
-    DateExample(client);
-    DateTime64Example(client);
-    DecimalExample(client);
-    EnumExample(client);
-    ExecptionExample(client);
-    GenericExample(client);
-    IPExample(client);
-    MultiArrayExample(client);
-    NullableExample(client);
-    NumbersExample(client);
-    SelectNull(client);
-    ShowTables(client);
+    testIntType(client);
+    // tArrayType(client);
+    // CancelableExample(client);
+    // testDateType(client);
+    // testDateTimeType(client);
+    // tArrayType(client);
+    // CancelableExample(client);
+    // testEnumType(client);
+    // ExecptionExample(client);
+    // GenericExample(client);
+    // testIPType(client);
+    // MultitestArrayType(client);
+    // NullableExample(client);
+    // NumbersExample(client);
+    // SelectNull(client);
+    // ShowTables(client);
 }
 
 // int main() {
@@ -553,41 +893,6 @@ int main()
         std::cerr << "exception : " << e.what() << std::endl;
     }
 
-
-    // Client client(ClientOptions().SetHost("localhost").SetPort(8463));
-    // /// Create a table.
-    // client.Execute("CREATE STREAM IF NOT EXISTS default.numbers (id uint64, name string) ENGINE = Memory");
-
-    // /// Insert some values.
-    // {
-    //     Block block;
-
-    //     auto id = std::make_shared<ColumnUInt64>();
-    //     id->Append(1);
-    //     id->Append(7);
-
-    //     auto name = std::make_shared<ColumnString>();
-    //     name->Append("one");
-    //     name->Append("seven");
-
-    //     block.AppendColumn("id"  , id);
-    //     block.AppendColumn("name", name);
-
-    //     client.Insert("default.numbers", block);
-    // }
-
-    // /// Select values inserted in the previous step.
-    // client.Select("SELECT id, name FROM default.numbers", [] (const Block& block)
-    //     {
-    //         for (size_t i = 0; i < block.GetRowCount(); ++i) {
-    //             std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
-    //                       << block[1]->As<ColumnString>()->At(i) << "\n";
-    //         }
-    //     }
-    // );
-
-    // /// Delete table.
-    // client.Execute("DROP STREAM default.numbers");
 
     return 0;
 }

@@ -245,7 +245,7 @@ TEST(ColumnsCase, DateTime64_0) {
     auto column = std::make_shared<ColumnDateTime64>(0ul);
 
     ASSERT_EQ(Type::DateTime64, column->Type()->GetCode());
-    ASSERT_EQ("DateTime64(0)", column->Type()->GetName());
+    ASSERT_EQ("datetime64(0)", column->Type()->GetName());
     ASSERT_EQ(0u, column->GetPrecision());
     ASSERT_EQ(0u, column->Size());
 }
@@ -255,7 +255,7 @@ TEST(ColumnsCase, DateTime64_6) {
     auto column = std::make_shared<ColumnDateTime64>(6ul);
 
     ASSERT_EQ(Type::DateTime64, column->Type()->GetCode());
-    ASSERT_EQ("DateTime64(6)", column->Type()->GetName());
+    ASSERT_EQ("datetime64(6)", column->Type()->GetName());
     ASSERT_EQ(6u, column->GetPrecision());
     ASSERT_EQ(0u, column->Size());
 }
@@ -417,7 +417,7 @@ TEST(ColumnsCase, EnumTest) {
     auto col16 = std::make_shared<ColumnEnum16>(Type::CreateEnum16(enum_items));
     ASSERT_TRUE(col16->Type()->IsEqual(Type::CreateEnum16(enum_items)));
 
-    ASSERT_TRUE(CreateColumnByType("Enum8('Hi' = 1, 'Hello' = 2)")->Type()->IsEqual(Type::CreateEnum8(enum_items)));
+    ASSERT_TRUE(CreateColumnByType("enum8('Hi' = 1, 'Hello' = 2)")->Type()->IsEqual(Type::CreateEnum8(enum_items)));
 }
 
 TEST(ColumnsCase, NullableSlice) {
@@ -690,7 +690,7 @@ TEST(ColumnsCase, ColumnDecimal128_from_string) {
 
     for (size_t i = 0; i < values.size(); ++i) {
         const auto value = values.begin()[i];
-        SCOPED_TRACE(::testing::Message() << "# index: " << i << " Int128 value: " << value);
+        SCOPED_TRACE(::testing::Message() << "# index: " << i << " int128 value: " << value);
 
         {
             std::stringstream sstr;

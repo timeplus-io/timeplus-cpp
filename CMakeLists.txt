@@ -8,8 +8,8 @@ INCLUDE (openssl)
 INCLUDE (version)
 
 OPTION (BUILD_BENCHMARK "Build benchmark" OFF)
-OPTION (BUILD_TESTS "Build tests" ON)
-OPTION (BUILD_EXAMPLES "Build examples" OFF)
+OPTION (BUILD_TESTS "Build tests" OFF)
+OPTION (BUILD_EXAMPLES "Build examples" ON)
 OPTION (BUILD_SHARED_LIBS "Build shared libs" OFF)
 OPTION (WITH_OPENSSL "Use OpenSSL for TLS connections" OFF)
 OPTION (WITH_SYSTEM_ABSEIL "Use system ABSEIL" OFF)
@@ -109,6 +109,7 @@ SUBDIRS (
 IF (BUILD_BENCHMARK)
     SUBDIRS (bench)
 ENDIF (BUILD_BENCHMARK)
+
 
 IF (BUILD_TESTS)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)

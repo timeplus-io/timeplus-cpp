@@ -826,7 +826,7 @@ void Client::Impl::SendQuery(const Query& query) {
     WireFormat::WriteString(*output_, query.GetText());
 
     /// start by Jax
-    std::cout<<"query.GetText(): "<<query.GetText()<<std::endl;
+    // std::cout<<"query.GetText(): "<<query.GetText()<<std::endl;
     /// end by Jax
 
     // Send empty block as marker of

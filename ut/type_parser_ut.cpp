@@ -7,52 +7,52 @@ using namespace clickhouse;
 
 TEST(TypeParserCase, ParseTerminals) {
     TypeAst ast;
-    TypeParser("UInt8").Parse(&ast);
+    TypeParser("uint8").Parse(&ast);
 
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "UInt8");
+    ASSERT_EQ(ast.name, "uint8");
     ASSERT_EQ(ast.code, Type::UInt8);
 }
 
 TEST(TypeParserCase, ParseFixedString) {
     TypeAst ast;
-    TypeParser("FixedString(24)").Parse(&ast);
+    TypeParser("fixed_string(24)").Parse(&ast);
 
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "FixedString");
+    ASSERT_EQ(ast.name, "fixed_string");
     ASSERT_EQ(ast.code, Type::FixedString);
     ASSERT_EQ(ast.elements.front().value, 24U);
 }
 
 TEST(TypeParserCase, ParseArray) {
     TypeAst ast;
-    TypeParser("Array(Int32)").Parse(&ast);
+    TypeParser("array(int32)").Parse(&ast);
 
     ASSERT_EQ(ast.meta, TypeAst::Array);
-    ASSERT_EQ(ast.name, "Array");
+    ASSERT_EQ(ast.name, "array");
     ASSERT_EQ(ast.code, Type::Array);
     ASSERT_EQ(ast.elements.front().meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.elements.front().name, "Int32");
+    ASSERT_EQ(ast.elements.front().name, "int32");
 }
 
 TEST(TypeParserCase, ParseNullable) {
     TypeAst ast;
-    TypeParser("Nullable(Date)").Parse(&ast);
+    TypeParser("nullable(date)").Parse(&ast);
 
     ASSERT_EQ(ast.meta, TypeAst::Nullable);
-    ASSERT_EQ(ast.name, "Nullable");
+    ASSERT_EQ(ast.name, "nullable");
     ASSERT_EQ(ast.code, Type::Nullable);
     ASSERT_EQ(ast.elements.front().meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.elements.front().name, "Date");
+    ASSERT_EQ(ast.elements.front().name, "date");
 }
 
 TEST(TypeParserCase, ParseEnum) {
     TypeAst ast;
     TypeParser(
-        "Enum8('COLOR_red_10_T' = -12, 'COLOR_green_20_T'=-25, 'COLOR_blue_30_T'= 53, 'COLOR_black_30_T' = 107")
+        "enum8('COLOR_red_10_T' = -12, 'COLOR_green_20_T'=-25, 'COLOR_blue_30_T'= 53, 'COLOR_black_30_T' = 107")
         .Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Enum);
-    ASSERT_EQ(ast.name, "Enum8");
+    ASSERT_EQ(ast.name, "enum8");
     ASSERT_EQ(ast.code, Type::Enum8);
     ASSERT_EQ(ast.elements.size(), 8u);
 
@@ -77,14 +77,14 @@ TEST(TypeParserCase, ParseEnum) {
 TEST(TypeParserCase, ParseTuple) {
     TypeAst ast;
     TypeParser(
-        "Tuple(UInt8, String)")
+        "tuple(uint8, string)")
         .Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Tuple);
-    ASSERT_EQ(ast.name, "Tuple");
+    ASSERT_EQ(ast.name, "tuple");
     ASSERT_EQ(ast.code, Type::Tuple);
     ASSERT_EQ(ast.elements.size(), 2u);
 
-    std::vector<std::string> names = {"UInt8", "String"};
+    std::vector<std::string> names = {"uint8", "string"};
 
     auto element = ast.elements.begin();
     for (size_t i = 0; i < 2; ++i) {
@@ -95,9 +95,9 @@ TEST(TypeParserCase, ParseTuple) {
 
 TEST(TypeParserCase, ParseDecimal) {
     TypeAst ast;
-    TypeParser("Decimal(12, 5)").Parse(&ast);
+    TypeParser("decimal(12, 5)").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "Decimal");
+    ASSERT_EQ(ast.name, "decimal");
     ASSERT_EQ(ast.code, Type::Decimal);
     ASSERT_EQ(ast.elements.size(), 2u);
     ASSERT_EQ(ast.elements[0].value, 12);
@@ -106,9 +106,9 @@ TEST(TypeParserCase, ParseDecimal) {
 
 TEST(TypeParserCase, ParseDecimal32) {
     TypeAst ast;
-    TypeParser("Decimal32(7)").Parse(&ast);
+    TypeParser("decimal32(7)").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "Decimal32");
+    ASSERT_EQ(ast.name, "decimal32");
     ASSERT_EQ(ast.code, Type::Decimal32);
     ASSERT_EQ(ast.elements.size(), 1u);
     ASSERT_EQ(ast.elements[0].value, 7);
@@ -116,9 +116,9 @@ TEST(TypeParserCase, ParseDecimal32) {
 
 TEST(TypeParserCase, ParseDecimal64) {
     TypeAst ast;
-    TypeParser("Decimal64(1)").Parse(&ast);
+    TypeParser("decimal64(1)").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "Decimal64");
+    ASSERT_EQ(ast.name, "decimal64");
     ASSERT_EQ(ast.code, Type::Decimal64);
     ASSERT_EQ(ast.elements.size(), 1u);
     ASSERT_EQ(ast.elements[0].value, 1);
@@ -126,9 +126,9 @@ TEST(TypeParserCase, ParseDecimal64) {
 
 TEST(TypeParserCase, ParseDecimal128) {
     TypeAst ast;
-    TypeParser("Decimal128(3)").Parse(&ast);
+    TypeParser("decimal128(3)").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "Decimal128");
+    ASSERT_EQ(ast.name, "decimal128");
     ASSERT_EQ(ast.code, Type::Decimal128);
     ASSERT_EQ(ast.elements.size(), 1u);
     ASSERT_EQ(ast.elements[0].value, 3);
@@ -136,18 +136,18 @@ TEST(TypeParserCase, ParseDecimal128) {
 
 TEST(TypeParserCase, ParseDateTime_NO_TIMEZONE) {
     TypeAst ast;
-    TypeParser("DateTime").Parse(&ast);
+    TypeParser("datetime").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "DateTime");
+    ASSERT_EQ(ast.name, "datetime");
     ASSERT_EQ(ast.code, Type::DateTime);
     ASSERT_EQ(ast.elements.size(), 0u);
 }
 
 TEST(TypeParserCase, ParseDateTime_UTC_TIMEZONE) {
     TypeAst ast;
-    TypeParser("DateTime('UTC')").Parse(&ast);
+    TypeParser("datetime('UTC')").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "DateTime");
+    ASSERT_EQ(ast.name, "datetime");
     ASSERT_EQ(ast.code, Type::DateTime);
     ASSERT_EQ(ast.elements.size(), 1u);
 
@@ -158,9 +158,9 @@ TEST(TypeParserCase, ParseDateTime_UTC_TIMEZONE) {
 
 TEST(TypeParserCase, ParseDateTime_MINSK_TIMEZONE) {
     TypeAst ast;
-    TypeParser("DateTime('Europe/Minsk')").Parse(&ast);
+    TypeParser("datetime('Europe/Minsk')").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "DateTime");
+    ASSERT_EQ(ast.name, "datetime");
     ASSERT_EQ(ast.code, Type::DateTime);
     ASSERT_EQ(ast.elements[0].code, Type::String);
     ASSERT_EQ(ast.elements[0].value_string, "Europe/Minsk");
@@ -169,29 +169,29 @@ TEST(TypeParserCase, ParseDateTime_MINSK_TIMEZONE) {
 
 TEST(TypeParserCase, LowCardinality_String) {
     TypeAst ast;
-    ASSERT_TRUE(TypeParser("LowCardinality(String)").Parse(&ast));
+    ASSERT_TRUE(TypeParser("low_cardinality(string)").Parse(&ast));
     ASSERT_EQ(ast.meta, TypeAst::LowCardinality);
-    ASSERT_EQ(ast.name, "LowCardinality");
+    ASSERT_EQ(ast.name, "low_cardinality");
     ASSERT_EQ(ast.code, Type::LowCardinality);
     ASSERT_EQ(ast.elements.size(), 1u);
     ASSERT_EQ(ast.elements[0].meta, TypeAst::Terminal);
     ASSERT_EQ(ast.elements[0].code, Type::String);
-    ASSERT_EQ(ast.elements[0].name, "String");
+    ASSERT_EQ(ast.elements[0].name, "string");
     ASSERT_EQ(ast.elements[0].value, 0);
     ASSERT_EQ(ast.elements[0].elements.size(), 0u);
 }
 
 TEST(TypeParserCase, LowCardinality_FixedString) {
     TypeAst ast;
-    ASSERT_TRUE(TypeParser("LowCardinality(FixedString(10))").Parse(&ast));
+    ASSERT_TRUE(TypeParser("low_cardinality(fixed_string(10))").Parse(&ast));
     ASSERT_EQ(ast.meta, TypeAst::LowCardinality);
-    ASSERT_EQ(ast.name, "LowCardinality");
+    ASSERT_EQ(ast.name, "low_cardinality");
     ASSERT_EQ(ast.code, Type::LowCardinality);
     ASSERT_EQ(ast.elements.size(), 1u);
     ASSERT_EQ(ast.elements.size(), 1u);
     ASSERT_EQ(ast.elements[0].meta, TypeAst::Terminal);
     ASSERT_EQ(ast.elements[0].code, Type::FixedString);
-    ASSERT_EQ(ast.elements[0].name, "FixedString");
+    ASSERT_EQ(ast.elements[0].name, "fixed_string");
     ASSERT_EQ(ast.elements[0].value, 0);
     ASSERT_EQ(ast.elements[0].elements.size(), 1u);
     auto param = TypeAst{TypeAst::Number, Type::Void, "", 10, {}, {}};
@@ -200,25 +200,25 @@ TEST(TypeParserCase, LowCardinality_FixedString) {
 
 TEST(TypeParserCase, SimpleAggregateFunction_UInt64) {
     TypeAst ast;
-    TypeParser("SimpleAggregateFunction(func, UInt64)").Parse(&ast);
+    TypeParser("simple_aggregate_function(func, uint64)").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::SimpleAggregateFunction);
-    ASSERT_EQ(ast.name, "SimpleAggregateFunction");
+    ASSERT_EQ(ast.name, "simple_aggregate_function");
     ASSERT_EQ(ast.code, Type::Void);
     ASSERT_EQ(ast.elements.size(), 2u);
     ASSERT_EQ(ast.elements[0].name, "func");
     ASSERT_EQ(ast.elements[0].code, Type::Void);
     ASSERT_EQ(ast.elements[0].meta, TypeAst::Terminal);
     ASSERT_EQ(ast.elements[0].value, 0);
-    ASSERT_EQ(ast.elements[1].name, "UInt64");
+    ASSERT_EQ(ast.elements[1].name, "uint64");
     ASSERT_EQ(ast.elements[1].code, Type::UInt64);
     ASSERT_EQ(ast.elements[1].meta, TypeAst::Terminal);
 }
 
 TEST(TypeParserCase, ParseDateTime64) {
     TypeAst ast;
-    TypeParser("DateTime64(3, 'UTC')").Parse(&ast);
+    TypeParser("datetime64(3, 'UTC')").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.name, "DateTime64");
+    ASSERT_EQ(ast.name, "datetime64");
     ASSERT_EQ(ast.code, Type::DateTime64);
     ASSERT_EQ(ast.elements.size(), 2u);
     ASSERT_EQ(ast.elements[0].name, "");
@@ -229,15 +229,15 @@ TEST(TypeParserCase, ParseDateTime64) {
 
 TEST(TypeParserCase, ParseMap) {
     TypeAst ast;
-    TypeParser("Map(Int32, String)").Parse(&ast);
+    TypeParser("map(int32, string)").Parse(&ast);
     ASSERT_EQ(ast.meta, TypeAst::Map);
-    ASSERT_EQ(ast.name, "Map");
+    ASSERT_EQ(ast.name, "map");
     ASSERT_EQ(ast.code, Type::Map);
     ASSERT_EQ(ast.elements.size(), 2u);
     ASSERT_EQ(ast.elements[0].meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.elements[0].name, "Int32");
+    ASSERT_EQ(ast.elements[0].name, "int32");
     ASSERT_EQ(ast.elements[1].meta, TypeAst::Terminal);
-    ASSERT_EQ(ast.elements[1].name, "String");
+    ASSERT_EQ(ast.elements[1].name, "string");
 }
 
 TEST(TypeParser, EmptyName) {
@@ -262,11 +262,11 @@ TEST(ParseTypeName, EmptyName) {
 TEST(TypeParser, AggregateFunction) {
     {
         TypeAst ast;
-        EXPECT_FALSE(TypeParser("AggregateFunction(argMax, Int32, DateTime(3))").Parse(&ast));
+        EXPECT_FALSE(TypeParser("aggregate_function(argMax, int32, datetime(3))").Parse(&ast));
     }
 
     {
         TypeAst ast;
-        EXPECT_FALSE(TypeParser("AggregateFunction(argMax, LowCardinality(Nullable(FixedString(4))), DateTime(3, 'UTC'))").Parse(&ast));
+        EXPECT_FALSE(TypeParser("aggregate_function(argMax, low_cardinality(nullable(fixed_string(4))), datetime(3, 'UTC'))").Parse(&ast));
     }
 }

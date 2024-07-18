@@ -445,7 +445,7 @@ TYPED_TEST(GenericColumnTest, LoadAndSave) {
 
 const auto LocalHostEndpoint = ClientOptions()
         .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
+        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
         .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
         .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
         .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));

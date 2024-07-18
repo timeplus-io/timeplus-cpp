@@ -28,8 +28,8 @@ std::shared_ptr<T> createTableWithOneColumn(Client & client, const std::string &
     auto col = std::make_shared<T>();
     const auto type_name = col->GetType().GetName();
 
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS " + table_name + ";");
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS " + table_name + "( " + column_name + " " + type_name + " )");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS " + table_name + ";");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS " + table_name + "( " + column_name + " " + type_name + " )");
 
     return col;
 }
@@ -109,7 +109,7 @@ TEST_P(ClientCase, Array) {
     Block b;
 
     /// Create a table.
-    client_->Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_array (arr Array(UInt64)) ");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_array (arr array(uint64)) ");
 
     /// Insert some values.
     {
@@ -160,7 +160,7 @@ TEST_P(ClientCase, Date) {
 
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_date (d DateTime('UTC')) ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_date (d datetime('UTC')) ");
 
     auto d = std::make_shared<ColumnDateTime>();
     auto const now = std::time(nullptr);
@@ -270,8 +270,8 @@ TEST_P(ClientCase, LowCardinalityString_AsString) {
     Block block;
     auto col = std::make_shared<ColumnString>();
 
-    client_->Execute("DROP TEMPORARY TABLE IF EXISTS " + table_name + ";");
-    client_->Execute("CREATE TEMPORARY TABLE IF NOT EXISTS " + table_name + "( " + column_name + " LowCardinality(String) )");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS " + table_name + ";");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS " + table_name + "( " + column_name + " low_cardinality(string) )");
 
     block.AppendColumn("test_column", col);
 
@@ -306,7 +306,7 @@ TEST_P(ClientCase, LowCardinalityString_AsString) {
 
 TEST_P(ClientCase, Generic) {
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_client (id UInt64, name String, f Bool) ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_client (id uint64, name string, f bool) ");
 
     const struct {
         uint64_t id;
@@ -361,7 +361,7 @@ TEST_P(ClientCase, Generic) {
 TEST_P(ClientCase, Nullable) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_nullable (id Nullable(UInt64), date Nullable(Date)) ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_nullable (id nullable(uint64), date nullable(date)) ");
 
     // Round std::time_t to start of date.
     const std::time_t cur_date = std::time(nullptr) / 86400 * 86400;
@@ -466,9 +466,9 @@ TEST_P(ClientCase, SimpleAggregateFunction) {
         GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support SimpleAggregateFunction" << std::endl;
     }
 
-    client_->Execute("DROP TEMPORARY TABLE IF EXISTS test_clickhouse_cpp_SimpleAggregateFunction");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_cpp_SimpleAggregateFunction");
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_SimpleAggregateFunction (saf SimpleAggregateFunction(sum, UInt64))");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_SimpleAggregateFunction (saf simple_aggregate_function(sum, uint64))");
 
     constexpr size_t EXPECTED_ROWS = 10;
     client_->Execute("INSERT INTO test_clickhouse_cpp_SimpleAggregateFunction (saf) VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)");
@@ -495,7 +495,7 @@ TEST_P(ClientCase, SimpleAggregateFunction) {
 TEST_P(ClientCase, Cancellable) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_cancel (x UInt64) ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_cancel (x uint64) ");
 
     /// Insert a few blocks. In order to make cancel have effect, we have to
     /// insert a relative larger amount of data.
@@ -531,19 +531,19 @@ TEST_P(ClientCase, Cancellable) {
 TEST_P(ClientCase, Exception) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_exceptions (id UInt64, name String) ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_exceptions (id uint64, name string) ");
 
     /// Expect failing on table creation.
     EXPECT_THROW(
         client_->Execute(
-            "CREATE TEMPORARY TABLE test_clickhouse_cpp_exceptions (id UInt64, name String) "),
+            "CREATE TEMPORARY STREAM test_clickhouse_cpp_exceptions (id uint64, name string) "),
         ServerException);
 }
 
 TEST_P(ClientCase, Enum) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_cpp_enums (id UInt64, e Enum8('One' = 1, 'Two' = 2)) ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_enums (id uint64, e enum8('One' = 1, 'Two' = 2)) ");
 
     const struct {
         uint64_t id;
@@ -601,9 +601,9 @@ TEST_P(ClientCase, Enum) {
 
 TEST_P(ClientCase, Decimal) {
     client_->Execute(
-        "CREATE TEMPORARY TABLE IF NOT EXISTS "
-        "test_clickhouse_cpp_decimal (id UInt64, d1 Decimal(9, 4), d2 Decimal(18, 9), d3 Decimal(38, 19), "
-        "                         d4 Decimal32(4), d5 Decimal64(9), d6 Decimal128(19)) ");
+        "CREATE TEMPORARY STREAM IF NOT EXISTS "
+        "test_clickhouse_cpp_decimal (id uint64, d1 decimal(9, 4), d2 decimal(18, 9), d3 decimal(38, 19), "
+        "                         d4 decimal32(4), d5 decimal64(9), d6 decimal128(19)) ");
 
     {
         Block b;
@@ -789,9 +789,9 @@ TEST_P(ClientCase, Decimal) {
 
 // Test special chars in names
 TEST_P(ClientCase, ColEscapeNameTest) {
-    client_->Execute(R"sql(DROP TEMPORARY TABLE IF EXISTS "test_clickhouse_cpp_col_escape_""name_test";)sql");
+    client_->Execute(R"sql(DROP TEMPORARY STREAM IF EXISTS "test_clickhouse_cpp_col_escape_""name_test";)sql");
 
-    client_->Execute(R"sql(CREATE TEMPORARY TABLE IF NOT EXISTS "test_clickhouse_cpp_col_escape_""name_test" ("test space" UInt64, "test "" quote" UInt64, "test ""`'[]&_\ all" UInt64))sql");
+    client_->Execute(R"sql(CREATE TEMPORARY STREAM IF NOT EXISTS "test_clickhouse_cpp_col_escape_""name_test" ("test space" UInt64, "test "" quote" UInt64, "test ""`'[]&_\ all" UInt64))sql");
 
     auto col1 = std::make_shared<ColumnUInt64>();
     col1->Append(1);
@@ -835,18 +835,18 @@ TEST_P(ClientCase, ColEscapeNameTest) {
     });
 }
 
-// Test roundtrip of DateTime64 values
-TEST_P(ClientCase, DateTime64) {
+// Test roundtrip of datetime64 values
+TEST_P(ClientCase, datetime64) {
     const auto & server_info = client_->GetServerInfo();
     if (versionNumber(server_info) < versionNumber(20, 1)) {
-        GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support DateTime64" << std::endl;
+        GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support datetime64" << std::endl;
     }
 
     Block block;
-    client_->Execute("DROP TEMPORARY TABLE IF EXISTS test_clickhouse_cpp_datetime64;");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_cpp_datetime64;");
 
-    client_->Execute("CREATE TEMPORARY TABLE IF NOT EXISTS "
-            "test_clickhouse_cpp_datetime64 (dt DateTime64(6)) ");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS "
+            "test_clickhouse_cpp_datetime64 (dt datetime64(6)) ");
 
     auto col_dt64 = std::make_shared<ColumnDateTime64>(6);
     block.AppendColumn("dt", col_dt64);
@@ -908,7 +908,7 @@ TEST_P(ClientCase, Query_ID) {
     SCOPED_TRACE(query_id);
 
     const std::string table_name = "test_clickhouse_cpp_query_id_test";
-    client_->Execute(Query("CREATE TEMPORARY TABLE IF NOT EXISTS " + table_name + " (a Int64)", query_id));
+    client_->Execute(Query("CREATE TEMPORARY STREAM IF NOT EXISTS " + table_name + " (a Int64)", query_id));
 
     {
         Block b;
@@ -918,7 +918,7 @@ TEST_P(ClientCase, Query_ID) {
 
     client_->Select("SELECT 'a', count(*) FROM " + table_name, query_id, [](const Block &) {});
     client_->SelectCancelable("SELECT 'b', count(*) FROM " + table_name, query_id, [](const Block &) { return true; });
-    client_->Execute(Query("TRUNCATE TABLE " + table_name, query_id));
+    client_->Execute(Query("TRUNCATE STREAM " + table_name, query_id));
 
     FlushLogs();
 
@@ -940,12 +940,12 @@ TEST_P(ClientCase, DISABLED_ArrayArrayUInt64) {
     // Based on https://github.com/ClickHouse/clickhouse-cpp/issues/43
     std::cerr << "Connected to: " << client_->GetServerInfo() << std::endl;
     std::cerr << "DROPPING TABLE" << std::endl;
-    client_->Execute("DROP TEMPORARY TABLE IF EXISTS multiarray");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS multiarray");
 
     std::cerr << "CREATING TABLE" << std::endl;
-    client_->Execute(Query(R"sql(CREATE TEMPORARY TABLE IF NOT EXISTS multiarray
+    client_->Execute(Query(R"sql(CREATE TEMPORARY STREAM IF NOT EXISTS multiarray
     (
-        `arr` Array(Array(UInt64))
+        `arr` array(array(uint64))
     );
 )sql"));
 
@@ -1039,11 +1039,11 @@ TEST_P(ClientCase, OnProgress) {
 }
 
 TEST_P(ClientCase, QuerySettings) {
-    client_->Execute("DROP TEMPORARY TABLE IF EXISTS test_clickhouse_query_settings_table_1;");
-    client_->Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_query_settings_table_1 ( id  Int64 )");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_query_settings_table_1;");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_query_settings_table_1 ( id  Int64 )");
 
-    client_->Execute("DROP TEMPORARY TABLE IF EXISTS test_clickhouse_query_settings_table_2;");
-    client_->Execute("CREATE TEMPORARY TABLE IF NOT EXISTS test_clickhouse_query_settings_table_2 ( id  Int64, value Int64 )");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_query_settings_table_2;");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_query_settings_table_2 ( id  Int64, value Int64 )");
 
     client_->Execute("INSERT INTO test_clickhouse_query_settings_table_1 (*) VALUES (1)");
 
@@ -1189,7 +1189,7 @@ TEST_P(ClientCase, OnProfile) {
 TEST_P(ClientCase, SelectAggregateFunction) {
     // Verifies that perofing SELECT value of type AggregateFunction(...) doesn't crash the client.
     // For details: https://github.com/ClickHouse/clickhouse-cpp/issues/266
-    client_->Execute("CREATE TEMPORARY TABLE IF NOT EXISTS tableplus_crash_example (col AggregateFunction(argMax, Int32, DateTime(3))) engine = Memory");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS tableplus_crash_example (col AggregateFunction(argMax, Int32, DateTime(3))) engine = Memory");
     client_->Execute("insert into tableplus_crash_example values (unhex('010000000001089170A883010000'))");
 
     client_->Select("select version()",
@@ -1207,7 +1207,7 @@ TEST_P(ClientCase, SelectAggregateFunction) {
 
 const auto LocalHostEndpoint = ClientOptions()
         .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
+        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
         .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
         .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
         .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
@@ -1249,7 +1249,7 @@ INSTANTIATE_TEST_SUITE_P(ClientLocalFailed, ConnectionFailedClientTest,
     ::testing::Values(ConnectionFailedClientTest::ParamType{
         ClientOptions()
             .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-            .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
+            .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
             .SetUser("non_existing_user_clickhouse_cpp_test")
             .SetPassword("wrongpwd")
             .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))

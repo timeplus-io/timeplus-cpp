@@ -7,33 +7,33 @@
 using namespace clickhouse;
 
 TEST(TypesCase, TypeName) {
-    ASSERT_EQ(Type::CreateDate()->GetName(), "Date");
+    ASSERT_EQ(Type::CreateDate()->GetName(), "date");
 
-    ASSERT_EQ(Type::CreateArray(Type::CreateSimple<int32_t>())->GetName(), "Array(Int32)");
+    ASSERT_EQ(Type::CreateArray(Type::CreateSimple<int32_t>())->GetName(), "array(int32)");
 
-    ASSERT_EQ(Type::CreateNullable(Type::CreateSimple<int32_t>())->GetName(), "Nullable(Int32)");
+    ASSERT_EQ(Type::CreateNullable(Type::CreateSimple<int32_t>())->GetName(), "nullable(int32)");
 
     ASSERT_EQ(Type::CreateArray(Type::CreateSimple<int32_t>())->As<ArrayType>()->GetItemType()->GetCode(), Type::Int32);
 
-    ASSERT_EQ(Type::CreateTuple({Type::CreateSimple<int32_t>(), Type::CreateString()})->GetName(), "Tuple(Int32, String)");
+    ASSERT_EQ(Type::CreateTuple({Type::CreateSimple<int32_t>(), Type::CreateString()})->GetName(), "tuple(int32, string)");
 
     ASSERT_EQ(
         Type::CreateTuple({
             Type::CreateSimple<int32_t>(),
             Type::CreateString()})->GetName(),
-        "Tuple(Int32, String)"
+        "tuple(int32, string)"
     );
 
     ASSERT_EQ(
         Type::CreateEnum8({{"One", 1}})->GetName(),
-        "Enum8('One' = 1)"
+        "enum8('One' = 1)"
     );
     ASSERT_EQ(
         Type::CreateEnum8({})->GetName(),
-        "Enum8()"
+        "enum8()"
     );
 
-    ASSERT_EQ(Type::CreateMap(Type::CreateSimple<int32_t>(), Type::CreateString())->GetName(), "Map(Int32, String)");
+    ASSERT_EQ(Type::CreateMap(Type::CreateSimple<int32_t>(), Type::CreateString())->GetName(), "map(int32, string)");
 }
 
 TEST(TypesCase, NullableType) {
@@ -43,7 +43,7 @@ TEST(TypesCase, NullableType) {
 
 TEST(TypesCase, EnumTypes) {
     auto enum8 = Type::CreateEnum8({{"One", 1}, {"Two", 2}});
-    ASSERT_EQ(enum8->GetName(), "Enum8('One' = 1, 'Two' = 2)");
+    ASSERT_EQ(enum8->GetName(), "enum8('One' = 1, 'Two' = 2)");
     ASSERT_TRUE(enum8->As<EnumType>()->HasEnumValue(1));
     ASSERT_TRUE(enum8->As<EnumType>()->HasEnumName("Two"));
     ASSERT_FALSE(enum8->As<EnumType>()->HasEnumValue(10));
@@ -52,7 +52,7 @@ TEST(TypesCase, EnumTypes) {
     ASSERT_EQ(enum8->As<EnumType>()->GetEnumValue("Two"), 2);
 
     auto enum16 = Type::CreateEnum16({{"Green", 1}, {"Red", 2}, {"Yellow", 3}});
-    ASSERT_EQ(enum16->GetName(), "Enum16('Green' = 1, 'Red' = 2, 'Yellow' = 3)");
+    ASSERT_EQ(enum16->GetName(), "enum16('Green' = 1, 'Red' = 2, 'Yellow' = 3)");
     ASSERT_TRUE(enum16->As<EnumType>()->HasEnumValue(3));
     ASSERT_TRUE(enum16->As<EnumType>()->HasEnumName("Green"));
     ASSERT_FALSE(enum16->As<EnumType>()->HasEnumValue(10));
@@ -68,8 +68,8 @@ TEST(TypesCase, EnumTypes) {
 }
 
 TEST(TypesCase, EnumTypesEmpty) {
-    ASSERT_EQ("Enum8()", Type::CreateEnum8({})->GetName());
-    ASSERT_EQ("Enum16()", Type::CreateEnum16({})->GetName());
+    ASSERT_EQ("enum8()", Type::CreateEnum8({})->GetName());
+    ASSERT_EQ("enum16()", Type::CreateEnum16({})->GetName());
 }
 
 TEST(TypesCase, DecimalTypes) {
@@ -78,42 +78,42 @@ TEST(TypesCase, DecimalTypes) {
 
 TEST(TypesCase, IsEqual) {
     const std::string type_names[] = {
-        "UInt8",
-        "Int8",
-//        "UInt128",
-        "String",
-        "FixedString(0)",
-        "FixedString(10000)",
-        "DateTime('UTC')",
-        "DateTime64(3, 'UTC')",
-        "Decimal(9,3)",
-        "Decimal(18,3)",
-        "Enum8('ONE' = 1)",
-        "Enum8('ONE' = 1, 'TWO' = 2)",
-        "Enum16('ONE' = 1, 'TWO' = 2, 'THREE' = 3, 'FOUR' = 4)",
-        "Nullable(FixedString(10000))",
-        "Nullable(LowCardinality(FixedString(10000)))",
-        "Array(Int8)",
-        "Array(UInt8)",
-        "Array(String)",
-        "Array(Nullable(LowCardinality(FixedString(10000))))",
-        "Array(Enum8('ONE' = 1, 'TWO' = 2))"
-        "Tuple(String, Int8, Date, DateTime)",
-        "Nullable(Tuple(String, Int8, Date, DateTime))",
-        "Array(Nullable(Tuple(String, Int8, Date, DateTime)))",
-        "Array(Array(Nullable(Tuple(String, Int8, Date, DateTime))))",
-        "Array(Array(Array(Nullable(Tuple(String, Int8, Date, DateTime)))))",
-        "Array(Array(Array(Array(Nullable(Tuple(String, Int8, Date, DateTime('UTC')))))))"
-        "Array(Array(Array(Array(Nullable(Tuple(String, Int8, Date, DateTime('UTC'), Tuple(LowCardinality(String), Enum8('READ'=1, 'WRITE'=0))))))))",
-        "Map(String, Int8)",
-        "Map(String, Tuple(String, Int8, Date, DateTime))",
-        "Map(UUID, Array(Tuple(String, Int8, Date, DateTime)))",
-        "Map(String, Array(Array(Array(Nullable(Tuple(String, Int8, Date, DateTime))))))",
-        "Map(LowCardinality(FixedString(10)), Array(Array(Array(Array(Nullable(Tuple(String, Int8, Date, DateTime('UTC'))))))))",
-        "Point",
-        "Ring",
-        "Polygon",
-        "MultiPolygon"
+        "uint8",
+        "int8",
+        "uint128",
+        "string",
+        "fixed_string(0)",
+        "sixed_string(10000)",
+        "datetime('UTC')",
+        "datetime64(3, 'UTC')",
+        "decimal(9,3)",
+        "decimal(18,3)",
+        "enum8('ONE' = 1)",
+        "enum8('ONE' = 1, 'TWO' = 2)",
+        "enum16('ONE' = 1, 'TWO' = 2, 'THREE' = 3, 'FOUR' = 4)",
+        "nullable(fixed_string(10000))",
+        "nullable(low_cardinality(fixed_string(10000)))",
+        "array(int8)",
+        "array(uint8)",
+        "array(string)",
+        "array(nullable(low_cardinality(fixed_string(10000))))",
+        "array(enum8('ONE' = 1, 'TWO' = 2))"
+        "tuple(string, int8, date, datetime)",
+        "nullable(tuple(string, int8, date, datetime))",
+        "array(nullable(tuple(string, int8, date, datetime)))",
+        "array(array(nullable(tuple(string, int8, date, datetime))))",
+        "array(array(array(nullable(tuple(string, int8, date, datetime)))))",
+        "array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC')))))))"
+        "array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC'), tuple(low_cardinality(String), enum8('READ'=1, 'WRITE'=0))))))))",
+        "map(string, int8)",
+        "map(string, tuple(string, int8, date, datetime))",
+        "map(uuid, array(tuple(string, int8, date, datetime)))",
+        "map(string, array(array(array(nullable(tuple(string, int8, date, datetime))))))",
+        "map(low_cardinality(fixed_string(10)), array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC'))))))))",
+        "point",
+        "ring",
+        "polygon",
+        "multipolygon"
     };
 
     // Check that Type::IsEqual returns true only if:
@@ -143,10 +143,10 @@ TEST(TypesCase, IsEqual) {
 
 TEST(TypesCase, ErrorEnumContent) {
     const std::string type_names[] = {
-        "Enum8()",
-        "Enum8('ONE')",
-        "Enum8('ONE'=1,'TWO')",
-        "Enum16('TWO'=,'TWO')",
+        "enum8()",
+        "enum8('ONE')",
+        "enum8('ONE'=1,'TWO')",
+        "enum16('TWO'=,'TWO')",
     };
 
     for (const auto& type_name : type_names) {

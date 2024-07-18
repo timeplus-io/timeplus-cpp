@@ -37,6 +37,7 @@ inline std::string to_string(const integer<Bits, Signed> & n)
 
 }
 
+
 namespace std {
 template <size_t Bits, typename Signed>
 inline std::ostream & operator<<(std::ostream & out, const wide::integer<Bits, Signed> & value)
@@ -44,4 +45,3 @@ inline std::ostream & operator<<(std::ostream & out, const wide::integer<Bits, S
     return out << wide::to_string(value);
 }
 }
-

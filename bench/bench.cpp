@@ -7,7 +7,7 @@ namespace clickhouse {
 
 Client g_client(ClientOptions()
         .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort( std::stoi(getEnvOrDefault("CLICKHOUSE_PORT",     "9000")))
+        .SetPort( std::stoi(getEnvOrDefault("CLICKHOUSE_PORT",     "8463")))
         .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
         .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
         .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))

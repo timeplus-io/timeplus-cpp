@@ -62,7 +62,7 @@ TEST(ArrayOfLowCardinality, InsertAndQuery) {
 
     const auto localHostEndpoint = ClientOptions()
                                        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                                       .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
+                                       .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
                                        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
                                        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
                                        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
@@ -82,8 +82,8 @@ TEST(ArrayOfLowCardinality, InsertAndQuery) {
     Block block;
     block.AppendColumn("arr", column);
 
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS array_lc");
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS array_lc (arr Array(LowCardinality(String))) ENGINE = Memory");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS array_lc");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS array_lc (arr array(low_cardinality(string))) ENGINE = Memory");
     client.Insert("array_lc", block);
 
     client.Select("SELECT * FROM array_lc", [&](const Block& bl) {

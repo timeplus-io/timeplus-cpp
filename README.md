@@ -1,7 +1,6 @@
-Timeplus C++ client [![Linux](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/linux.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/linux.yml) [![macOS](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/macos.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/macos.yml) [![Windows MSVC](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_msvc.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_msvc.yml) [![Windows mingw](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_mingw.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_mingw.yml)
-=====
+Timeplus C++ client 
 
-C++ client for [Timeplus](https://timeplus.com/).
+C++ client for [Timeplus](https://www.timeplus.com/).
 
 ## Supported data types
 
