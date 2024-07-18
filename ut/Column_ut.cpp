@@ -494,7 +494,14 @@ TYPED_TEST(GenericColumnTest, ArrayT_RoundTrip) {
     auto column = std::make_shared<ColumnArrayType>(nested_column->CloneEmpty()->template As<typename TestFixture::ColumnType>());
     for (size_t i = 0; i < values.size(); ++i)
     {
-        const std::vector<std::decay_t<decltype(values[0])>> row{values.begin(), values.begin() + i};
+        std::vector<std::decay_t<decltype(values[0])>> row;
+        row.reserve(values.size());
+
+        for (auto & value : values)
+        {
+            row.push_back(value);
+        };
+
         column->Append(values.begin(), values.begin() + i);
 
         EXPECT_TRUE(CompareRecursive(row, (*column)[column->Size() - 1]));
