@@ -31,8 +31,8 @@ ColumnRef buildTestColumn(const std::vector<std::string>& rowsData, const std::v
 }
 
 void createTable(Client& client) {
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS lc_of_nullable");
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS lc_of_nullable (words LowCardinality(Nullable(String))) ENGINE = Memory");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS lc_of_nullable");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS lc_of_nullable (words low_cardinality(nullable(string))) ENGINE = Memory");
 }
 
 TEST(LowCardinalityOfNullable, InsertAndQuery) {

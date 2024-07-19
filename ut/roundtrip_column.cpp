@@ -37,7 +37,7 @@ ColumnRef RoundtripColumnValues(Client& client, ColumnRef expected) {
     const std::string type_name = result->GetType().GetName();
     client.Execute("DROP TEMPORARY STREAM IF EXISTS temporary_roundtrip_table;");
     // id column is to have the same order of rows on SELECT
-    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS temporary_roundtrip_table (id uint32, col " + type_name + ");");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS temporary_roundtrip_table (id uint32, col " + type_name + ") ENGINE = Memory;");
     {
         Block block;
         block.AppendColumn("col", expected);

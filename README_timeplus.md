@@ -1,4 +1,5 @@
 Timeplus C++ client 
+=====
 
 C++ client for [Timeplus](https://www.timeplus.com/).
 
@@ -54,9 +55,10 @@ timeplus-cpp/examples/main.cpp
 
 ```cpp
 #include <iostream>
-#include <timeplus/client.h>
+#include <clickhouse/client.h>
+#include <ut/utils.h>
 
-using namespace timeplus;
+using namespace clickhouse;
 
 void createAndSelect(Client& client) {
     /// Initialize client connection.

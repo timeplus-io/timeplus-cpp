@@ -182,8 +182,8 @@ TYPED_TEST_P(ColumnPerformanceTest, InsertAndSelect) {
             .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
     );
     // client.Execute("CREATE DATABASE IF NOT EXISTS PerformanceTests");
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS PerformanceTests_ColumnTest");
-    client.Execute("CREATE TEMPORARY TABLE PerformanceTests_ColumnTest (" + column_name + " " + column.Type()->GetName() + ")");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS PerformanceTests_ColumnTest");
+    client.Execute("CREATE TEMPORARY STREAM PerformanceTests_ColumnTest (" + column_name + " " + column.Type()->GetName() + ") ENGINE = Memory");
 
     const size_t ITEMS_COUNT = 1'000'000;
 

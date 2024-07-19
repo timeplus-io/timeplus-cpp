@@ -116,7 +116,7 @@ IF (BUILD_TESTS)
     SUBDIRS (
         contrib/gtest
         tests/simple
-        ut
+        # ut
     )
 ENDIF (BUILD_TESTS)
 

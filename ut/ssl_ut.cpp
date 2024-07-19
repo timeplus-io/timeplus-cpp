@@ -14,7 +14,7 @@ namespace {
     const auto QUERIES = std::vector<std::string> {
         "SELECT version()",
         "SELECT fqdn()",
-        "SELECT buildId()",
+        "SELECT build_id()",
         "SELECT uptime()",
         "SELECT now()"
     };

@@ -16,75 +16,73 @@
 
 using namespace clickhouse;
 
-inline void InsertExample(Client& client) {
+void createAndSelect(Client& client) {
+
     /// Create a table.
-     client.Execute("CREATE STREAM IF NOT EXISTS test_insert (id uint64, str string)");
+    client.Execute("CREATE STREAM IF NOT EXISTS default.numbers (id uint64, name string)");
+
+    /// Select values inserted in the previous step.
+    client.Select("SELECT id, name FROM default.numbers", [] (const Block& block)
+        {
+            for (size_t i = 0; i < block.GetRowCount(); ++i) {
+                std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
+                          << block[1]->As<ColumnString>()->At(i) << "\n";
+            }
+            // std::cout << PrettyPrintBlock{block} << std::endl;
+        }
+    );
+
+}
+
+void insertStream(Client& client) {
 
     /// Insert some values.
     {
-        const size_t ITEMS_COUNT = 1000;
+        Block block;
 
+        auto id = std::make_shared<ColumnUInt64>();
+        id->Append(1);
+        id->Append(7);
 
-        auto start_of_insert = std::chrono::high_resolution_clock::now();
+        auto name = std::make_shared<ColumnString>();
+        name->Append("one");
+        name->Append("seven");
 
-        for (size_t i = 0; i < ITEMS_COUNT; ++i) {
-            Block block;
+        block.AppendColumn("id"  , id);
+        block.AppendColumn("name", name);
 
-            auto id = std::make_shared<ColumnUInt64>();
-            auto s = std::make_shared<ColumnString>();
-
-            id->Append(static_cast<std::uint64_t>(i + 1));
-            s->Append(std::to_string(i + 1));
-
-            block.AppendColumn("id", id);
-            block.AppendColumn("str", s);
-            client.Insert("test_insert", block);
-
-        }
-        auto end_of_insert = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_of_insert - start_of_insert);
-        std::cout << "insert time: " << duration.count() << " milliseconds." << std::endl;
+        client.Insert("default.numbers", block);
     }
-
-    /// Select values inserted in the previous step.
-    // client.Select("SELECT id, s FROM test_insert", [](const Block& block)
-    //     {
-    //         for (Block::Iterator bi(block); bi.IsValid(); bi.Next()) {
-    //             std::cout << bi.Name() << " ";
-    //         }
-    //         std::cout << std::endl;
-
-    //         for (size_t i = 0; i < block.GetRowCount(); ++i) {
-    //             std::cout << (*block[0]->As<ColumnUInt64>())[i] << " "
-    //                       << (*block[1]->As<ColumnEnum16>()).NameAt(i) << "\n";
-    //         }
-    //     }
-    // );
-
-    /// Delete table.
-    // client.Execute("DROP STREAM test_insert");
 }
 
+void dropStream(Client& client) {
 
+    /// Delete stream.
+    client.Execute("DROP STREAM IF EXISTS default.numbers");
+}
 
-int main()
-{
-    /// Initialize client connection.
-    try {
-        const auto localHostEndpoint = ClientOptions()
-                .SetHost(   getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
-                .SetPort(   getEnvOrDefault<size_t>("TIMEPLUS_PORT",     "8463"));
+void (*functionPointers[])(Client&) = {createAndSelect, insertStream, dropStream};
 
-        {
-            Client client(ClientOptions(localHostEndpoint)
-                    .SetPingBeforeQuery(true));
-            InsertExample(client);
-            // std::cout << "current endpoint : " <<  client.GetCurrentEndpoint().value().host << "\n";
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "exception : " << e.what() << std::endl;
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <function_number>" << std::endl;
+        return 1;
     }
 
+    int functionNumber = std::stoi(argv[1]);
+
+    if (functionNumber < 1 || functionNumber > 3) {
+        std::cerr << "Invalid function number. Please enter: "<<"\n"
+                  << "1 (create stream)" <<"\n"
+                  << "2 (insert into stream)" <<"\n"
+                  << "3 (delete stream)" <<std::endl;
+        return 1;
+    }
+
+    /// Initialize client connection.
+    Client client(ClientOptions().SetHost("localhost").SetPort(8463));
+
+    functionPointers[functionNumber - 1](client);
 
     return 0;
 }
