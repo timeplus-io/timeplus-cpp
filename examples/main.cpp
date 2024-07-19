@@ -28,7 +28,6 @@ void createAndSelect(Client& client) {
                 std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
                           << block[1]->As<ColumnString>()->At(i) << "\n";
             }
-            std::cout << PrettyPrintBlock{block} << std::endl;
         }
     );
 
