@@ -1,14 +1,14 @@
 #include "connection_failed_client_test.h"
 #include "utils.h"
 
-#include <clickhouse/columns/column.h>
-#include <clickhouse/block.h>
+#include <timeplus/columns/column.h>
+#include <timeplus/block.h>
 
 #include <memory>
 #include <iostream>
 
 namespace {
-    using namespace clickhouse;
+    using namespace timeplus;
 }
 
 TEST_P(ConnectionFailedClientTest, ValidateConnectionError) {

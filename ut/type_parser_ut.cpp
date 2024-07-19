@@ -1,7 +1,7 @@
 #include <clickhouse/types/type_parser.h>
 #include <gtest/gtest.h>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 // TODO: add tests for Decimal column types.
 

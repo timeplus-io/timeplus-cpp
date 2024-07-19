@@ -1,5 +1,5 @@
-#include <clickhouse/columns/itemview.h>
-#include <clickhouse/columns/numeric.h>
+#include <timeplus/columns/itemview.h>
+#include <timeplus/columns/numeric.h>
 
 #include <gtest/gtest.h>
 #include "utils.h"
@@ -9,7 +9,7 @@
 
 namespace
 {
-using namespace clickhouse;
+using namespace timeplus;
 }
 
 TEST(ItemView, StorableTypes) {

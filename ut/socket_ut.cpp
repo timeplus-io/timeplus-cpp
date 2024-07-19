@@ -1,6 +1,6 @@
 #include "tcp_server.h"
 
-#include <clickhouse/base/socket.h>
+#include <timeplus/base/socket.h>
 #include <gtest/gtest.h>
 
 #include <iostream>
@@ -15,7 +15,7 @@
 #   include <netdb.h>
 #endif
 
-using namespace clickhouse;
+using namespace timeplus;
 
 TEST(Socketcase, connecterror) {
     int port = 19978;

@@ -1,4 +1,4 @@
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 #include "readonly_client_test.h"
 #include "connection_failed_client_test.h"
 #include "utils.h"
@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 
 Block MakeBlock(std::vector<std::pair<std::string, ColumnRef>> columns) {
     Block result;

@@ -1,22 +1,22 @@
 #include "utils.h"
 
-#include <clickhouse/block.h>
-#include <clickhouse/client.h>
-#include <clickhouse/columns/column.h>
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/decimal.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/geo.h>
-#include <clickhouse/columns/ip4.h>
-#include <clickhouse/columns/ip6.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/map.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/columns/uuid.h>
+#include <timeplus/block.h>
+#include <timeplus/client.h>
+#include <timeplus/columns/column.h>
+#include <timeplus/columns/array.h>
+#include <timeplus/columns/date.h>
+#include <timeplus/columns/decimal.h>
+#include <timeplus/columns/enum.h>
+#include <timeplus/columns/geo.h>
+#include <timeplus/columns/ip4.h>
+#include <timeplus/columns/ip6.h>
+#include <timeplus/columns/numeric.h>
+#include <timeplus/columns/map.h>
+#include <timeplus/columns/string.h>
+#include <timeplus/columns/tuple.h>
+#include <timeplus/columns/uuid.h>
 
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <timeplus/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
 #include <cinttypes>
 #include <iomanip>
@@ -25,7 +25,7 @@
 
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 std::ostream & printColumnValue(const ColumnRef& c, const size_t row, std::ostream & ostr);
 
 struct DateTimeValue {
@@ -276,7 +276,7 @@ std::ostream& operator<<(std::ostream& ostr, const in6_addr& addr) {
     return ostr << ip_str;
 }
 
-namespace clickhouse {
+namespace timeplus {
 
 std::ostream& operator<<(std::ostream & ostr, const Block & block) {
     if (block.GetRowCount() == 0 || block.GetColumnCount() == 0)
@@ -338,7 +338,7 @@ uint64_t versionNumber(const ServerInfo & server_info) {
     return versionNumber(server_info.version_major, server_info.version_minor, server_info.version_patch, server_info.revision);
 }
 
-std::string ToString(const clickhouse::UUID& v) {
+std::string ToString(const timeplus::UUID& v) {
     std::string result(36, 0);
     // ffff ff ff ss ssssss
     const int count = std::snprintf(result.data(), result.size() + 1, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.12" PRIx64,

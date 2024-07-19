@@ -1,8 +1,8 @@
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 
-#include "clickhouse/base/socket.h"
-#include "clickhouse/version.h"
-#include "clickhouse/error_codes.h"
+#include "timeplus/base/socket.h"
+#include "timeplus/version.h"
+#include "timeplus/error_codes.h"
 
 #include "readonly_client_test.h"
 #include "connection_failed_client_test.h"
@@ -20,7 +20,7 @@
 #include <thread>
 #include <chrono>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 template <typename T>
 std::shared_ptr<T> createTableWithOneColumn(Client & client, const std::string & table_name, const std::string & column_name)
@@ -74,11 +74,11 @@ protected:
                 std::cerr << "Now we wait " << wait_duration << "..." << std::endl;
                 std::this_thread::sleep_for(wait_duration);
             };
-            // DB::Exception: clickhouse_cpp_cicd: Not enough privileges. To execute this query it's necessary to have grant SYSTEM FLUSH LOGS ON
+            // DB::Exception: timeplus_cpp_cicd: Not enough privileges. To execute this query it's necessary to have grant SYSTEM FLUSH LOGS ON
             if (std::string(e.what()).find("To execute this query it's necessary to have grant SYSTEM FLUSH LOGS ON") != std::string::npos) {
                 wait_for_flush();
             }
-            // DB::Exception: clickhouse_cpp_cicd: Cannot execute query in readonly mode
+            // DB::Exception: timeplus_cpp_cicd: Cannot execute query in readonly mode
             if (std::string(e.what()).find("Cannot execute query in readonly mode") != std::string::npos) {
                 wait_for_flush();
             }
@@ -86,30 +86,30 @@ protected:
     }
 
     std::unique_ptr<Client> client_;
-    const std::string table_name = "test_clickhouse_cpp_test_ut_table";
+    const std::string table_name = "test_timeplus_cpp_test_ut_table";
     const std::string column_name = "test_column";
 };
 
 TEST_P(ClientCase, Version) {
     auto version = client_->GetVersion();
-    EXPECT_NE(0, CLICKHOUSE_CPP_VERSION);
+    EXPECT_NE(0, timeplus_cpp_VERSION);
 
-    EXPECT_GE(2, CLICKHOUSE_CPP_VERSION_MAJOR);
-    EXPECT_LE(0, CLICKHOUSE_CPP_VERSION_MINOR);
-    EXPECT_LE(0, CLICKHOUSE_CPP_VERSION_PATCH);
+    EXPECT_GE(2, timeplus_cpp_VERSION_MAJOR);
+    EXPECT_LE(0, timeplus_cpp_VERSION_MINOR);
+    EXPECT_LE(0, timeplus_cpp_VERSION_PATCH);
 
-    EXPECT_EQ(CLICKHOUSE_CPP_VERSION_MAJOR, version.major);
-    EXPECT_EQ(CLICKHOUSE_CPP_VERSION_MINOR, version.minor);
-    EXPECT_EQ(CLICKHOUSE_CPP_VERSION_PATCH, version.patch);
-    EXPECT_EQ(CLICKHOUSE_CPP_VERSION_BUILD, version.build);
-    EXPECT_EQ(CLICKHOUSE_CPP_VERSION_PATCH, version.patch);
+    EXPECT_EQ(timeplus_cpp_VERSION_MAJOR, version.major);
+    EXPECT_EQ(timeplus_cpp_VERSION_MINOR, version.minor);
+    EXPECT_EQ(timeplus_cpp_VERSION_PATCH, version.patch);
+    EXPECT_EQ(timeplus_cpp_VERSION_BUILD, version.build);
+    EXPECT_EQ(timeplus_cpp_VERSION_PATCH, version.patch);
 }
 
 TEST_P(ClientCase, Array) {
     Block b;
 
     /// Create a table.
-    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_array (arr array(uint64)) ENGINE = Memory");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_array (arr array(uint64)) ENGINE = Memory");
 
     /// Insert some values.
     {
@@ -129,13 +129,13 @@ TEST_P(ClientCase, Array) {
         arr->AppendAsColumn(id);
 
         b.AppendColumn("arr", arr);
-        client_->Insert("test_clickhouse_cpp_array", b);
+        client_->Insert("test_timeplus_cpp_array", b);
     }
 
     const uint64_t ARR_SIZE[] = { 1, 2, 3, 4 };
     const uint64_t VALUE[] = { 1, 3, 7, 9 };
     size_t row = 0;
-    client_->Select("SELECT arr FROM test_clickhouse_cpp_array",
+    client_->Select("SELECT arr FROM test_timeplus_cpp_array",
             [ARR_SIZE, VALUE, &row](const Block& block)
         {
             if (block.GetRowCount() == 0) {
@@ -160,15 +160,15 @@ TEST_P(ClientCase, Date) {
 
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_date (d datetime('UTC')) ENGINE = Memory");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_date (d datetime('UTC')) ENGINE = Memory");
 
     auto d = std::make_shared<ColumnDateTime>();
     auto const now = std::time(nullptr);
     d->Append(now);
     b.AppendColumn("d", d);
-    client_->Insert("test_clickhouse_cpp_date", b);
+    client_->Insert("test_timeplus_cpp_date", b);
 
-    client_->Select("SELECT d FROM test_clickhouse_cpp_date", [&now](const Block& block)
+    client_->Select("SELECT d FROM test_timeplus_cpp_date", [&now](const Block& block)
         {
             if (block.GetRowCount() == 0) {
                 return;
@@ -265,7 +265,7 @@ TEST_P(ClientCase, LowCardinalityString_AsString) {
     options.SetBakcwardCompatibilityFeatureLowCardinalityAsWrappedColumn(true);
 
     client_ = std::make_unique<Client>(GetParam());
-    // client_->Execute("CREATE DATABASE IF NOT EXISTS test_clickhouse_cpp");
+    // client_->Execute("CREATE DATABASE IF NOT EXISTS test_timeplus_cpp");
 
     Block block;
     auto col = std::make_shared<ColumnString>();
@@ -306,7 +306,7 @@ TEST_P(ClientCase, LowCardinalityString_AsString) {
 
 TEST_P(ClientCase, Generic) {
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_client (id uint64, name string, f bool) ENGINE = Memory");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_client (id uint64, name string, f bool) ENGINE = Memory");
 
     const struct {
         uint64_t id;
@@ -336,12 +336,12 @@ TEST_P(ClientCase, Generic) {
         block.AppendColumn("name", name);
         block.AppendColumn("f",    f);
 
-        client_->Insert("test_clickhouse_cpp_client", block);
+        client_->Insert("test_timeplus_cpp_client", block);
     }
 
     /// Select values inserted in the previous step.
     size_t row = 0;
-    client_->Select("SELECT id, name, f FROM test_clickhouse_cpp_client", [TEST_DATA, &row](const Block& block)
+    client_->Select("SELECT id, name, f FROM test_timeplus_cpp_client", [TEST_DATA, &row](const Block& block)
         {
             if (block.GetRowCount() == 0) {
                 return;
@@ -361,7 +361,7 @@ TEST_P(ClientCase, Generic) {
 TEST_P(ClientCase, Nullable) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_nullable (id nullable(uint64), date nullable(date)) ENGINE = Memory ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_nullable (id nullable(uint64), date nullable(date)) ENGINE = Memory ");
 
     // Round std::time_t to start of date.
     const std::time_t cur_date = std::time(nullptr) / 86400 * 86400;
@@ -400,12 +400,12 @@ TEST_P(ClientCase, Nullable) {
             block.AppendColumn("date", std::make_shared<ColumnNullable>(date, nulls));
         }
 
-        client_->Insert("test_clickhouse_cpp_nullable", block);
+        client_->Insert("test_timeplus_cpp_nullable", block);
     }
 
     /// Select values inserted in the previous step.
     size_t row = 0;
-    client_->Select("SELECT id, date FROM test_clickhouse_cpp_nullable",
+    client_->Select("SELECT id, date FROM test_timeplus_cpp_nullable",
             [TEST_DATA, &row](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c, ++row) {
@@ -452,7 +452,7 @@ TEST_P(ClientCase, Numbers) {
         );
         EXPECT_EQ(1000U, num);
     }
-    catch (const clickhouse::ServerError & e) {
+    catch (const timeplus::ServerError & e) {
         if (e.GetCode() == ErrorCodes::ACCESS_DENIED)
             GTEST_SKIP() << e.what() << " : " << GetParam();
         else
@@ -466,15 +466,15 @@ TEST_P(ClientCase, SimpleAggregateFunction) {
         GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support SimpleAggregateFunction" << std::endl;
     }
 
-    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_cpp_SimpleAggregateFunction");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_timeplus_cpp_SimpleAggregateFunction");
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_SimpleAggregateFunction (saf simple_aggregate_function(sum, uint64)) ENGINE = Memory");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_SimpleAggregateFunction (saf simple_aggregate_function(sum, uint64)) ENGINE = Memory");
 
     constexpr size_t EXPECTED_ROWS = 10;
-    client_->Execute("INSERT INTO test_clickhouse_cpp_SimpleAggregateFunction (saf) VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)");
+    client_->Execute("INSERT INTO test_timeplus_cpp_SimpleAggregateFunction (saf) VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)");
 
     size_t total_rows = 0;
-    client_->Select("Select * FROM test_clickhouse_cpp_SimpleAggregateFunction", [&total_rows](const Block & block) {
+    client_->Select("Select * FROM test_timeplus_cpp_SimpleAggregateFunction", [&total_rows](const Block & block) {
         if (block.GetRowCount() == 0)
             return;
 
@@ -495,7 +495,7 @@ TEST_P(ClientCase, SimpleAggregateFunction) {
 TEST_P(ClientCase, Cancellable) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_cancel (x uint64) ENGINE = Memory ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_cancel (x uint64) ENGINE = Memory ");
 
     /// Insert a few blocks. In order to make cancel have effect, we have to
     /// insert a relative larger amount of data.
@@ -510,13 +510,13 @@ TEST_P(ClientCase, Cancellable) {
         }
 
         b.AppendColumn("x", x);
-        client_->Insert("test_clickhouse_cpp_cancel", b);
+        client_->Insert("test_timeplus_cpp_cancel", b);
     }
 
     /// Send a query which is canceled after receiving the first blockr.
     int row_cnt = 0;
     EXPECT_NO_THROW(
-        client_->SelectCancelable("SELECT * FROM test_clickhouse_cpp_cancel",
+        client_->SelectCancelable("SELECT * FROM test_timeplus_cpp_cancel",
             [&row_cnt](const Block& block)
             {
                 row_cnt += block.GetRowCount();
@@ -531,19 +531,19 @@ TEST_P(ClientCase, Cancellable) {
 TEST_P(ClientCase, Exception) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_exceptions (id uint64, name string) ENGINE = Memory ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_exceptions (id uint64, name string) ENGINE = Memory ");
 
     /// Expect failing on table creation.
     EXPECT_THROW(
         client_->Execute(
-            "CREATE TEMPORARY STREAM test_clickhouse_cpp_exceptions (id uint64, name string) ENGINE = Memory "),
+            "CREATE TEMPORARY STREAM test_timeplus_cpp_exceptions (id uint64, name string) ENGINE = Memory "),
         ServerException);
 }
 
 TEST_P(ClientCase, Enum) {
     /// Create a table.
     client_->Execute(
-            "CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_cpp_enums (id uint64, e enum8('One' = 1, 'Two' = 2)) ENGINE = Memory ");
+            "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_enums (id uint64, e enum8('One' = 1, 'Two' = 2)) ENGINE = Memory ");
 
     const struct {
         uint64_t id;
@@ -576,12 +576,12 @@ TEST_P(ClientCase, Enum) {
         block.AppendColumn("id", id);
         block.AppendColumn("e", e);
 
-        client_->Insert("test_clickhouse_cpp_enums", block);
+        client_->Insert("test_timeplus_cpp_enums", block);
     }
 
     /// Select values inserted in the previous step.
     size_t row = 0;
-    client_->Select("SELECT id, e FROM test_clickhouse_cpp_enums", [&row, TEST_DATA](const Block& block)
+    client_->Select("SELECT id, e FROM test_timeplus_cpp_enums", [&row, TEST_DATA](const Block& block)
         {
             if (block.GetRowCount() == 0) {
                 return;
@@ -602,7 +602,7 @@ TEST_P(ClientCase, Enum) {
 TEST_P(ClientCase, Decimal) {
     client_->Execute(
         "CREATE TEMPORARY STREAM IF NOT EXISTS "
-        "test_clickhouse_cpp_decimal (id uint64, d1 decimal(9, 4), d2 decimal(18, 9), d3 decimal(38, 19), "
+        "test_timeplus_cpp_decimal (id uint64, d1 decimal(9, 4), d2 decimal(18, 9), d3 decimal(38, 19), "
         "                         d4 decimal32(4), d5 decimal64(9), d6 decimal128(19))  ENGINE = Memory");
 
     {
@@ -699,10 +699,10 @@ TEST_P(ClientCase, Decimal) {
         b.AppendColumn("d5", d5);
         b.AppendColumn("d6", d6);
 
-        client_->Insert("test_clickhouse_cpp_decimal", b);
+        client_->Insert("test_timeplus_cpp_decimal", b);
     }
 
-    client_->Select("SELECT id, d1, d2, d3, d4, d5, d6 FROM test_clickhouse_cpp_decimal ORDER BY id", [](const Block& b) {
+    client_->Select("SELECT id, d1, d2, d3, d4, d5, d6 FROM test_timeplus_cpp_decimal ORDER BY id", [](const Block& b) {
         if (b.GetRowCount() == 0) {
             return;
         }
@@ -789,9 +789,9 @@ TEST_P(ClientCase, Decimal) {
 
 // Test special chars in names
 TEST_P(ClientCase, ColEscapeNameTest) {
-    client_->Execute(R"sql(DROP TEMPORARY STREAM IF EXISTS "test_clickhouse_cpp_col_escape_""name_test";)sql");
+    client_->Execute(R"sql(DROP TEMPORARY STREAM IF EXISTS "test_timeplus_cpp_col_escape_""name_test";)sql");
 
-    client_->Execute(R"sql(CREATE TEMPORARY STREAM IF NOT EXISTS "test_clickhouse_cpp_col_escape_""name_test" ("test space" uint64, "test "" quote" uint64, "test ""`'[]&_\ all" uint64))sql");
+    client_->Execute(R"sql(CREATE TEMPORARY STREAM IF NOT EXISTS "test_timeplus_cpp_col_escape_""name_test" ("test space" uint64, "test "" quote" uint64, "test ""`'[]&_\ all" uint64))sql");
 
     auto col1 = std::make_shared<ColumnUInt64>();
     col1->Append(1);
@@ -815,8 +815,8 @@ TEST_P(ClientCase, ColEscapeNameTest) {
     block.AppendColumn(column_names[1], col2);
     block.AppendColumn(column_names[2], col3);
 
-    client_->Insert(R"sql("test_clickhouse_cpp_col_escape_""name_test")sql", block);
-    client_->Select(R"sql(SELECT * FROM "test_clickhouse_cpp_col_escape_""name_test")sql", [] (const Block& sblock)
+    client_->Insert(R"sql("test_timeplus_cpp_col_escape_""name_test")sql", block);
+    client_->Select(R"sql(SELECT * FROM "test_timeplus_cpp_col_escape_""name_test")sql", [] (const Block& sblock)
     {
         int row = sblock.GetRowCount();
         if (row <= 0) {return;}
@@ -843,17 +843,17 @@ TEST_P(ClientCase, datetime64) {
     }
 
     Block block;
-    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_cpp_datetime64;");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_timeplus_cpp_datetime64;");
 
     client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS "
-            "test_clickhouse_cpp_datetime64 (dt datetime64(6)) ENGINE = Memory ");
+            "test_timeplus_cpp_datetime64 (dt datetime64(6)) ENGINE = Memory ");
 
     auto col_dt64 = std::make_shared<ColumnDateTime64>(6);
     block.AppendColumn("dt", col_dt64);
 
     // Empty INSERT and SELECT
-    client_->Insert("test_clickhouse_cpp_datetime64", block);
-    client_->Select("SELECT dt FROM test_clickhouse_cpp_datetime64",
+    client_->Insert("test_timeplus_cpp_datetime64", block);
+    client_->Select("SELECT dt FROM test_timeplus_cpp_datetime64",
         [](const Block& block) {
             ASSERT_EQ(0U, block.GetRowCount());
         }
@@ -875,10 +875,10 @@ TEST_P(ClientCase, datetime64) {
     block.RefreshRowCount();
 
     // Non-empty INSERT and SELECT
-    client_->Insert("test_clickhouse_cpp_datetime64", block);
+    client_->Insert("test_timeplus_cpp_datetime64", block);
 
     size_t total_rows = 0;
-    client_->Select("SELECT dt FROM test_clickhouse_cpp_datetime64",
+    client_->Select("SELECT dt FROM test_timeplus_cpp_datetime64",
         [&total_rows, &data](const Block& block) {
             total_rows += block.GetRowCount();
             if (block.GetRowCount() == 0) {
@@ -907,7 +907,7 @@ TEST_P(ClientCase, Query_ID) {
 
     SCOPED_TRACE(query_id);
 
-    const std::string table_name = "test_clickhouse_cpp_query_id_test";
+    const std::string table_name = "test_timeplus_cpp_query_id_test";
     client_->Execute(Query("CREATE TEMPORARY STREAM IF NOT EXISTS " + table_name + " (a int64) ENGINE = Memory", query_id));
 
     {
@@ -937,7 +937,6 @@ TEST_P(ClientCase, Query_ID) {
 
 // Spontaneosly fails on INSERTint data.
 TEST_P(ClientCase, DISABLED_ArrayArrayUInt64) {
-    // Based on https://github.com/ClickHouse/clickhouse-cpp/issues/43
     std::cerr << "Connected to: " << client_->GetServerInfo() << std::endl;
     std::cerr << "DROPPING TABLE" << std::endl;
     client_->Execute("DROP TEMPORARY STREAM IF EXISTS multiarray");
@@ -1039,18 +1038,18 @@ TEST_P(ClientCase, OnProgress) {
 }
 
 TEST_P(ClientCase, QuerySettings) {
-    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_query_settings_table_1;");
-    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_query_settings_table_1 ( id  int64 ) ENGINE = Memory");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_timeplus_query_settings_table_1;");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_query_settings_table_1 ( id  int64 ) ENGINE = Memory");
 
-    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_clickhouse_query_settings_table_2;");
-    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_clickhouse_query_settings_table_2 ( id  int64, value int64 ) ENGINE = Memory");
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_timeplus_query_settings_table_2;");
+    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_query_settings_table_2 ( id  int64, value int64 ) ENGINE = Memory");
 
-    client_->Execute("INSERT INTO test_clickhouse_query_settings_table_1 (*) VALUES (1)");
+    client_->Execute("INSERT INTO test_timeplus_query_settings_table_1 (*) VALUES (1)");
 
     Query query("SELECT value "
-                "FROM test_clickhouse_query_settings_table_1 "
-                "LEFT OUTER JOIN test_clickhouse_query_settings_table_2 "
-                "ON test_clickhouse_query_settings_table_1.id = test_clickhouse_query_settings_table_2.id");
+                "FROM test_timeplus_query_settings_table_1 "
+                "LEFT OUTER JOIN test_timeplus_query_settings_table_2 "
+                "ON test_timeplus_query_settings_table_1.id = test_timeplus_query_settings_table_2.id");
 
 
     bool checked = false;
@@ -1178,7 +1177,7 @@ TEST_P(ClientCase, OnProfile) {
         EXPECT_GE(profile->rows_before_limit, 10u);
         EXPECT_EQ(profile->applied_limit, true);
         EXPECT_EQ(profile->calculated_rows_before_limit, true);
-    } catch (const clickhouse::ServerError & e) {
+    } catch (const timeplus::ServerError & e) {
         if (e.GetCode() == ErrorCodes::ACCESS_DENIED)
             GTEST_SKIP() << e.what() << " : " << GetParam();
         else
@@ -1188,7 +1187,6 @@ TEST_P(ClientCase, OnProfile) {
 
 TEST_P(ClientCase, SelectAggregateFunction) {
     // Verifies that perofing SELECT value of type AggregateFunction(...) doesn't crash the client.
-    // For details: https://github.com/ClickHouse/clickhouse-cpp/issues/266
     client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS tableplus_crash_example (col aggregate_function(argMax, int32, datetime(3))) engine = Memory");
     client_->Execute("insert into tableplus_crash_example values (unhex('010000000001089170A883010000'))");
 
@@ -1201,16 +1199,16 @@ TEST_P(ClientCase, SelectAggregateFunction) {
     EXPECT_THROW(client_->Select("select toTypeName(col), col from tableplus_crash_example",
     [&](const Block& block) {
         std::cerr << PrettyPrintBlock{block} << std::endl;
-    }), clickhouse::UnimplementedError);
+    }), timeplus::UnimplementedError);
 }
 
 
 const auto LocalHostEndpoint = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+        .SetHost(           getEnvOrDefault("timeplus_HOST",     "localhost"))
+        .SetPort(   getEnvOrDefault<size_t>("timeplus_PORT",     "8463"))
+        .SetUser(           getEnvOrDefault("timeplus_USER",     "default"))
+        .SetPassword(       getEnvOrDefault("timeplus_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("timeplus_DB",       "default"));
 
 INSTANTIATE_TEST_SUITE_P(
     Client, ClientCase,
@@ -1223,7 +1221,7 @@ INSTANTIATE_TEST_SUITE_P(
     ));
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 
 const auto QUERIES = std::vector<std::string>{
     "SELECT version()",
@@ -1248,11 +1246,11 @@ INSTANTIATE_TEST_SUITE_P(ClientLocalReadonly, ReadonlyClientTest,
 INSTANTIATE_TEST_SUITE_P(ClientLocalFailed, ConnectionFailedClientTest,
     ::testing::Values(ConnectionFailedClientTest::ParamType{
         ClientOptions()
-            .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-            .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
-            .SetUser("non_existing_user_clickhouse_cpp_test")
+            .SetHost(           getEnvOrDefault("timeplus_HOST",     "localhost"))
+            .SetPort(   getEnvOrDefault<size_t>("timeplus_PORT",     "8463"))
+            .SetUser("non_existing_user_timeplus_cpp_test")
             .SetPassword("wrongpwd")
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetDefaultDatabase(getEnvOrDefault("timeplus_DB",       "default"))
             .SetSendRetries(1)
             .SetPingBeforeQuery(true)
             .SetCompressionMethod(CompressionMethod::None),
@@ -1288,9 +1286,9 @@ INSTANTIATE_TEST_SUITE_P(ClientMultipleEndpoints, ConnectionSuccessTestCase,
                     , {"localhost", 9000}
                     , {"noalocalhost", 6784}
                 })
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetUser(           getEnvOrDefault("timeplus_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("timeplus_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("timeplus_DB",       "default"))
             .SetPingBeforeQuery(true)
             .SetConnectionConnectTimeout(std::chrono::milliseconds(200))
             .SetRetryTimeout(std::chrono::seconds(1)),
@@ -1306,9 +1304,9 @@ INSTANTIATE_TEST_SUITE_P(ClientMultipleEndpointsWithDefaultPort, ConnectionSucce
                     , {"localhost"}
                     , {"noalocalhost", 6784}
                 })
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetUser(           getEnvOrDefault("timeplus_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("timeplus_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("timeplus_DB",       "default"))
             .SetPingBeforeQuery(true)
             .SetConnectionConnectTimeout(std::chrono::milliseconds(200))
             .SetRetryTimeout(std::chrono::seconds(1)),
@@ -1323,9 +1321,9 @@ INSTANTIATE_TEST_SUITE_P(MultipleEndpointsFailed, ConnectionFailedClientTest,
                     ,{"somedeadhost",  1245}
                     ,{"noalocalhost",  6784}
                 })
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetUser(           getEnvOrDefault("timeplus_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("timeplus_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("timeplus_DB",       "default"))
             .SetPingBeforeQuery(true)
             .SetConnectionConnectTimeout(std::chrono::milliseconds(200))
             .SetRetryTimeout(std::chrono::seconds(1)),
@@ -1392,9 +1390,9 @@ INSTANTIATE_TEST_SUITE_P(ResetConnectionClientTest, ResetConnectionTestCase,
                     ,{"noalocalhost",  6784}
                     ,{"127.0.0.1", 9000}
                 })
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetUser(           getEnvOrDefault("timeplus_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("timeplus_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("timeplus_DB",       "default"))
             .SetPingBeforeQuery(true)
             .SetConnectionConnectTimeout(std::chrono::milliseconds(200))
             .SetRetryTimeout(std::chrono::seconds(1))
@@ -1439,7 +1437,7 @@ TEST(SimpleClientTest, issue_335) {
     std::unique_ptr<SocketFactory> socket_factory = std::make_unique<CountingSocketFactoryAdapter>(*wrapped_socket_factory, connect_requests);
 
     Client client(ClientOptions(LocalHostEndpoint)
-                      .SetSendRetries(0), // <<=== crucial for reproducing https://github.com/ClickHouse/clickhouse-cpp/issues/335
+                      .SetSendRetries(0),
                   std::move(socket_factory));
 
     EXPECT_EQ(1u, connect_requests.size());
@@ -1472,7 +1470,7 @@ TEST(SimpleClientTest, issue_335_reconnects_count) {
     EXPECT_ANY_THROW(
         Client(ClientOptions()
                           .SetEndpoints(endpoints)
-                          .SetSendRetries(0), // <<=== crucial for reproducing https://github.com/ClickHouse/clickhouse-cpp/issues/335
+                          .SetSendRetries(0),
                       std::move(socket_factory));
     );
 

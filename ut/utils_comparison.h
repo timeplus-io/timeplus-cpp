@@ -2,7 +2,7 @@
 
 #include "utils_meta.h"
 
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <timeplus/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
 #include <gtest/gtest.h>
 
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <type_traits>
 
-namespace clickhouse {
+namespace timeplus {
     class Block;
     class Column;
 }
@@ -108,7 +108,7 @@ struct ColumnAsContainerWrapper {
 
 template <typename T>
 auto maybeWrapColumnAsContainer(const T & t) {
-    if constexpr (std::is_base_of_v<clickhouse::Column, T>) {
+    if constexpr (std::is_base_of_v<timeplus::Column, T>) {
         return ::details::ColumnAsContainerWrapper<T>{t};
     } else {
         return t;
@@ -144,8 +144,8 @@ struct PrintContainer;
 template <typename Left, typename Right>
 ::testing::AssertionResult CompareRecursive(const Left & left, const Right & right) {
     if constexpr (!is_string_v<Left> && !is_string_v<Right>
-            && (is_container_v<Left> || std::is_base_of_v<clickhouse::Column, std::decay_t<Left>>)
-            && (is_container_v<Right> || std::is_base_of_v<clickhouse::Column, std::decay_t<Right>>) ) {
+            && (is_container_v<Left> || std::is_base_of_v<timeplus::Column, std::decay_t<Left>>)
+            && (is_container_v<Right> || std::is_base_of_v<timeplus::Column, std::decay_t<Right>>) ) {
 
         const auto & l = maybeWrapColumnAsContainer(left);
         const auto & r = maybeWrapColumnAsContainer(right);

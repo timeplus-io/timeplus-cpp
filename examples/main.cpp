@@ -1,7 +1,7 @@
-#include <clickhouse/client.h>
-#include <clickhouse/error_codes.h>
-#include <clickhouse/types/type_parser.h>
-#include <clickhouse/base/socket.h>
+#include <timeplus/client.h>
+#include <timeplus/error_codes.h>
+#include <timeplus/types/type_parser.h>
+#include <timeplus/base/socket.h>
 
 #include <ut/utils.h>
 
@@ -14,7 +14,7 @@
 #   pragma warning(disable : 4996)
 #endif
 
-using namespace clickhouse;
+using namespace timeplus;
 
 void createAndSelect(Client& client) {
 
@@ -28,7 +28,7 @@ void createAndSelect(Client& client) {
                 std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
                           << block[1]->As<ColumnString>()->At(i) << "\n";
             }
-            // std::cout << PrettyPrintBlock{block} << std::endl;
+            std::cout << PrettyPrintBlock{block} << std::endl;
         }
     );
 

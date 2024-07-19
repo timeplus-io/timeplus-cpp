@@ -1,14 +1,14 @@
 #include "roundtrip_column.h"
 
-#include <clickhouse/client.h>
-#include <clickhouse/block.h>
+#include <timeplus/client.h>
+#include <timeplus/block.h>
 
 #include <gtest/gtest.h>
 #include <type_traits>
-#include "clickhouse/columns/numeric.h"
+#include "timeplus/columns/numeric.h"
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 
 template <typename T>
 std::vector<T> GenerateConsecutiveNumbers(size_t count, T start = 0)

@@ -1,7 +1,7 @@
-#include <clickhouse/client.h>
-#include <clickhouse/error_codes.h>
-#include <clickhouse/types/type_parser.h>
-#include <clickhouse/base/socket.h>
+#include <timeplus/client.h>
+#include <timeplus/error_codes.h>
+#include <timeplus/types/type_parser.h>
+#include <timeplus/base/socket.h>
 
 #include <ut/utils.h>
 
@@ -14,7 +14,7 @@
 #   pragma warning(disable : 4996)
 #endif
 
-using namespace clickhouse;
+using namespace timeplus;
 
 void InsertTask(const ClientOptions& client_options, const size_t start_index, const size_t end_index) {
     try {

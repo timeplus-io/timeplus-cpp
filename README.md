@@ -60,7 +60,7 @@ using namespace timeplus;
 
 void createAndSelect(Client& client) {
     /// Initialize client connection.
-    Client client(ClientOptions().SetHost("localhost").SetPort(8463));
+    Client client(ClientOptions().SetHost("localhost").SetPort(8463));// your server's port
 
     /// Create a table.
     client.Execute("CREATE STREAM IF NOT EXISTS default.numbers (id uint64, name string)");

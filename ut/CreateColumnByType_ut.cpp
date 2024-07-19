@@ -1,12 +1,12 @@
-#include <clickhouse/columns/factory.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
+#include <timeplus/columns/factory.h>
+#include <timeplus/columns/date.h>
+#include <timeplus/columns/numeric.h>
+#include <timeplus/columns/string.h>
 
 #include <gtest/gtest.h>
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 }
 
 TEST(CreateColumnByType, CreateSimpleAggregateFunction) {

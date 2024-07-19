@@ -1,4 +1,4 @@
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 
 #include "utils.h"
 #include "roundtrip_column.h"
@@ -7,7 +7,7 @@
 #include <map>
 #include <optional>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 // Use value-parameterized tests to run same tests with different client
 // options.
@@ -314,11 +314,11 @@ TEST_P(RoundtripCase, RoundtripArrayLowCardinalityTString) {
 }
 
 const auto LocalHostEndpoint = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+        .SetHost(           getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
+        .SetPort(   getEnvOrDefault<size_t>("TIMEPLUS_PORT",     "8463"))
+        .SetUser(           getEnvOrDefault("TIMEPLUS_USER",     "default"))
+        .SetPassword(       getEnvOrDefault("TIMEPLUS_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("TIMEPLUS_DB",       "default"));
 
 INSTANTIATE_TEST_SUITE_P(
     Roundtrip, RoundtripCase,

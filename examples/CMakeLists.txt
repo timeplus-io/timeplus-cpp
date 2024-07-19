@@ -1,3 +1,3 @@
-add_executable(timeplusd-client main.cpp)
+add_executable(timeplus-client main.cpp)
 
-target_link_libraries(timeplusd-client PRIVATE clickhouse-cpp-lib)
+target_link_libraries(timeplus-client PRIVATE timeplus-cpp-lib)

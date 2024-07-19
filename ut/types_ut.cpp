@@ -1,10 +1,10 @@
-#include <clickhouse/types/types.h>
-#include <clickhouse/columns/factory.h>
+#include <timeplus/types/types.h>
+#include <timeplus/columns/factory.h>
 #include <ut/utils.h>
 
 #include <gtest/gtest.h>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 TEST(TypesCase, TypeName) {
     ASSERT_EQ(Type::CreateDate()->GetName(), "date");
@@ -121,7 +121,7 @@ TEST(TypesCase, IsEqual) {
     // - same Type layout (matching outer type with all nested types and/or parameters)
     for (const auto & type_name : type_names) {
         SCOPED_TRACE(type_name);
-        const auto type = clickhouse::CreateColumnByType(type_name)->Type();
+        const auto type = timeplus::CreateColumnByType(type_name)->Type();
 
         // Should be equal to itself
         EXPECT_TRUE(type->IsEqual(type));
@@ -129,7 +129,7 @@ TEST(TypesCase, IsEqual) {
 
         for (const auto & other_type_name : type_names) {
             SCOPED_TRACE(other_type_name);
-            const auto other_column = clickhouse::CreateColumnByType(other_type_name);
+            const auto other_column = timeplus::CreateColumnByType(other_type_name);
             ASSERT_NE(nullptr, other_column);
 
             const auto other_type = other_column->Type();
@@ -151,6 +151,6 @@ TEST(TypesCase, ErrorEnumContent) {
 
     for (const auto& type_name : type_names) {
         SCOPED_TRACE(type_name);
-        EXPECT_THROW(clickhouse::CreateColumnByType(type_name)->Type(), ValidationError);
+        EXPECT_THROW(timeplus::CreateColumnByType(type_name)->Type(), ValidationError);
     }
 }

@@ -4,7 +4,7 @@ ADD_EXECUTABLE (simple-test
 )
 
 TARGET_LINK_LIBRARIES (simple-test
-    clickhouse-cpp-lib
+    timeplus-cpp-lib
 )
 
 IF (MSVC)

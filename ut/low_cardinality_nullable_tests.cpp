@@ -1,23 +1,23 @@
 #include <gtest/gtest.h>
-#include <clickhouse/columns/string.h>
-#include "clickhouse/columns/nullable.h"
-#include "clickhouse/columns/lowcardinality.h"
-#include "clickhouse/client.h"
+#include <timeplus/columns/string.h>
+#include "timeplus/columns/nullable.h"
+#include "timeplus/columns/lowcardinality.h"
+#include "timeplus/client.h"
 #include "utils.h"
-#include "clickhouse/base/wire_format.h"
-#include <clickhouse/base/output.h>
+#include "timeplus/base/wire_format.h"
+#include <timeplus/base/output.h>
 
 namespace
 {
-using namespace clickhouse;
+using namespace timeplus;
 }
 
 static const auto localHostEndpoint = ClientOptions()
-                                   .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                                   .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "8463"))
-                                   .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-                                   .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-                                   .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+                                   .SetHost(           getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
+                                   .SetPort(   getEnvOrDefault<size_t>("TIMEPLUS_PORT",     "8463"))
+                                   .SetUser(           getEnvOrDefault("TIMEPLUS_USER",     "default"))
+                                   .SetPassword(       getEnvOrDefault("TIMEPLUS_PASSWORD", ""))
+                                   .SetDefaultDatabase(getEnvOrDefault("TIMEPLUS_DB",       "default"));
 
 
 ColumnRef buildTestColumn(const std::vector<std::string>& rowsData, const std::vector<uint8_t>& nulls) {
