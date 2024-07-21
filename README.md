@@ -26,12 +26,38 @@ In the most basic case one needs only:
 - a C++-17-complaint compiler,
 - `cmake` (3.12 or newer), and
 - `ninja`
+- `GTest`
 
 Optional dependencies:
 - openssl
 - liblz4
 - libabsl
 - libzstd
+
+
+### install GTest
+- Installing on Ubuntu
+
+
+```bash
+# First, ensure you have `cmake` and `make` installed：
+sudo apt-get update
+sudo apt-get install cmake make
+
+# Install the libgtest-dev package:
+sudo apt-get install libgtest-dev
+
+# Compile the Google Test source and install the static libraries:
+cd /usr/src/gtest
+sudo cmake .
+sudo make
+sudo cp lib/*.a /usr/lib
+
+# Ensure the header files and library files are correctly installed:
+ls /usr/include/gtest/gtest.h
+ls /usr/lib/libgtest.a
+
+```
 
 ## Building
 
@@ -68,7 +94,10 @@ void createAndSelect(Client& client) {
     /// Select values inserted in the previous step.
     client.Select("SELECT id, name FROM default.numbers", [] (const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t i = 0; i < block.GetRowCount(); ++i) {
+                std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
+                          << block[1]->As<ColumnString>()->At(i) << "\n";
+            }
         }
     );
 
@@ -123,7 +152,6 @@ int main(int argc, char* argv[]) {
     Client client(ClientOptions().SetHost("localhost").SetPort(8463));
 
 
-    // 调用对应的函数
     functionPointers[functionNumber - 1](client);
 
     return 0;
