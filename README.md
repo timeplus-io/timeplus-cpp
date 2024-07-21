@@ -46,13 +46,13 @@ $ make
 ```
 
 Plese refer to the workflows for the reference on dependencies/build options
-- https://github.com/ClickHouse/clickhouse-cpp/blob/master/.github/workflows/linux.yml
-- https://github.com/ClickHouse/clickhouse-cpp/blob/master/.github/workflows/windows_msvc.yml
-- https://github.com/ClickHouse/clickhouse-cpp/blob/master/.github/workflows/windows_mingw.yml
-- https://github.com/ClickHouse/clickhouse-cpp/blob/master/.github/workflows/macos.yml
+- https://github.com/timeplus-io/timeplus-cpp/blob/master/.github/workflows/linux.yml
+- https://github.com/timeplus-io/timeplus-cpp/blob/master/.github/workflows/windows_msvc.yml
+- https://github.com/timeplus-io/timeplus-cpp/blob/master/.github/workflows/windows_mingw.yml
+- https://github.com/timeplus-io/timeplus-cpp/blob/master/.github/workflows/macos.yml
 
 
-## Example application build with clickhouse-cpp
+## Example application build with timeplus-cpp
 
 There are various ways to integrate clickhouse-cpp with the build system of an application. Below example uses the simple approach based on
 submodules presented in https://www.youtube.com/watch?v=ED-WUk440qc .
