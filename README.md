@@ -1,4 +1,4 @@
-Timeplus C++ client [![Linux](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/linux.yml/badge.svg)](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/linux.yml) [![macOS](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/macos.yml/badge.svg)](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/macos.yml) [![Windows MSVC](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/windows_msvc.yml/badge.svg)](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/windows_msvc.yml) [![Windows mingw](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/windows_mingw.yml/badge.svg)](https://github.com/ClickHouse/clickhouse-cpp/actions/workflows/windows_mingw.yml)
+Timeplus C++ client [![Linux](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/linux.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/linux.yml) [![macOS](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/macos.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/macos.yml) [![Windows MSVC](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_msvc.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_msvc.yml) [![Windows mingw](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_mingw.yml/badge.svg)](https://github.com/timeplus-io/timeplus-cpp/actions/workflows/windows_mingw.yml)
 =====
 
 C++ client for [Timeplus](https://timeplus.com/).
@@ -57,15 +57,15 @@ Plese refer to the workflows for the reference on dependencies/build options
 There are various ways to integrate clickhouse-cpp with the build system of an application. Below example uses the simple approach based on
 submodules presented in https://www.youtube.com/watch?v=ED-WUk440qc .
 
-- `mkdir clickhouse-app && cd clickhouse-app && git init`
-- `git submodule add https://github.com/ClickHouse/clickhouse-cpp.git contribs/clickhouse-cpp`
+- `mkdir timeplus-cpp && cd timeplus-cpp && git init`
+- `git submodule add https://github.com/timeplus-io/timeplus-cpp.git contribs/timeplus-cpp`
 - `touch app.cpp`, then copy the following C++ code into that file
 
 ```cpp
 #include <iostream>
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 int main()
 {
@@ -118,13 +118,13 @@ project(application-example)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(contribs/clickhouse-cpp)
+add_subdirectory(contribs/timeplus-cpp)
 
 add_executable(${PROJECT_NAME} "app.cpp")
 
-target_include_directories(${PROJECT_NAME} PRIVATE contribs/clickhouse-cpp/ contribs/clickhouse-cpp/contrib/absl)
+target_include_directories(${PROJECT_NAME} PRIVATE contribs/timeplus-cpp/ contribs/timeplus-cpp/contrib/absl)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE clickhouse-cpp-lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE timeplus-cpp-lib)
 ```
 
 - run `rm -rf build && cmake -B build -S . && cmake --build build -j32` to remove remainders of the previous builds, run CMake and build the
@@ -134,8 +134,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE clickhouse-cpp-lib)
 ⚠ Please note that `Client` instance is NOT thread-safe. I.e. you must create a separate `Client` for each thread or utilize some synchronization techniques. ⚠
 
 ## Retries
-If you wish to implement some retry logic atop of `clickhouse::Client` there are few simple rules to make you life easier:
-- If previous attempt threw an exception, then make sure to call `clickhouse::Client::ResetConnection()` before the next try.
-- For `clickhouse::Client::Insert()` you can reuse a block from previous try, no need to rebuild it from scratch.
+If you wish to implement some retry logic atop of `timeplus::Client` there are few simple rules to make you life easier:
+- If previous attempt threw an exception, then make sure to call `timeplus::Client::ResetConnection()` before the next try.
+- For `timeplus::Client::Insert()` you can reuse a block from previous try, no need to rebuild it from scratch.
 
 See https://github.com/ClickHouse/clickhouse-cpp/issues/184 for details.
