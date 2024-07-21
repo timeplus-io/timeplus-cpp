@@ -35,30 +35,6 @@ Optional dependencies:
 - libzstd
 
 
-### install GTest
-- Installing on Ubuntu
-
-
-```bash
-# First, ensure you have `cmake` and `make` installed：
-sudo apt-get update
-sudo apt-get install cmake make
-
-# Install the libgtest-dev package:
-sudo apt-get install libgtest-dev
-
-# Compile the Google Test source and install the static libraries:
-cd /usr/src/gtest
-sudo cmake .
-sudo make
-sudo cp lib/*.a /usr/lib
-
-# Ensure the header files and library files are correctly installed:
-ls /usr/include/gtest/gtest.h
-ls /usr/lib/libgtest.a
-
-```
-
 ## Building
 
 ```sh
@@ -176,3 +152,4 @@ $ ./build/example/timeplus-client 2
 # delete stream
 $ ./build/example/timeplus-client 3
 ```
+

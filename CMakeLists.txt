@@ -18,6 +18,7 @@ OPTION (WITH_SYSTEM_CITYHASH "Use system cityhash" OFF)
 OPTION (WITH_SYSTEM_ZSTD "Use system ZSTD" OFF)
 OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies duting build" ON)
 OPTION (CHECK_VERSION "Check that version number corresponds to git tag, usefull in CI/CD to validate that new version published on GitHub has same version in sources" OFF)
+OPTION (BUILD_GTEST "Build Google Test" OFF)
 
 PROJECT (TIMEPLUS-CLIENT
     VERSION "${TIMEPLUS_CPP_VERSION}"
@@ -110,13 +111,18 @@ IF (BUILD_BENCHMARK)
     SUBDIRS (bench)
 ENDIF (BUILD_BENCHMARK)
 
+IF (BUILD_GTEST)
+    INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
+    SUBDIRS (
+        contrib/gtest
+        # ut
+    )
+ENDIF (BUILD_GTEST)
 
 IF (BUILD_TESTS)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
-        contrib/gtest
         tests/simple
-        # ut
     )
 ENDIF (BUILD_TESTS)
 

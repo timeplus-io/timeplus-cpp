@@ -3,8 +3,6 @@
 #include <timeplus/types/type_parser.h>
 #include <timeplus/base/socket.h>
 
-#include <ut/utils.h>
-
 #include <stdexcept>
 #include <iostream>
 #include <cmath>
