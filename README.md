@@ -26,7 +26,6 @@ In the most basic case one needs only:
 - a C++-17-complaint compiler,
 - `cmake` (3.12 or newer), and
 - `ninja`
-- `GTest`
 
 Optional dependencies:
 - openssl
