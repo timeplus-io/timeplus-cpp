@@ -495,12 +495,14 @@ TYPED_TEST(GenericColumnTest, ArrayT_RoundTrip) {
     for (size_t i = 0; i < values.size(); ++i)
     {
         std::vector<std::decay_t<decltype(values[0])>> row;
-        row.reserve(values.size());
+        // row.reserve(values.size());
+        row.reserve(i + 1);
 
-        for (auto & value : values)
-        {
-            row.push_back(value);
-        };
+        // for (auto & value : values)
+        // {
+        //     row.push_back(value);
+        // };
+        std::copy(values.begin(), values.begin() + i, std::back_inserter(row));
 
         column->Append(values.begin(), values.begin() + i);
 

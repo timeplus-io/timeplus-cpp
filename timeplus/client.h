@@ -48,7 +48,7 @@ enum class CompressionMethod : int8_t {
 
 struct Endpoint {
     std::string host;
-    uint16_t port = 9000;
+    uint16_t port = 8463;
     inline bool operator==(const Endpoint& right) const {
         return host == right.host && port == right.port;
     }
@@ -70,13 +70,13 @@ struct ClientOptions {
     /// Hostname of the server.
     DECLARE_FIELD(host, std::string, SetHost, std::string());
     /// Service port.
-    DECLARE_FIELD(port, uint16_t, SetPort, 9000);
+    DECLARE_FIELD(port, uint16_t, SetPort, 8463);
 
     /** Set endpoints (host+port), only one is used.
      * Client tries to connect to those endpoints one by one, on the round-robin basis:
      * first default enpoint (set via SetHost() + SetPort()), then each of endpoints, from begin() to end(),
      * the first one to establish connection is used for the rest of the session.
-     * If port isn't specified, default(9000) value will be used.
+     * If port isn't specified, default(8463) value will be used.
      */
     DECLARE_FIELD(endpoints, std::vector<Endpoint>, SetEndpoints, {});
 

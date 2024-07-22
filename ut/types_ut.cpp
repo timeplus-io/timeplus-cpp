@@ -83,7 +83,7 @@ TEST(TypesCase, IsEqual) {
         "uint128",
         "string",
         "fixed_string(0)",
-        "sixed_string(10000)",
+        "fixed_string(10000)",
         "datetime('UTC')",
         "datetime64(3, 'UTC')",
         "decimal(9,3)",
@@ -113,7 +113,7 @@ TEST(TypesCase, IsEqual) {
         "point",
         "ring",
         "polygon",
-        "multipolygon"
+        "multi_polygon"
     };
 
     // Check that Type::IsEqual returns true only if:

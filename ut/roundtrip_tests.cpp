@@ -128,6 +128,9 @@ TEST_P(RoundtripCase, MapUUID_Tuple_String_Array_Uint64) {
 }
 
 TEST_P(RoundtripCase, Point) {
+
+    GTEST_SKIP() << "Point type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -141,6 +144,9 @@ TEST_P(RoundtripCase, Point) {
 }
 
 TEST_P(RoundtripCase, Ring) {
+
+    GTEST_SKIP() << "Ring type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -160,6 +166,9 @@ TEST_P(RoundtripCase, Ring) {
 }
 
 TEST_P(RoundtripCase, Polygon) {
+
+    GTEST_SKIP() << "Polygon type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -181,6 +190,9 @@ TEST_P(RoundtripCase, Polygon) {
 }
 
 TEST_P(RoundtripCase, MultiPolygon) {
+
+    GTEST_SKIP() << "MultiPolygon type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
