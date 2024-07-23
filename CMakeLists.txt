@@ -8,7 +8,7 @@ INCLUDE (openssl)
 INCLUDE (version)
 
 OPTION (BUILD_BENCHMARK "Build benchmark" OFF)
-OPTION (BUILD_TESTS "Build tests" OFF)
+OPTION (BUILD_TESTS "Build tests" ON)
 OPTION (BUILD_EXAMPLES "Build examples" ON)
 OPTION (BUILD_SHARED_LIBS "Build shared libs" OFF)
 OPTION (WITH_OPENSSL "Use OpenSSL for TLS connections" OFF)
@@ -18,7 +18,7 @@ OPTION (WITH_SYSTEM_CITYHASH "Use system cityhash" OFF)
 OPTION (WITH_SYSTEM_ZSTD "Use system ZSTD" OFF)
 OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies duting build" ON)
 OPTION (CHECK_VERSION "Check that version number corresponds to git tag, usefull in CI/CD to validate that new version published on GitHub has same version in sources" OFF)
-OPTION (BUILD_GTEST "Build Google Test" OFF)
+OPTION (BUILD_GTEST "Build Google Test" ON)
 
 PROJECT (TIMEPLUS-CLIENT
     VERSION "${TIMEPLUS_CPP_VERSION}"
@@ -115,7 +115,7 @@ IF (BUILD_GTEST)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
         contrib/gtest
-        # ut
+        ut
     )
 ENDIF (BUILD_GTEST)
 

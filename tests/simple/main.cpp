@@ -47,8 +47,8 @@ int main() {
 
     ClientOptions client_options;
     client_options
-        .SetHost(getEnvOrDefault("TIMEPLUS_HOST", "localhost"))
-        .SetPort(std::stoi(getEnvOrDefault("TIMEPLUS_PORT", "8463")))
+        .SetHost(("localhost"))
+        .SetPort(std::stoi("8463"))
         .SetPingBeforeQuery(true);
 
     // auto start_of_insert = std::chrono::high_resolution_clock::now();

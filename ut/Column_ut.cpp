@@ -131,9 +131,9 @@ public:
 
         timeplus::Client client(client_options);
 
-        if (auto message = CheckIfShouldSkipTest(client)) {
-            GTEST_SKIP() << *message;
-        }
+        // if (auto message = CheckIfShouldSkipTest(client)) {
+        //     GTEST_SKIP() << *message;
+        // }
 
         auto result_typed = RoundtripColumnValues(client, column)->template AsStrict<ColumnType>();
         EXPECT_TRUE(CompareRecursive(*column, *result_typed));

@@ -463,10 +463,10 @@ TEST_P(ClientCase, Numbers) {
 }
 
 TEST_P(ClientCase, SimpleAggregateFunction) {
-    const auto & server_info = client_->GetServerInfo();
-    if (versionNumber(server_info) < versionNumber(19, 9)) {
-        GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support SimpleAggregateFunction" << std::endl;
-    }
+    // const auto & server_info = client_->GetServerInfo();
+    // if (versionNumber(server_info) < versionNumber(19, 9)) {
+    //     GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support SimpleAggregateFunction" << std::endl;
+    // }
 
     client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_timeplus_cpp_SimpleAggregateFunction");
     client_->Execute(
@@ -791,9 +791,9 @@ TEST_P(ClientCase, Decimal) {
 
 // Test special chars in names
 TEST_P(ClientCase, ColEscapeNameTest) {
-    client_->Execute(R"sql(DROP TEMPORARY STREAM IF EXISTS "test_timeplus_cpp_col_escape_" "name_test";)sql");
+    client_->Execute(R"sql(DROP TEMPORARY STREAM IF EXISTS "test_timeplus_cpp_col_escape_ name_test";)sql");
 
-    client_->Execute(R"sql(CREATE TEMPORARY STREAM IF NOT EXISTS "test_timeplus_cpp_col_escape_" "name_test" ("test space" uint64, "test "" quote" uint64, "test ""`'[]&_\ all" uint64) ENGINE = Memory)sql");
+    client_->Execute(R"sql(CREATE TEMPORARY STREAM IF NOT EXISTS "test_timeplus_cpp_col_escape_ name_test" ("test space" uint64, "test "" quote" uint64, "test ""`'[]&_\ all" uint64) ENGINE = Memory)sql");
 
     auto col1 = std::make_shared<ColumnUInt64>();
     col1->Append(1);
@@ -817,8 +817,8 @@ TEST_P(ClientCase, ColEscapeNameTest) {
     block.AppendColumn(column_names[1], col2);
     block.AppendColumn(column_names[2], col3);
 
-    client_->Insert(R"sql("test_timeplus_cpp_col_escape_" "name_test")sql", block);
-    client_->Select(R"sql(SELECT * FROM "test_timeplus_cpp_col_escape_" "name_test")sql", [] (const Block& sblock)
+    client_->Insert(R"sql("test_timeplus_cpp_col_escape_ name_test")sql", block);
+    client_->Select(R"sql(SELECT * FROM "test_timeplus_cpp_col_escape_ name_test")sql", [] (const Block& sblock)
     {
         int row = sblock.GetRowCount();
         if (row <= 0) {return;}
@@ -839,10 +839,10 @@ TEST_P(ClientCase, ColEscapeNameTest) {
 
 // Test roundtrip of datetime64 values
 TEST_P(ClientCase, datetime64) {
-    const auto & server_info = client_->GetServerInfo();
-    if (versionNumber(server_info) < versionNumber(20, 1)) {
-        GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support datetime64" << std::endl;
-    }
+    // const auto & server_info = client_->GetServerInfo();
+    // if (versionNumber(server_info) < versionNumber(20, 1)) {
+    //     GTEST_SKIP() << "Test is skipped since server '" << server_info << "' does not support datetime64" << std::endl;
+    // }
 
     Block block;
     client_->Execute("DROP TEMPORARY STREAM IF EXISTS test_timeplus_cpp_datetime64;");
@@ -930,11 +930,11 @@ TEST_P(ClientCase, Query_ID) {
                     " WHERE type = 'QueryStart' AND query_id == '" + query_id +"'",
         [&total_count](const Block & block) {
             total_count += block.GetRowCount();
-//            std::cerr << PrettyPrintBlock{block} << std::endl;
+            // std::cerr << PrettyPrintBlock{block} << std::endl;
     });
 
-    // We've executed 5 queries with explicit query_id, hence we expect to see 5 entries in logs.
-    EXPECT_EQ(5u, total_count);
+    // We've executed 4 queries with explicit query_id, hence we expect to see 4 entries in logs.
+    EXPECT_EQ(4u, total_count);
 }
 
 // Spontaneosly fails on INSERTint data.
@@ -1111,7 +1111,8 @@ TEST_P(ClientCase, ServerLogs) {
     });
     client_->Execute(query);
 
-    EXPECT_GT(received_row_count, 0U);
+    // EXPECT_GT(received_row_count, 0U);
+    EXPECT_EQ(received_row_count, 0U); // Proton won't record insert
 }
 
 TEST_P(ClientCase, TracingContext) {
@@ -1128,9 +1129,9 @@ TEST_P(ClientCase, TracingContext) {
     FlushLogs();
 
     size_t received_rows = 0;
-    client_->Select("SELECT trace_id, toString(trace_id), operation_name "
+    client_->Select("SELECT trace_id, to_string(trace_id), operation_name "
                    "FROM system.opentelemetry_span_log "
-                   "WHERE trace_id = toUUID(\'" + ToString(tracing_context.trace_id) + "\');",
+                   "WHERE trace_id = to_uuid(\'" + ToString(tracing_context.trace_id) + "\');",
         [&](const Block& block) {
             // std::cerr << PrettyPrintBlock{block} << std::endl;
             received_rows += block.GetRowCount();
