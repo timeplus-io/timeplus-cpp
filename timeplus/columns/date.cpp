@@ -310,7 +310,7 @@ void ColumnDateTime64::Reserve(size_t new_cap)
 
 void ColumnDateTime64::Append(ColumnRef column) {
     if (auto col = column->As<ColumnDateTime64>()) {
-        data_->Append(col->data_);
+        data_->Append(static_cast<ColumnRef>(col->data_));
     }
 }
 

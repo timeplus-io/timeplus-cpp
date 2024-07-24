@@ -10,14 +10,14 @@ namespace timeplus {
  */
 class ColumnDecimal : public Column {
 public:
-    using ValueType = Int128;
+    using ValueType = Int256;
 
     ColumnDecimal(size_t precision, size_t scale);
 
-    void Append(const Int128& value);
+    void Append(const Int256& value);
     void Append(const std::string& value);
 
-    Int128 At(size_t i) const;
+    Int256 At(size_t i) const;
     inline auto operator[](size_t i) const { return At(i); }
 
 public:

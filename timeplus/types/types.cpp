@@ -43,6 +43,7 @@ const char* Type::TypeName(Type::Code code) {
         case Type::Code::Decimal32:      return "decimal32";
         case Type::Code::Decimal64:      return "decimal64";
         case Type::Code::Decimal128:     return "decimal128";
+        case Type::Code::Decimal256:     return "decimal256";
         case Type::Code::LowCardinality: return "low_cardinality";
         case Type::Code::DateTime64:     return "datetime64";
         case Type::Code::Date32:         return "date32";
@@ -106,6 +107,7 @@ std::string Type::GetName() const {
         case Decimal32:
         case Decimal64:
         case Decimal128:
+        case Decimal256:
             return As<DecimalType>()->GetName();
         case LowCardinality:
             return As<LowCardinalityType>()->GetName();
@@ -162,6 +164,7 @@ uint64_t Type::GetTypeUniqueId() const {
         case Decimal32:
         case Decimal64:
         case Decimal128:
+        case Decimal256:
         case LowCardinality:
         case Map: {
             // For complex types, exact unique ID depends on nested types and/or parameters,
@@ -294,6 +297,8 @@ std::string DecimalType::GetName() const {
             return "decimal64(" + std::to_string(scale_) + ")";
         case Decimal128:
             return "decimal128(" + std::to_string(scale_) + ")";
+        case Decimal256:
+            return "decimal256(" + std::to_string(scale_) + ")";
         default:
             /// XXX: NOT REACHED!
             return "";

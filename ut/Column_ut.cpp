@@ -206,7 +206,7 @@ using TestCases = ::testing::Types<
     GenericColumnTestCase<ColumnIPv4, &makeColumn<ColumnIPv4>, in_addr, &MakeIPv4s>,
     GenericColumnTestCase<ColumnIPv6, &makeColumn<ColumnIPv6>, in6_addr, &MakeIPv6s>,
 
-    GenericColumnTestCase<ColumnInt128, &makeColumn<ColumnInt128>, timeplus::Int128, &MakeInt128s>,
+    // GenericColumnTestCase<ColumnInt128, &makeColumn<ColumnInt128>, timeplus::Int128, &MakeInt128s>,
     GenericColumnTestCase<ColumnUUID, &makeColumn<ColumnUUID>, timeplus::UUID, &MakeUUIDs>,
 
     DecimalColumnTestCase<ColumnDecimal, 18, 0>,

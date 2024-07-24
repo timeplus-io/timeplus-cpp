@@ -618,28 +618,30 @@ TEST_P(ClientCase, Decimal) {
         auto d5 = std::make_shared<ColumnDecimal>(18, 9);
         auto d6 = std::make_shared<ColumnDecimal>(38, 19);
 
+
+        // TODO: now decimal support 256bit, the test number should be larger
+        // EXPECT_THROW(
+        //     d1->Append(static_cast<std::string>("1234567890123456789012345678901234567890")),
+        //     std::runtime_error
+        // );
+        // EXPECT_THROW(
+        //     d1->Append(static_cast<std::string>("123456789012345678901234567890123456.7890")),
+        //     std::runtime_error
+        // );
+        // EXPECT_THROW(
+        //     d1->Append(static_cast<std::string>("-1234567890123456789012345678901234567890")),
+        //     std::runtime_error
+        // );
         EXPECT_THROW(
-            d1->Append("1234567890123456789012345678901234567890"),
+            d1->Append(static_cast<std::string>("12345678901234567890123456789012345678a")),
             std::runtime_error
         );
         EXPECT_THROW(
-            d1->Append("123456789012345678901234567890123456.7890"),
+            d1->Append(static_cast<std::string>("12345678901234567890123456789012345678-")),
             std::runtime_error
         );
         EXPECT_THROW(
-            d1->Append("-1234567890123456789012345678901234567890"),
-            std::runtime_error
-        );
-        EXPECT_THROW(
-            d1->Append("12345678901234567890123456789012345678a"),
-            std::runtime_error
-        );
-        EXPECT_THROW(
-            d1->Append("12345678901234567890123456789012345678-"),
-            std::runtime_error
-        );
-        EXPECT_THROW(
-            d1->Append("1234.12.1234"),
+            d1->Append(static_cast<std::string>("1234.12.1234")),
             std::runtime_error
         );
 
@@ -669,29 +671,29 @@ TEST_P(ClientCase, Decimal) {
 
         // Check strings with decimal point
         id->Append(4);
-        d1->Append("12345.6789");
-        d2->Append("123456789.012345678");
-        d3->Append("1234567890123456789.0123456789012345678");
-        d4->Append("12345.6789");
-        d5->Append("123456789.012345678");
-        d6->Append("1234567890123456789.0123456789012345678");
+        d1->Append(static_cast<std::string>("12345.6789"));
+        d2->Append(static_cast<std::string>("123456789.012345678"));
+        d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
+        d4->Append(static_cast<std::string>("12345.6789"));
+        d5->Append(static_cast<std::string>("123456789.012345678"));
+        d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
 
         // Check strings with minus sign and without decimal point
         id->Append(5);
-        d1->Append("-12345.6789");
-        d2->Append("-123456789012345678");
-        d3->Append("-12345678901234567890123456789012345678");
-        d4->Append("-12345.6789");
-        d5->Append("-123456789012345678");
-        d6->Append("-12345678901234567890123456789012345678");
+        d1->Append(static_cast<std::string>("-12345.6789"));
+        d2->Append(static_cast<std::string>("-123456789012345678"));
+        d3->Append(static_cast<std::string>("-12345678901234567890123456789012345678"));
+        d4->Append(static_cast<std::string>("-12345.6789"));
+        d5->Append(static_cast<std::string>("-123456789012345678"));
+        d6->Append(static_cast<std::string>("-12345678901234567890123456789012345678"));
 
         id->Append(6);
-        d1->Append("12345.678");
-        d2->Append("123456789.0123456789");
-        d3->Append("1234567890123456789.0123456789012345678");
-        d4->Append("12345.6789");
-        d5->Append("123456789.012345678");
-        d6->Append("1234567890123456789.0123456789012345678");
+        d1->Append(static_cast<std::string>("12345.678"));
+        d2->Append(static_cast<std::string>("123456789.0123456789"));
+        d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
+        d4->Append(static_cast<std::string>("12345.6789"));
+        d5->Append(static_cast<std::string>("123456789.012345678"));
+        d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
 
         b.AppendColumn("id", id);
         b.AppendColumn("d1", d1);

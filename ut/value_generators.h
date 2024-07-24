@@ -38,7 +38,7 @@ std::vector<timeplus::Int64> MakeDateTimes();
 std::vector<in_addr> MakeIPv4s();
 std::vector<in6_addr> MakeIPv6s();
 std::vector<timeplus::UUID> MakeUUIDs();
-std::vector<timeplus::Int128> MakeInt128s();
+// std::vector<timeplus::Int128> MakeInt128s();
 std::vector<timeplus::Int128> MakeDecimals(size_t precision, size_t scale);
 
 template <typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>

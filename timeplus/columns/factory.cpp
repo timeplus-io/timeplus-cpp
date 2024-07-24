@@ -87,6 +87,8 @@ static ColumnRef CreateTerminalColumn(const TypeAst& ast) {
         return std::make_shared<ColumnDecimal>(18, GetASTChildElement(ast, 0).value);
     case Type::Decimal128:
         return std::make_shared<ColumnDecimal>(38, GetASTChildElement(ast, 0).value);
+    case Type::Decimal256:
+        return std::make_shared<ColumnDecimal>(76, GetASTChildElement(ast, 0).value);
 
     case Type::String:
         return std::make_shared<ColumnString>();

@@ -5,24 +5,87 @@ namespace
 using namespace timeplus;
 
 #ifdef ABSL_HAVE_INTRINSIC_INT128
-template <typename T>
-inline bool addOverflow(const Int128 & l, const T & r, Int128 * result)
-{
-    __int128 res;
-    const auto ret_value = __builtin_add_overflow(static_cast<__int128>(l), static_cast<__int128>(r), &res);
+// template <typename T>
+// inline bool addOverflow(const Int128 & l, const T & r, Int128 * result)
+// {
+//     __int128 res;
+//     const auto ret_value = __builtin_add_overflow(static_cast<__int128>(l), static_cast<__int128>(r), &res);
 
-    *result = res;
-    return ret_value;
+//     *result = res;
+//     return ret_value;
+// }
+
+// template <typename T>
+// inline bool mulOverflow(const Int128 & l, const T & r, Int128 * result)
+// {
+//     __int128 res;
+//     const auto ret_value = __builtin_mul_overflow(static_cast<__int128>(l), static_cast<__int128>(r), &res);
+
+//     *result = res;
+//     return ret_value;
+// }
+
+inline void mul64(uint64_t a, uint64_t b, uint64_t &high, uint64_t &low) {
+    __uint128_t product = static_cast<__uint128_t>(a) * static_cast<__uint128_t>(b);
+    high = static_cast<uint64_t>(product >> 64);
+    low = static_cast<uint64_t>(product);
 }
 
 template <typename T>
-inline bool mulOverflow(const Int128 & l, const T & r, Int128 * result)
+inline bool addOverflow(const Int256 & l, const T & r, Int256 * result)
 {
-    __int128 res;
-    const auto ret_value = __builtin_mul_overflow(static_cast<__int128>(l), static_cast<__int128>(r), &res);
+    Int256 res;
+    bool overflow = false;
+    unsigned long long carry = 0;
+
+    for (int i = 0; i < 4; ++i) {
+    unsigned long long right_operand = (i == 0) ? static_cast<unsigned long long>(r) : 0;
+    unsigned long long sum = l.items[i] + right_operand + carry;
+    carry = (sum < l.items[i]) ? 1 : 0; 
+    res.items[i] = sum;
+    }
 
     *result = res;
-    return ret_value;
+    
+    overflow = (carry != 0);
+
+    return overflow;
+}
+
+template <typename T>
+inline bool mulOverflow(const Int256 &l, const T &r, Int256 *result) {
+    Int256 res = {0};
+    bool overflow = false;
+    uint64_t carry = 0;
+
+    for (int i = 0; i < 4; ++i) {
+        uint64_t right_operand = (i == 0) ? static_cast<uint64_t>(r) : 0;
+        if (right_operand == 0) continue;
+
+        for (int j = 0; j < 4 - i; ++j) {
+            uint64_t high, low;
+            mul64(l.items[j], right_operand, high, low);
+
+            uint64_t sum = res.items[i + j] + low + carry;
+            carry = (sum < res.items[i + j]) ? 1 : 0;
+            res.items[i + j] = sum;
+
+            carry += high;
+            if (carry > 0 && (i + j + 1) < 4) {
+                sum = res.items[i + j + 1] + carry;
+                carry = (sum < res.items[i + j + 1]) ? 1 : 0;
+                res.items[i + j + 1] = sum;
+            }
+        }
+
+        if (carry != 0 && (i + 4) < 4) {
+            overflow = true;
+            break;
+        }
+    }
+
+    *result = res;
+    return overflow;
 }
 
 #else
@@ -106,8 +169,10 @@ ColumnDecimal::ColumnDecimal(size_t precision, size_t scale)
         data_ = std::make_shared<ColumnInt32>();
     } else if (precision <= 18) {
         data_ = std::make_shared<ColumnInt64>();
-    } else {
+    } else if (precision <= 38) {
         data_ = std::make_shared<ColumnInt128>();
+    } else {
+        data_ = std::make_shared<ColumnInt256>();
     }
 }
 
@@ -117,18 +182,20 @@ ColumnDecimal::ColumnDecimal(TypeRef type, ColumnRef data)
 {
 }
 
-void ColumnDecimal::Append(const Int128& value) {
+void ColumnDecimal::Append(const Int256& value) {
     if (data_->Type()->GetCode() == Type::Int32) {
         data_->As<ColumnInt32>()->Append(static_cast<ColumnInt32::DataType>(value));
     } else if (data_->Type()->GetCode() == Type::Int64) {
         data_->As<ColumnInt64>()->Append(static_cast<ColumnInt64::DataType>(value));
-    } else {
+    } else if (data_->Type()->GetCode() == Type::Int128) {
         data_->As<ColumnInt128>()->Append(static_cast<ColumnInt128::DataType>(value));
+    } else {
+        data_->As<ColumnInt256>()->Append(static_cast<ColumnInt256::DataType>(value));
     }
 }
 
 void ColumnDecimal::Append(const std::string& value) {
-    Int128 int_value = 0;
+    Int256 int_value = 0;
     auto c = value.begin();
     auto end = value.end();
     bool sign = true;
@@ -156,7 +223,7 @@ void ColumnDecimal::Append(const std::string& value) {
         } else if (*c >= '0' && *c <= '9') {
             if (mulOverflow(int_value, 10, &int_value) ||
                 addOverflow(int_value, *c - '0', &int_value)) {
-                throw AssertionError("value is too big for 128-bit integer");
+                throw AssertionError("value is too big for 256-bit integer");
             }
         } else {
             throw ValidationError(std::string("unexpected symbol '") + (*c) + "' in decimal value");
@@ -170,7 +237,7 @@ void ColumnDecimal::Append(const std::string& value) {
 
     while (zeros) {
         if (mulOverflow(int_value, 10, &int_value)) {
-            throw AssertionError("value is too big for 128-bit integer");
+            throw AssertionError("value is too big for 256-bit integer");
         }
         --zeros;
     }
@@ -178,14 +245,16 @@ void ColumnDecimal::Append(const std::string& value) {
     Append(sign ? int_value : -int_value);
 }
 
-Int128 ColumnDecimal::At(size_t i) const {
+Int256 ColumnDecimal::At(size_t i) const {
     switch (data_->Type()->GetCode()) {
         case Type::Int32:
-            return static_cast<Int128>(data_->As<ColumnInt32>()->At(i));
+            return static_cast<Int256>(data_->As<ColumnInt32>()->At(i));
         case Type::Int64:
-            return static_cast<Int128>(data_->As<ColumnInt64>()->At(i));
+            return static_cast<Int256>(data_->As<ColumnInt64>()->At(i));
         case Type::Int128:
-            return data_->As<ColumnInt128>()->At(i);
+            return static_cast<Int256>(data_->As<ColumnInt128>()->At(i));
+        case Type::Int256:
+            return data_->As<ColumnInt256>()->At(i);
         default:
             throw ValidationError("Invalid data_ column type in ColumnDecimal");
     }

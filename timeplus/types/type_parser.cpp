@@ -61,6 +61,7 @@ static const std::unordered_map<std::string, Type::Code> kTypeCode = {
     { "decimal32",   Type::Decimal32 },
     { "decimal64",   Type::Decimal64 },
     { "decimal128",  Type::Decimal128 },
+    { "decimal256",  Type::Decimal256 },
     { "low_cardinality", Type::LowCardinality },
     { "map",         Type::Map },
     { "point",       Type::Point },

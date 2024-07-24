@@ -73,8 +73,8 @@ TEST(ColumnArray, ArrayOfDecimal) {
     auto column = std::make_shared<timeplus::ColumnDecimal>(18, 10);
     auto array = std::make_shared<timeplus::ColumnArray>(column->CloneEmpty());
 
-    column->Append("1");
-    column->Append("2");
+    column->Append(static_cast<std::string>("1"));
+    column->Append(static_cast<std::string>("2"));
     EXPECT_EQ(2u, column->Size());
 
     array->AppendAsColumn(column);

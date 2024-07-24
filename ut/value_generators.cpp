@@ -101,15 +101,15 @@ std::vector<timeplus::Int64> MakeDateTimes() {
     };
 }
 
-std::vector<timeplus::Int128> MakeInt128s() {
-    return {
-        absl::MakeInt128(0xffffffffffffffffll, 0xffffffffffffffffll), // -1
-        absl::MakeInt128(0, 0xffffffffffffffffll),  // 2^64
-        absl::MakeInt128(0xffffffffffffffffll, 0),
-        absl::MakeInt128(0x8000000000000000ll, 0),
-        Int128(0)
-    };
-}
+// std::vector<timeplus::Int128> MakeInt128s() {
+//     return {
+//         absl::MakeInt128(0xffffffffffffffffll, 0xffffffffffffffffll), // -1
+//         absl::MakeInt128(0, 0xffffffffffffffffll),  // 2^64
+//         absl::MakeInt128(0xffffffffffffffffll, 0),
+//         absl::MakeInt128(0x8000000000000000ll, 0),
+//         Int128(0)
+//     };
+// }
 
 std::vector<timeplus::Int128> MakeDecimals(size_t /*precision*/, size_t scale) {
     const auto scale_multiplier = static_cast<size_t>(std::pow(10, scale));
