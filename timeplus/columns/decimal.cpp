@@ -32,53 +32,58 @@ inline void mul64(uint64_t a, uint64_t b, uint64_t &high, uint64_t &low) {
 }
 
 template <typename T>
-inline bool addOverflow(const Int256 & l, const T & r, Int256 * result)
-{
-    Int256 res;
-    bool overflow = false;
-    unsigned long long carry = 0;
+inline bool addOverflow(const Int256 &l, const T &r, Int256 *result) {
+    static_assert(std::numeric_limits<T>::digits <= 64, "T must be 64 bits or less");
+
+    Int256 res = l;
+    uint64_t right_operand = static_cast<uint64_t>(r);
+    uint64_t carry = right_operand;
 
     for (int i = 0; i < 4; ++i) {
-    unsigned long long right_operand = (i == 0) ? static_cast<unsigned long long>(r) : 0;
-    unsigned long long sum = l.items[i] + right_operand + carry;
-    carry = (sum < l.items[i]) ? 1 : 0; 
-    res.items[i] = sum;
+        uint64_t sum = res.items[i] + carry;
+        carry = (sum < res.items[i]) ? 1 : 0;
+        res.items[i] = sum;
+
+        if (carry == 0) {
+            break;
+        }
+    }
+
+    if (carry != 0) {
+        return true;
     }
 
     *result = res;
-    
-    overflow = (carry != 0);
-
-    return overflow;
+    return false;
 }
 
 template <typename T>
 inline bool mulOverflow(const Int256 &l, const T &r, Int256 *result) {
+    static_assert(std::numeric_limits<T>::digits <= 64, "T must be 64 bits or less");
+
     Int256 res = {0};
     bool overflow = false;
     uint64_t carry = 0;
+    uint64_t right_operand = static_cast<uint64_t>(r);
 
     for (int i = 0; i < 4; ++i) {
-        uint64_t right_operand = (i == 0) ? static_cast<uint64_t>(r) : 0;
-        if (right_operand == 0) continue;
+        uint64_t high = 0, low = 0;
+        mul64(l.items[i], right_operand, high, low);
 
-        for (int j = 0; j < 4 - i; ++j) {
-            uint64_t high, low;
-            mul64(l.items[j], right_operand, high, low);
+        // low64
+        uint64_t sum = res.items[i] + low + carry;
+        carry = (sum < res.items[i]) ? 1 : 0;
+        res.items[i] = sum;
 
-            uint64_t sum = res.items[i + j] + low + carry;
-            carry = (sum < res.items[i + j]) ? 1 : 0;
-            res.items[i + j] = sum;
-
-            carry += high;
-            if (carry > 0 && (i + j + 1) < 4) {
-                sum = res.items[i + j + 1] + carry;
-                carry = (sum < res.items[i + j + 1]) ? 1 : 0;
-                res.items[i + j + 1] = sum;
-            }
+        // high64
+        carry += high;
+        if (carry > 0 && (i + 1) < 4) {
+            sum = res.items[i + 1] + carry;
+            carry = (sum < res.items[i + 1]) ? 1 : 0;
+            res.items[i + 1] = sum;
         }
 
-        if (carry != 0 && (i + 4) < 4) {
+        if (carry != 0 && (i + 1) == 4) {
             overflow = true;
             break;
         }
@@ -233,6 +238,15 @@ void ColumnDecimal::Append(const std::string& value) {
 
     if (c != end) {
         throw ValidationError("unexpected symbol '-' in decimal value");
+    }
+
+    if (!has_dot) {
+        auto scale = type_->As<DecimalType>()->GetScale();
+        for (size_t i = 0; i < scale; ++i) {
+            if (mulOverflow(int_value, 10, &int_value)) {
+                throw AssertionError("value is too big for 256-bit integer");
+            }
+        }
     }
 
     while (zeros) {

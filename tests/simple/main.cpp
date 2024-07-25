@@ -20,19 +20,22 @@ void InsertTask(const ClientOptions& client_options, const size_t start_index, c
 
         // Create a table for each thread if necessary (optional, depends on the use case)
         client.Execute("DROP STREAM IF EXISTS test_insert");
-        client.Execute("CREATE STREAM IF NOT EXISTS test_insert (id uint64, str string)");
+        client.Execute("CREATE STREAM IF NOT EXISTS test_insert (id uint64, str string, d256 decimal256(38))");
 
         for (size_t i = start_index; i < end_index; ++i) {
             Block block;
 
             auto id = std::make_shared<ColumnUInt64>();
             auto s = std::make_shared<ColumnString>();
+            auto d256 = std::make_shared<ColumnDecimal>(76,38);
 
             id->Append(static_cast<std::uint64_t>(i + 1));
             s->Append(std::to_string(i + 1));
+            d256->Append(static_cast<std::string>("9999999999999999999999999999.9999999999999999999999"));
 
             block.AppendColumn("id", id);
             block.AppendColumn("str", s);
+            block.AppendColumn("d256", d256);
             client.Insert("test_insert", block);
         }
     } catch (const std::exception& e) {
@@ -41,8 +44,8 @@ void InsertTask(const ClientOptions& client_options, const size_t start_index, c
 }
 
 int main() {
-    const size_t TOTAL_ITEMS = 100000;
-    const size_t THREADS_COUNT = 10;
+    const size_t TOTAL_ITEMS = 10;
+    const size_t THREADS_COUNT = 2;
     const size_t ITEMS_PER_THREAD = TOTAL_ITEMS / THREADS_COUNT;
     std::vector<std::thread> threads;
 
