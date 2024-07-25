@@ -19,7 +19,8 @@ void InsertTask(const ClientOptions& client_options, const size_t start_index, c
         Client client(client_options);
 
         // Create a table for each thread if necessary (optional, depends on the use case)
-        // client.Execute("CREATE STREAM IF NOT EXISTS test_insert (id uint64, str string)");
+        client.Execute("DROP STREAM IF EXISTS test_insert");
+        client.Execute("CREATE STREAM IF NOT EXISTS test_insert (id uint64, str string)");
 
         for (size_t i = start_index; i < end_index; ++i) {
             Block block;
