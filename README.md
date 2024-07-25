@@ -8,7 +8,7 @@ C++ client for [Timeplus](https://www.timeplus.com/).
 * date
 * datetime, datetime64
 * datetime([timezone]), datetime64(N, [timezone])
-* decimal32, decimal64, decimal128
+* decimal32, decimal64, decimal128, decimal256
 * enum8, enum16
 * fixed_string(N)
 * float32, float64
