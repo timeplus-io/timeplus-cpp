@@ -131,6 +131,8 @@ public:
 
         timeplus::Client client(client_options);
 
+        // timeplus-server's version number is unrelated, no need to check if skip.
+
         // if (auto message = CheckIfShouldSkipTest(client)) {
         //     GTEST_SKIP() << *message;
         // }
