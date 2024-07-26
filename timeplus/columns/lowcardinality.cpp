@@ -253,7 +253,7 @@ void ColumnLowCardinality::Append(ColumnRef col) {
 namespace {
 
 auto Load(ColumnRef new_dictionary_column, InputStream& input, size_t rows) {
-    // This code tries to follow original implementation of TimePlus's LowCardinality serialization with
+    // This code tries to follow original implementation of Timeplus's LowCardinality serialization with
     // NativeBlockOutputStream::writeData() for DataTypeLowCardinality
     // (see corresponding serializeBinaryBulkStateSuffix, serializeBinaryBulkStatePrefix, and serializeBinaryBulkWithMultipleStreams),
     // but with certain simplifications: no shared dictionaries, no on-the-fly dictionary updates.

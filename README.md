@@ -15,7 +15,7 @@ C++ client for [Timeplus](https://www.timeplus.com/).
 * ipv4, ipv6
 * nullable(T)
 * string
-* low_cardinality(string) or low_cardinality(Fixefixed_string(N))
+* low_cardinality(string) or low_cardinality(fixed_string(N))
 * tuple
 * uint8, uint16, uint32, uint64, uint128, uint256, int8, int16, int32, int64, int128, int256
 * uuid

@@ -22,14 +22,14 @@ OPTION (BUILD_GTEST "Build Google Test" ON)
 
 PROJECT (TIMEPLUS-CLIENT
     VERSION "${TIMEPLUS_CPP_VERSION}"
-    DESCRIPTION "TimePlus C++ client library"
+    DESCRIPTION "Timeplus C++ client library"
 )
 
 USE_CXX17 ()
 USE_OPENSSL ()
 
 IF (CHECK_VERSION)
-timeplus_cpp_check_library_version(FATAL_ERROR)
+    timeplus_cpp_check_library_version(FATAL_ERROR)
 ENDIF ()
 
 IF (NOT CMAKE_BUILD_TYPE)

@@ -18,7 +18,7 @@
 #include "base/sslsocket.h"
 #endif
 
-#define DBMS_NAME                                       "TimePlus"
+#define DBMS_NAME                                       "Timeplus"
 
 #define DBMS_MIN_REVISION_WITH_TEMPORARY_TABLES         50264
 #define DBMS_MIN_REVISION_WITH_TOTAL_ROWS_IN_PROGRESS   51554
@@ -743,7 +743,7 @@ void Client::Impl::SendQuery(const Query& query) {
         ClientInfo info;
 
         info.query_kind = 1;
-        info.client_name = "TimePlus client";
+        info.client_name = "Timeplus client";
         info.client_version_major = TIMEPLUS_CPP_VERSION_MAJOR;
         info.client_version_minor = TIMEPLUS_CPP_VERSION_MINOR;
         info.client_version_patch = TIMEPLUS_CPP_VERSION_PATCH;
@@ -797,7 +797,7 @@ void Client::Impl::SendQuery(const Query& query) {
     }
 
     /// start by Jax
-    WireFormat::WriteUInt64(*output_, uint64_t(0));//:value
+    WireFormat::WriteUInt64(*output_, uint64_t(0));//:collaborate_with_initiator
     WireFormat::WriteUInt64(*output_, uint64_t(0));//:count_participating_replicas
     WireFormat::WriteUInt64(*output_, uint64_t(0));//:number_of_current_replica
     /// end by Jax
@@ -825,9 +825,6 @@ void Client::Impl::SendQuery(const Query& query) {
     WireFormat::WriteUInt64(*output_, compression_);
     WireFormat::WriteString(*output_, query.GetText());
 
-    /// start by Jax
-    // std::cout<<"query.GetText(): "<<query.GetText()<<std::endl;
-    /// end by Jax
 
     // Send empty block as marker of
     // end of data

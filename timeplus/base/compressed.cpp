@@ -13,7 +13,7 @@
 namespace {
 constexpr size_t HEADER_SIZE = 9;
 
-// see DB::CompressionMethodByte from src/Compression/CompressionInfo.h of TimePlus project
+// see DB::CompressionMethodByte from src/Compression/CompressionInfo.h of Timeplus project
 enum class CompressionMethodByte : uint8_t {
     NONE = 0x02,
     LZ4  = 0x82,
