@@ -7,6 +7,6 @@ cxx_binary(
     '-std=c++11',
   ],
   deps = [
-    '//:clickhouse-cpp',
+    '//:timeplus-cpp',
   ],
 )

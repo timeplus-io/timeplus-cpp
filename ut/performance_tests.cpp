@@ -1,14 +1,14 @@
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include <clickhouse/columns/nullable.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/uuid.h>
-#include <clickhouse/client.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/input.h>
+#include <timeplus/columns/array.h>
+#include <timeplus/columns/date.h>
+#include <timeplus/columns/enum.h>
+#include <timeplus/columns/lowcardinality.h>
+#include <timeplus/columns/nullable.h>
+#include <timeplus/columns/numeric.h>
+#include <timeplus/columns/string.h>
+#include <timeplus/columns/uuid.h>
+#include <timeplus/client.h>
+#include <timeplus/base/output.h>
+#include <timeplus/base/input.h>
 
 #include <gtest/gtest.h>
 
@@ -17,7 +17,7 @@
 #include "utils.h"
 #include "utils_performance.h"
 
-using namespace clickhouse;
+using namespace timeplus;
 
 inline std::uint64_t generate(const ColumnUInt64&, size_t index) {
     const auto base = static_cast<std::uint64_t>(index) % 255;
@@ -175,15 +175,15 @@ TYPED_TEST_P(ColumnPerformanceTest, InsertAndSelect) {
 
     auto column = InstantiateColumn<ColumnType>();
     Client client(ClientOptions()
-            .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-            .SetPort( std::stoi(getEnvOrDefault("CLICKHOUSE_PORT",     "9000")))
-            .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-            .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-            .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"))
+            .SetHost(           getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
+            .SetPort( std::stoi(getEnvOrDefault("TIMEPLUS_PORT",     "8463")))
+            .SetUser(           getEnvOrDefault("TIMEPLUS_USER",     "default"))
+            .SetPassword(       getEnvOrDefault("TIMEPLUS_PASSWORD", ""))
+            .SetDefaultDatabase(getEnvOrDefault("TIMEPLUS_DB",       "default"))
     );
     // client.Execute("CREATE DATABASE IF NOT EXISTS PerformanceTests");
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS PerformanceTests_ColumnTest");
-    client.Execute("CREATE TEMPORARY TABLE PerformanceTests_ColumnTest (" + column_name + " " + column.Type()->GetName() + ")");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS PerformanceTests_ColumnTest");
+    client.Execute("CREATE TEMPORARY STREAM PerformanceTests_ColumnTest (" + column_name + " " + column.Type()->GetName() + ") ENGINE = Memory");
 
     const size_t ITEMS_COUNT = 1'000'000;
 

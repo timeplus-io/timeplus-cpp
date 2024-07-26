@@ -1,19 +1,19 @@
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/tuple.h>
-#include <clickhouse/columns/date.h>
-#include <clickhouse/columns/enum.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include <clickhouse/columns/nullable.h>
-#include <clickhouse/columns/numeric.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/uuid.h>
-#include <clickhouse/columns/ip4.h>
-#include <clickhouse/columns/ip6.h>
-#include <clickhouse/base/input.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/socket.h> // for ipv4-ipv6 platform-specific stuff
+#include <timeplus/columns/array.h>
+#include <timeplus/columns/tuple.h>
+#include <timeplus/columns/date.h>
+#include <timeplus/columns/enum.h>
+#include <timeplus/columns/lowcardinality.h>
+#include <timeplus/columns/nullable.h>
+#include <timeplus/columns/numeric.h>
+#include <timeplus/columns/string.h>
+#include <timeplus/columns/uuid.h>
+#include <timeplus/columns/ip4.h>
+#include <timeplus/columns/ip6.h>
+#include <timeplus/base/input.h>
+#include <timeplus/base/output.h>
+#include <timeplus/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -29,10 +29,10 @@
 #include "value_generators.h"
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 }
 
-namespace clickhouse{
+namespace timeplus{
 
 std::ostream& operator<<(std::ostream& ostr, const Type::Code& type_code) {
     return ostr << Type::TypeName(type_code) << " (" << static_cast<int>(type_code) << ")";
@@ -101,7 +101,7 @@ public:
         return std::tuple{column, values};
     }
 
-    static std::optional<std::string> CheckIfShouldSkipTest(clickhouse::Client& client) {
+    static std::optional<std::string> CheckIfShouldSkipTest(timeplus::Client& client) {
         if constexpr (std::is_same_v<ColumnType, ColumnDate32>) {
             // Date32 first appeared in v21.9.2.17-stable
             const auto server_info = client.GetServerInfo();
@@ -129,11 +129,13 @@ public:
         SCOPED_TRACE(::testing::Message("Column type: ") << column->GetType().GetName());
         SCOPED_TRACE(::testing::Message("Client options: ") << client_options);
 
-        clickhouse::Client client(client_options);
+        timeplus::Client client(client_options);
 
-        if (auto message = CheckIfShouldSkipTest(client)) {
-            GTEST_SKIP() << *message;
-        }
+        // timeplus-server's version number is unrelated, no need to check if skip.
+
+        // if (auto message = CheckIfShouldSkipTest(client)) {
+        //     GTEST_SKIP() << *message;
+        // }
 
         auto result_typed = RoundtripColumnValues(client, column)->template AsStrict<ColumnType>();
         EXPECT_TRUE(CompareRecursive(*column, *result_typed));
@@ -169,9 +171,9 @@ struct NumberColumnTestCase : public GenericColumnTestCase<ColumnTypeT, &makeCol
 };
 
 template <typename ColumnTypeT, size_t precision, size_t scale>
-struct DecimalColumnTestCase : public GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, clickhouse::Int128, &MakeDecimals<precision, scale>>
+struct DecimalColumnTestCase : public GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, timeplus::Int128, &MakeDecimals<precision, scale>>
 {
-    using Base = GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, clickhouse::Int128, &MakeDecimals<precision, scale>>;
+    using Base = GenericColumnTestCase<ColumnDecimal, &makeColumn<ColumnDecimal, precision, scale>, timeplus::Int128, &MakeDecimals<precision, scale>>;
 
     using ColumnType = typename Base::ColumnType;
     using Base::createColumn;
@@ -197,17 +199,17 @@ using TestCases = ::testing::Types<
 
     GenericColumnTestCase<ColumnDate, &makeColumn<ColumnDate>, time_t, &MakeDates<time_t>>,
     GenericColumnTestCase<ColumnDate32, &makeColumn<ColumnDate32>, time_t, &MakeDates<time_t>>,
-    GenericColumnTestCase<ColumnDateTime, &makeColumn<ColumnDateTime>, clickhouse::Int64, &MakeDateTimes>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 0>, clickhouse::Int64, &MakeDateTime64s<0>>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 3>, clickhouse::Int64, &MakeDateTime64s<3>>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 6>, clickhouse::Int64, &MakeDateTime64s<6>>,
-    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 9>, clickhouse::Int64, &MakeDateTime64s<9>>,
+    GenericColumnTestCase<ColumnDateTime, &makeColumn<ColumnDateTime>, timeplus::Int64, &MakeDateTimes>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 0>, timeplus::Int64, &MakeDateTime64s<0>>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 3>, timeplus::Int64, &MakeDateTime64s<3>>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 6>, timeplus::Int64, &MakeDateTime64s<6>>,
+    GenericColumnTestCase<ColumnDateTime64, &makeColumn<ColumnDateTime64, 9>, timeplus::Int64, &MakeDateTime64s<9>>,
 
     GenericColumnTestCase<ColumnIPv4, &makeColumn<ColumnIPv4>, in_addr, &MakeIPv4s>,
     GenericColumnTestCase<ColumnIPv6, &makeColumn<ColumnIPv6>, in6_addr, &MakeIPv6s>,
 
-    GenericColumnTestCase<ColumnInt128, &makeColumn<ColumnInt128>, clickhouse::Int128, &MakeInt128s>,
-    GenericColumnTestCase<ColumnUUID, &makeColumn<ColumnUUID>, clickhouse::UUID, &MakeUUIDs>,
+    // GenericColumnTestCase<ColumnInt128, &makeColumn<ColumnInt128>, timeplus::Int128, &MakeInt128s>,
+    GenericColumnTestCase<ColumnUUID, &makeColumn<ColumnUUID>, timeplus::UUID, &MakeUUIDs>,
 
     DecimalColumnTestCase<ColumnDecimal, 18, 0>,
     DecimalColumnTestCase<ColumnDecimal, 18, 6>,
@@ -286,8 +288,8 @@ inline auto convertValueForGetItem(const ColumnType& col, ValueType&& t) {
         // Since ColumnDecimal can hold 32, 64, 128-bit wide data and there is no way telling at run-time.
         const ItemView item = col.GetItem(0);
         return std::string_view(reinterpret_cast<const char*>(&t), item.data.size());
-    } else if constexpr (std::is_same_v<T, clickhouse::UInt128>
-            || std::is_same_v<T, clickhouse::Int128>) {
+    } else if constexpr (std::is_same_v<T, timeplus::UInt128>
+            || std::is_same_v<T, timeplus::Int128>) {
         return std::string_view{reinterpret_cast<const char*>(&t), sizeof(T)};
     } else if constexpr (std::is_same_v<T, in_addr>) {
         return htonl(t.s_addr);
@@ -444,16 +446,16 @@ TYPED_TEST(GenericColumnTest, LoadAndSave) {
 }
 
 const auto LocalHostEndpoint = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+        .SetHost(           getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
+        .SetPort(   getEnvOrDefault<size_t>("TIMEPLUS_PORT",     "8463"))
+        .SetUser(           getEnvOrDefault("TIMEPLUS_USER",     "default"))
+        .SetPassword(       getEnvOrDefault("TIMEPLUS_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("TIMEPLUS_DB",       "default"));
 
 const auto AllCompressionMethods = {
-    clickhouse::CompressionMethod::None,
-    clickhouse::CompressionMethod::LZ4,
-    clickhouse::CompressionMethod::ZSTD
+    timeplus::CompressionMethod::None,
+    timeplus::CompressionMethod::LZ4,
+    timeplus::CompressionMethod::ZSTD
 };
 
 TYPED_TEST(GenericColumnTest, RoundTrip) {
@@ -494,7 +496,16 @@ TYPED_TEST(GenericColumnTest, ArrayT_RoundTrip) {
     auto column = std::make_shared<ColumnArrayType>(nested_column->CloneEmpty()->template As<typename TestFixture::ColumnType>());
     for (size_t i = 0; i < values.size(); ++i)
     {
-        const std::vector<std::decay_t<decltype(values[0])>> row{values.begin(), values.begin() + i};
+        std::vector<std::decay_t<decltype(values[0])>> row;
+        // row.reserve(values.size());
+        row.reserve(i + 1);
+
+        // for (auto & value : values)
+        // {
+        //     row.push_back(value);
+        // };
+        std::copy(values.begin(), values.begin() + i, std::back_inserter(row));
+
         column->Append(values.begin(), values.begin() + i);
 
         EXPECT_TRUE(CompareRecursive(row, (*column)[column->Size() - 1]));

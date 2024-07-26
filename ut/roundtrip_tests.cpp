@@ -1,4 +1,4 @@
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 
 #include "utils.h"
 #include "roundtrip_column.h"
@@ -7,7 +7,7 @@
 #include <map>
 #include <optional>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 // Use value-parameterized tests to run same tests with different client
 // options.
@@ -128,6 +128,9 @@ TEST_P(RoundtripCase, MapUUID_Tuple_String_Array_Uint64) {
 }
 
 TEST_P(RoundtripCase, Point) {
+
+    GTEST_SKIP() << "Point type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -141,6 +144,9 @@ TEST_P(RoundtripCase, Point) {
 }
 
 TEST_P(RoundtripCase, Ring) {
+
+    GTEST_SKIP() << "Ring type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -160,6 +166,9 @@ TEST_P(RoundtripCase, Ring) {
 }
 
 TEST_P(RoundtripCase, Polygon) {
+
+    GTEST_SKIP() << "Polygon type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -181,6 +190,9 @@ TEST_P(RoundtripCase, Polygon) {
 }
 
 TEST_P(RoundtripCase, MultiPolygon) {
+
+    GTEST_SKIP() << "MultiPolygon type is not allowed in Proton now.";
+
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -314,11 +326,11 @@ TEST_P(RoundtripCase, RoundtripArrayLowCardinalityTString) {
 }
 
 const auto LocalHostEndpoint = ClientOptions()
-        .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-        .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-        .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-        .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-        .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+        .SetHost(           getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
+        .SetPort(   getEnvOrDefault<size_t>("TIMEPLUS_PORT",     "8463"))
+        .SetUser(           getEnvOrDefault("TIMEPLUS_USER",     "default"))
+        .SetPassword(       getEnvOrDefault("TIMEPLUS_PASSWORD", ""))
+        .SetDefaultDatabase(getEnvOrDefault("TIMEPLUS_DB",       "default"));
 
 INSTANTIATE_TEST_SUITE_P(
     Roundtrip, RoundtripCase,

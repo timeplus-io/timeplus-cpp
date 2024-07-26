@@ -19,17 +19,17 @@ function (regex_extract_matching_groups INPUT REGEX_STR)
 endfunction ()
 
 
-function(clickhouse_cpp_get_version)
-    # Extract all components of the version from the clickhouse/version.h
+function(timeplus_cpp_get_version)
+    # Extract all components of the version from the timeplus/version.h
 
-    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/clickhouse/version.h VERSION_FILE_DATA)
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/timeplus/version.h VERSION_FILE_DATA)
 
     foreach (VERSION_COMPONENT
             IN ITEMS
-            CLICKHOUSE_CPP_VERSION_MAJOR
-            CLICKHOUSE_CPP_VERSION_MINOR
-            CLICKHOUSE_CPP_VERSION_PATCH
-            CLICKHOUSE_CPP_VERSION_BUILD)
+            TIMEPLUS_CPP_VERSION_MAJOR
+            TIMEPLUS_CPP_VERSION_MINOR
+            TIMEPLUS_CPP_VERSION_PATCH
+            TIMEPLUS_CPP_VERSION_BUILD)
 
         regex_extract_matching_groups(
             "${VERSION_FILE_DATA}"
@@ -39,12 +39,12 @@ function(clickhouse_cpp_get_version)
         set ("${VERSION_COMPONENT}" "${${VERSION_COMPONENT}}" PARENT_SCOPE)
     endforeach ()
 
-    set(CLICKHOUSE_CPP_VERSION "${CLICKHOUSE_CPP_VERSION_MAJOR}.${CLICKHOUSE_CPP_VERSION_MINOR}.${CLICKHOUSE_CPP_VERSION_PATCH}" PARENT_SCOPE)
+    set(TIMEPLUS_CPP_VERSION "${TIMEPLUS_CPP_VERSION_MAJOR}.${TIMEPLUS_CPP_VERSION_MINOR}.${TIMEPLUS_CPP_VERSION_PATCH}" PARENT_SCOPE)
 endfunction()
 
-clickhouse_cpp_get_version()
+timeplus_cpp_get_version()
 
-function(clickhouse_cpp_check_library_version CHECK_MODE)
+function(timeplus_cpp_check_library_version CHECK_MODE)
 ## Verify that current tag matches the version
 
     find_program (GIT git)
@@ -62,7 +62,7 @@ function(clickhouse_cpp_check_library_version CHECK_MODE)
             VERSION_FROM_GIT_DESCRIBE_MAJOR
             VERSION_FROM_GIT_DESCRIBE_MINOR
             VERSION_FROM_GIT_DESCRIBE_PATCH
-            CLICKHOUSE_CPP_VERSION_COMMIT
+            TIMEPLUS_CPP_VERSION_COMMIT
         )
 
         if (NOT (VERSION_FROM_GIT_DESCRIBE_MAJOR AND VERSION_FROM_GIT_DESCRIBE_MINOR AND VERSION_FROM_GIT_DESCRIBE_PATCH))
@@ -70,18 +70,18 @@ function(clickhouse_cpp_check_library_version CHECK_MODE)
             return ()
         endif ()
 
-      set (EXPECTED_CLICKHOUSE_CPP_VERSION "${VERSION_FROM_GIT_DESCRIBE_MAJOR}.${VERSION_FROM_GIT_DESCRIBE_MINOR}.${VERSION_FROM_GIT_DESCRIBE_PATCH}")
-      if (NOT "${EXPECTED_CLICKHOUSE_CPP_VERSION}" STREQUAL ${CLICKHOUSE_CPP_VERSION})
-          message(${CHECK_MODE} "update CLICKHOUSE_CPP_VERSION_ values in version.h.\n"
+      set (EXPECTED_TIMEPLUS_CPP_VERSION "${VERSION_FROM_GIT_DESCRIBE_MAJOR}.${VERSION_FROM_GIT_DESCRIBE_MINOR}.${VERSION_FROM_GIT_DESCRIBE_PATCH}")
+      if (NOT "${EXPECTED_TIMEPLUS_CPP_VERSION}" STREQUAL ${TIMEPLUS_CPP_VERSION})
+          message(${CHECK_MODE} "update TIMEPLUS_CPP_VERSION_ values in version.h.\n"
 "git reports version as \"${GIT_DESCRIBE_DATA}\","
-" hence expecting version to be ${EXPECTED_CLICKHOUSE_CPP_VERSION}, "
-" instead got ${CLICKHOUSE_CPP_VERSION}")
+" hence expecting version to be ${EXPECTED_TIMEPLUS_CPP_VERSION}, "
+" instead got ${TIMEPLUS_CPP_VERSION}")
       endif ()
     else ()
       message (${CHECK_MODE} "git is not found, can't verify library version")
     endif ()
 
-    message("Version check passed: ${CLICKHOUSE_CPP_VERSION}")
+    message("Version check passed: ${TIMEPLUS_CPP_VERSION}")
 endfunction()
 
-# clickhouse_cpp_check_library_version()
+# timeplus_cpp_check_library_version()

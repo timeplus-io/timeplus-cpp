@@ -1,14 +1,14 @@
 #include "roundtrip_column.h"
 
-#include <clickhouse/client.h>
-#include <clickhouse/block.h>
+#include <timeplus/client.h>
+#include <timeplus/block.h>
 
 #include <gtest/gtest.h>
 #include <type_traits>
-#include "clickhouse/columns/numeric.h"
+#include "timeplus/columns/numeric.h"
 
 namespace {
-using namespace clickhouse;
+using namespace timeplus;
 
 template <typename T>
 std::vector<T> GenerateConsecutiveNumbers(size_t count, T start = 0)
@@ -35,9 +35,9 @@ ColumnRef RoundtripColumnValues(Client& client, ColumnRef expected) {
     auto result = expected->CloneEmpty();
 
     const std::string type_name = result->GetType().GetName();
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS temporary_roundtrip_table;");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS temporary_roundtrip_table;");
     // id column is to have the same order of rows on SELECT
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS temporary_roundtrip_table (id UInt32, col " + type_name + ");");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS temporary_roundtrip_table (id uint32, col " + type_name + ") ENGINE = Memory;");
     {
         Block block;
         block.AppendColumn("col", expected);

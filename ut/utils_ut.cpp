@@ -49,7 +49,7 @@ TEST(CompareRecursive, CompareNestedContainers) {
 }
 
 TEST(StringUtils, UUID) {
-    const clickhouse::UUID& uuid{0x0102030405060708, 0x090a0b0c0d0e0f10};
+    const timeplus::UUID& uuid{0x0102030405060708, 0x090a0b0c0d0e0f10};
     const std::string uuid_string = "01020304-0506-0708-090a-0b0c0d0e0f10";
     EXPECT_EQ(ToString(uuid), uuid_string);
 }

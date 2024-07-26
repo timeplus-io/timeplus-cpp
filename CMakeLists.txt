@@ -8,7 +8,8 @@ INCLUDE (openssl)
 INCLUDE (version)
 
 OPTION (BUILD_BENCHMARK "Build benchmark" OFF)
-OPTION (BUILD_TESTS "Build tests" OFF)
+OPTION (BUILD_TESTS "Build tests" ON)
+OPTION (BUILD_EXAMPLES "Build examples" ON)
 OPTION (BUILD_SHARED_LIBS "Build shared libs" OFF)
 OPTION (WITH_OPENSSL "Use OpenSSL for TLS connections" OFF)
 OPTION (WITH_SYSTEM_ABSEIL "Use system ABSEIL" OFF)
@@ -17,17 +18,18 @@ OPTION (WITH_SYSTEM_CITYHASH "Use system cityhash" OFF)
 OPTION (WITH_SYSTEM_ZSTD "Use system ZSTD" OFF)
 OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies duting build" ON)
 OPTION (CHECK_VERSION "Check that version number corresponds to git tag, usefull in CI/CD to validate that new version published on GitHub has same version in sources" OFF)
+OPTION (BUILD_GTEST "Build Google Test" ON)
 
-PROJECT (CLICKHOUSE-CLIENT
-    VERSION "${CLICKHOUSE_CPP_VERSION}"
-    DESCRIPTION "ClickHouse C++ client library"
+PROJECT (TIMEPLUS-CLIENT
+    VERSION "${TIMEPLUS_CPP_VERSION}"
+    DESCRIPTION "Timeplus C++ client library"
 )
 
 USE_CXX17 ()
 USE_OPENSSL ()
 
 IF (CHECK_VERSION)
-    clickhouse_cpp_check_library_version(FATAL_ERROR)
+    timeplus_cpp_check_library_version(FATAL_ERROR)
 ENDIF ()
 
 IF (NOT CMAKE_BUILD_TYPE)
@@ -102,21 +104,33 @@ ELSE ()
 ENDIF ()
 
 SUBDIRS (
-    clickhouse
+    timeplus
 )
 
 IF (BUILD_BENCHMARK)
     SUBDIRS (bench)
 ENDIF (BUILD_BENCHMARK)
 
-IF (BUILD_TESTS)
+IF (BUILD_GTEST)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
         contrib/gtest
-        tests/simple
         ut
     )
+ENDIF (BUILD_GTEST)
+
+IF (BUILD_TESTS)
+    INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
+    SUBDIRS (
+        tests/simple
+    )
 ENDIF (BUILD_TESTS)
+
+IF (BUILD_EXAMPLES)
+    SUBDIRS (
+        examples
+    )
+ENDIF (BUILD_EXAMPLES)
 
 if(DEBUG_DEPENDENCIES)
     function(print_target_properties target)
@@ -131,7 +145,7 @@ if(DEBUG_DEPENDENCIES)
         # so have to create a target to fetch that info at generate time.
         string(REPLACE ":" "_" target_plain_name ${target})
         add_custom_target(${target_plain_name}_print_debug_info COMMAND ${CMAKE_COMMAND} -E echo "${target} : $<TARGET_FILE:${target}>")
-        add_dependencies(clickhouse-cpp-lib ${target_plain_name}_print_debug_info)
+        add_dependencies(timeplus-cpp-lib ${target_plain_name}_print_debug_info)
     endfunction()
 
     function(print_target_debug_info target)

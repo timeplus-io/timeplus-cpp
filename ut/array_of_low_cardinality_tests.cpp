@@ -3,18 +3,18 @@
 #include <iterator>
 #include <vector>
 
-#include <clickhouse/columns/array.h>
-#include <clickhouse/columns/string.h>
-#include <clickhouse/columns/lowcardinality.h>
-#include "clickhouse/block.h"
-#include "clickhouse/client.h"
+#include <timeplus/columns/array.h>
+#include <timeplus/columns/string.h>
+#include <timeplus/columns/lowcardinality.h>
+#include "timeplus/block.h"
+#include "timeplus/client.h"
 #include "utils.h"
-#include "clickhouse/base/buffer.h"
-#include "clickhouse/base/output.h"
+#include "timeplus/base/buffer.h"
+#include "timeplus/base/output.h"
 
 namespace
 {
-using namespace clickhouse;
+using namespace timeplus;
 }
 
 std::shared_ptr<ColumnArray> buildTestColumn(const std::vector<std::vector<std::string>>& rows) {
@@ -40,8 +40,7 @@ TEST(ArrayOfLowCardinality, Serialization) {
     });
 
     // The serialization data was extracted from a successful insert.
-    // When compared to what Clickhouse/NativeWriter does for the same fields, the only differences are the index type and indexes.
-    // Since we are setting a different index type in clickhouse-cpp, it's expected to have different indexes.
+    // Since we are setting a different index type in timeplus-cpp, it's expected to have different indexes.
     const std::vector<uint8_t> expectedSerialization {
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x61, 0x61,
@@ -61,11 +60,11 @@ TEST(ArrayOfLowCardinality, Serialization) {
 TEST(ArrayOfLowCardinality, InsertAndQuery) {
 
     const auto localHostEndpoint = ClientOptions()
-                                       .SetHost(           getEnvOrDefault("CLICKHOUSE_HOST",     "localhost"))
-                                       .SetPort(   getEnvOrDefault<size_t>("CLICKHOUSE_PORT",     "9000"))
-                                       .SetUser(           getEnvOrDefault("CLICKHOUSE_USER",     "default"))
-                                       .SetPassword(       getEnvOrDefault("CLICKHOUSE_PASSWORD", ""))
-                                       .SetDefaultDatabase(getEnvOrDefault("CLICKHOUSE_DB",       "default"));
+                                       .SetHost(           getEnvOrDefault("TIMEPLUS_HOST",     "localhost"))
+                                       .SetPort(   getEnvOrDefault<size_t>("TIMEPLUS_PORT",     "8463"))
+                                       .SetUser(           getEnvOrDefault("TIMEPLUS_USER",     "default"))
+                                       .SetPassword(       getEnvOrDefault("TIMEPLUS_PASSWORD", ""))
+                                       .SetDefaultDatabase(getEnvOrDefault("TIMEPLUS_DB",       "default"));
 
     Client client(ClientOptions(localHostEndpoint)
                       .SetPingBeforeQuery(true));
@@ -82,8 +81,8 @@ TEST(ArrayOfLowCardinality, InsertAndQuery) {
     Block block;
     block.AppendColumn("arr", column);
 
-    client.Execute("DROP TEMPORARY TABLE IF EXISTS array_lc");
-    client.Execute("CREATE TEMPORARY TABLE IF NOT EXISTS array_lc (arr Array(LowCardinality(String))) ENGINE = Memory");
+    client.Execute("DROP TEMPORARY STREAM IF EXISTS array_lc");
+    client.Execute("CREATE TEMPORARY STREAM IF NOT EXISTS array_lc (arr array(low_cardinality(string))) ENGINE = Memory");
     client.Insert("array_lc", block);
 
     client.Select("SELECT * FROM array_lc", [&](const Block& bl) {

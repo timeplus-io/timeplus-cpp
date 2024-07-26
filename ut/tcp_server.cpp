@@ -15,7 +15,7 @@
 
 #include <thread>
 
-namespace clickhouse {
+namespace timeplus {
 
 LocalTcpServer::LocalTcpServer(int port)
     : port_(port)

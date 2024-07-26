@@ -1,4 +1,4 @@
-SET ( clickhouse-cpp-ut-src
+SET ( timeplus-cpp-ut-src
     main.cpp
 
     block_ut.cpp
@@ -29,19 +29,19 @@ SET ( clickhouse-cpp-ut-src
 )
 
 IF (WITH_OPENSSL)
-    LIST (APPEND clickhouse-cpp-ut-src ssl_ut.cpp)
+    LIST (APPEND timepluscpp-ut-src ssl_ut.cpp)
 ENDIF ()
 
-ADD_EXECUTABLE (clickhouse-cpp-ut
-    ${clickhouse-cpp-ut-src}
+ADD_EXECUTABLE (timeplus-cpp-ut
+    ${timeplus-cpp-ut-src}
 )
 
-TARGET_LINK_LIBRARIES (clickhouse-cpp-ut
-    clickhouse-cpp-lib
+TARGET_LINK_LIBRARIES (timeplus-cpp-ut
+    timeplus-cpp-lib
     gtest-lib
 )
 
 IF (MSVC)
-    TARGET_COMPILE_OPTIONS(clickhouse-cpp-ut PRIVATE /bigobj)
-    TARGET_LINK_LIBRARIES (clickhouse-cpp-ut Crypt32)
+    TARGET_COMPILE_OPTIONS(timeplus-cpp-ut PRIVATE /bigobj)
+    TARGET_LINK_LIBRARIES (timeplus-cpp-ut Crypt32)
 ENDIF()

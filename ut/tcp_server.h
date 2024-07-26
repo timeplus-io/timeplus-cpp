@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace clickhouse {
+namespace timeplus {
 
 class InputStream;
 class OutputStream;

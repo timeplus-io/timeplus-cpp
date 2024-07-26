@@ -1,6 +1,6 @@
 #pragma once
 
-#include <clickhouse/client.h>
+#include <timeplus/client.h>
 
 #include <gtest/gtest.h>
 
@@ -14,4 +14,4 @@ struct ExpectingException {
 
 /// Verify that connection fails with some specific message.
 class ConnectionFailedClientTest : public testing::TestWithParam<
-        std::tuple<clickhouse::ClientOptions, ExpectingException>> {};
+        std::tuple<timeplus::ClientOptions, ExpectingException>> {};

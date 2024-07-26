@@ -1,10 +1,10 @@
-#include <clickhouse/base/wire_format.h>
-#include <clickhouse/base/output.h>
-#include <clickhouse/base/input.h>
+#include <timeplus/base/wire_format.h>
+#include <timeplus/base/output.h>
+#include <timeplus/base/input.h>
 
 #include <gtest/gtest.h>
 
-using namespace clickhouse;
+using namespace timeplus;
 
 TEST(CodedStreamCase, Varint64) {
     Buffer buf;
