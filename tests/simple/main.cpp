@@ -144,12 +144,12 @@ inline void testDateTimeType(Client& client) {
     /// Delete table.
     client.Execute("DROP STREAM IF EXISTS test_datetime");
     /// Create a table.
-    client.Execute("CREATE STREAM IF NOT EXISTS test_datetime (d date, d32 date32, dt32 datetime, dt64 datetime64(3))");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_datetime (d date, d32 date32, dt32 datetime, dt64 datetime64)");
     
     auto d = std::make_shared<ColumnDate>();
     auto d32 = std::make_shared<ColumnDate32>();
     auto dt32 = std::make_shared<ColumnDateTime>();
-    auto dt64 = std::make_shared<ColumnDateTime64>(3);
+    auto dt64 = std::make_shared<ColumnDateTime64>();
 
     d->Append(std::time(nullptr));
     d32->Append(std::time(nullptr));
@@ -864,9 +864,9 @@ inline void ShowTables(Client& client) {
 static void RunTests(Client& client) {
     // testIntType(client); //1
     // testDecimalType(client); //1
-    testArrayType(client); //
+    // testArrayType(client); //
     // CancelableExample(client);
-    // testDateTimeType(client); //1
+    testDateTimeType(client); //1
     // testFloatType(client); //1
     // CancelableExample(client);
     // testEnumType(client); //2

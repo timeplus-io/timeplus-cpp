@@ -188,6 +188,7 @@ class ColumnDateTime64 : public Column {
 public:
     using ValueType = Int64;
 
+    ColumnDateTime64();
     explicit ColumnDateTime64(size_t precision);
     ColumnDateTime64(size_t precision, std::string timezone);
 
