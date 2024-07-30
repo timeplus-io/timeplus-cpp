@@ -122,7 +122,7 @@ ENDIF (BUILD_GTEST)
 IF (BUILD_TESTS)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
-        tests/CI
+        tests/simple
     )
 ENDIF (BUILD_TESTS)
 
