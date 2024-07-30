@@ -206,13 +206,7 @@ void ColumnDecimal::Append(const std::string& value) {
     bool sign = true;
     bool has_dot = false;
 
-    size_t int_part_length = 0;
-
     size_t zeros = 0;
-
-    auto scale = type_->As<DecimalType>()->GetScale();
-    auto precision = type_->As<DecimalType>()->GetPrecision();
-    auto name = type_->As<DecimalType>()->GetName();
 
     while (c != end) {
         if (*c == '-') {
@@ -232,16 +226,9 @@ void ColumnDecimal::Append(const std::string& value) {
 
             has_dot = true;
         } else if (*c >= '0' && *c <= '9') {
-            if (!has_dot && int_part_length >= precision - scale) {
-                throw std::runtime_error("value is too big for " + std::string(name));
-            }
-
             if (mulOverflow(int_value, 10, &int_value) ||
                 addOverflow(int_value, *c - '0', &int_value)) {
-                throw AssertionError("value is too big for " + std::string(name));
-            }
-            if (!has_dot) {
-                int_part_length++;
+                throw AssertionError("value is too big for 256-bit integer");
             }
         } else {
             throw ValidationError(std::string("unexpected symbol '") + (*c) + "' in decimal value");
@@ -254,14 +241,17 @@ void ColumnDecimal::Append(const std::string& value) {
     }
 
     if (!has_dot) {
-        if (int_part_length > precision - scale) {
-            throw std::runtime_error("value is too big for " + std::string(name));
+        auto scale = type_->As<DecimalType>()->GetScale();
+        for (size_t i = 0; i < scale; ++i) {
+            if (mulOverflow(int_value, 10, &int_value)) {
+                throw AssertionError("value is too big for 256-bit integer");
+            }
         }
     }
 
     while (zeros) {
         if (mulOverflow(int_value, 10, &int_value)) {
-            throw AssertionError("value is too big for " + std::string(name));
+            throw AssertionError("value is too big for 256-bit integer");
         }
         --zeros;
     }
