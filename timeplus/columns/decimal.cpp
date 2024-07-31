@@ -4,96 +4,6 @@ namespace
 {
 using namespace timeplus;
 
-#ifdef ABSL_HAVE_INTRINSIC_INT128
-// template <typename T>
-// inline bool addOverflow(const Int128 & l, const T & r, Int128 * result)
-// {
-//     __int128 res;
-//     const auto ret_value = __builtin_add_overflow(static_cast<__int128>(l), static_cast<__int128>(r), &res);
-
-//     *result = res;
-//     return ret_value;
-// }
-
-// template <typename T>
-// inline bool mulOverflow(const Int128 & l, const T & r, Int128 * result)
-// {
-//     __int128 res;
-//     const auto ret_value = __builtin_mul_overflow(static_cast<__int128>(l), static_cast<__int128>(r), &res);
-
-//     *result = res;
-//     return ret_value;
-// }
-
-inline void mul64(uint64_t a, uint64_t b, uint64_t &high, uint64_t &low) {
-    __uint128_t product = static_cast<__uint128_t>(a) * static_cast<__uint128_t>(b);
-    high = static_cast<uint64_t>(product >> 64);
-    low = static_cast<uint64_t>(product);
-}
-
-template <typename T>
-inline bool addOverflow(const Int256 &l, const T &r, Int256 *result) {
-    static_assert(std::numeric_limits<T>::digits <= 64, "T must be 64 bits or less");
-
-    Int256 res = l;
-    uint64_t right_operand = static_cast<uint64_t>(r);
-    uint64_t carry = right_operand;
-
-    for (int i = 0; i < 4; ++i) {
-        uint64_t sum = res.items[i] + carry;
-        carry = (sum < res.items[i]) ? 1 : 0;
-        res.items[i] = sum;
-
-        if (carry == 0) {
-            break;
-        }
-    }
-
-    if (carry != 0) {
-        return true;
-    }
-
-    *result = res;
-    return false;
-}
-
-template <typename T>
-inline bool mulOverflow(const Int256 &l, const T &r, Int256 *result) {
-    static_assert(std::numeric_limits<T>::digits <= 64, "T must be 64 bits or less");
-
-    Int256 res = {0};
-    bool overflow = false;
-    uint64_t carry = 0;
-    uint64_t right_operand = static_cast<uint64_t>(r);
-
-    for (int i = 0; i < 4; ++i) {
-        uint64_t high = 0, low = 0;
-        mul64(l.items[i], right_operand, high, low);
-
-        // low64
-        uint64_t sum = res.items[i] + low + carry;
-        carry = (sum < res.items[i]) ? 1 : 0;
-        res.items[i] = sum;
-
-        // high64
-        carry += high;
-        if (carry > 0 && (i + 1) < 4) {
-            sum = res.items[i + 1] + carry;
-            carry = (sum < res.items[i + 1]) ? 1 : 0;
-            res.items[i + 1] = sum;
-        }
-
-        if (carry != 0 && (i + 1) == 4) {
-            overflow = true;
-            break;
-        }
-    }
-
-    *result = res;
-    return overflow;
-}
-
-#else
 template <typename T>
 inline bool getSignBit(const T & v)
 {
@@ -102,25 +12,26 @@ inline bool getSignBit(const T & v)
 
 inline bool getSignBit(const Int128 & v)
 {
-//    static constexpr Int128 zero {};
-//    return v < zero;
+   static constexpr Int128 zero {};
+   return v < zero;
 
-    // Sign of the whole absl::int128 value is determined by sign of higher 64 bits.
-    return absl::Int128High64(v) < 0;
 }
 
-inline bool addOverflow(const Int128 & l, const Int128 & r, Int128 * result)
+inline bool getSignBit(const Int256 & v)
 {
-    //    *result = l + r;
-    //    const auto result_sign = getSignBit(*result);
-    //    return l_sign == r_sign && l_sign != result_sign;
+   static constexpr Int256 zero {};
+   return v < zero;
 
+}
+
+inline bool addOverflow(const Int256 & l, const Int256 & r, Int256 * result)
+{
     // Based on code from:
     // https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow#INT32C.Ensurethatoperationsonsignedintegersdonotresultinoverflow-CompliantSolution
     const auto r_positive = !getSignBit(r);
 
-    if ((r_positive && (l > (std::numeric_limits<Int128>::max() - r))) ||
-        (!r_positive && (l < (std::numeric_limits<Int128>::min() - r)))) {
+    if ((r_positive && (l > (std::numeric_limits<Int256>::max() - r))) ||
+        (!r_positive && (l < (std::numeric_limits<Int256>::min() - r)))) {
         return true;
     }
     *result = l + r;
@@ -129,7 +40,7 @@ inline bool addOverflow(const Int128 & l, const Int128 & r, Int128 * result)
 }
 
 template <typename T>
-inline bool mulOverflow(const Int128 & l, const T & r, Int128 * result)
+inline bool mulOverflow(const Int256 & l, const T & r, Int256 * result)
 {
     // Based on code from:
     // https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow#INT32C.Ensurethatoperationsonsignedintegersdonotresultinoverflow-CompliantSolution.3
@@ -138,21 +49,21 @@ inline bool mulOverflow(const Int128 & l, const T & r, Int128 * result)
 
     if (l_positive) {
         if (r_positive) {
-            if (r != 0 && l > (std::numeric_limits<Int128>::max() / r)) {
+            if (r != 0 && l > (std::numeric_limits<Int256>::max() / r)) {
                 return true;
             }
         } else {
-            if (l != 0 && r < (std::numeric_limits<Int128>::min() / l)) {
+            if (l != 0 && r < (std::numeric_limits<Int256>::min() / l)) {
                 return true;
             }
         }
     } else {
         if (r_positive) {
-            if (r != 0 && l < (std::numeric_limits<Int128>::min() / r)) {
+            if (r != 0 && l < (std::numeric_limits<Int256>::min() / r)) {
                 return true;
             }
         } else {
-            if (l != 0 && (r < (std::numeric_limits<Int128>::max() / l))) {
+            if (l != 0 && (r < (std::numeric_limits<Int256>::max() / l))) {
                 return true;
             }
         }
@@ -161,7 +72,6 @@ inline bool mulOverflow(const Int128 & l, const T & r, Int128 * result)
     *result = l * r;
     return false;
 }
-#endif
 
 }
 
@@ -216,7 +126,6 @@ void ColumnDecimal::Append(const std::string& value) {
             }
         } else if (*c == '.' && !has_dot) {
             size_t distance = std::distance(c, end) - 1;
-            auto scale = type_->As<DecimalType>()->GetScale();
 
             if (distance <= scale) {
                 zeros = scale - distance;
