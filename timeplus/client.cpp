@@ -1042,7 +1042,17 @@ void Client::Insert(const std::string& table_name, const Block& block) {
     impl_->Insert(table_name, Query::default_query_id, block);
 }
 
+// TODO: implement idempotent insert
+void Client::Insert(const std::string& table_name, const Block& block, const std::string &) {
+    impl_->Insert(table_name, Query::default_query_id, block);
+}
+
 void Client::Insert(const std::string& table_name, const std::string& query_id, const Block& block) {
+    impl_->Insert(table_name, query_id, block);
+}
+
+// TODO: implement idempotent insert
+void Client::Insert(const std::string& table_name, const std::string& query_id, const Block& block, const std::string &) {
     impl_->Insert(table_name, query_id, block);
 }
 

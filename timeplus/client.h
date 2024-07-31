@@ -253,7 +253,9 @@ public:
 
     /// Intends for insert block of data into a table \p table_name.
     void Insert(const std::string& table_name, const Block& block);
+    void Insert(const std::string& table_name, const Block& block, const std::string & idempotent_key);
     void Insert(const std::string& table_name, const std::string& query_id, const Block& block);
+    void Insert(const std::string& table_name, const std::string & query_id, const Block& block, const std::string & idempotent_key);
 
     /// Ping server for aliveness.
     void Ping();

@@ -32,6 +32,7 @@ SET ( timeplus-cpp-lib-src
     block.cpp
     client.cpp
     query.cpp
+    inserter.cpp
 
     # Headers
     base/buffer.h
@@ -81,6 +82,7 @@ SET ( timeplus-cpp-lib-src
     protocol.h
     query.h
     server_exception.h
+    inserter.h
 )
 
 if (MSVC)
