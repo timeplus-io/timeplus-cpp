@@ -3,7 +3,6 @@
 
 void testIntType(Client& client) {
 
-    // Create a table for each thread if necessary (optional, depends on the use case)
     client.Execute("DROP STREAM IF EXISTS test_insert_int");
     client.Execute("CREATE STREAM IF NOT EXISTS test_insert_int "
     "(id uint64, int8_val int8, int16_val int16, int32_val int32, int64_val int64, int128_val int128, int256_val int256, uint128_val uint128, uint256_val uint256) ENGINE = Memory");
@@ -20,48 +19,39 @@ void testIntType(Client& client) {
     auto uint128_col = std::make_shared<ColumnUInt128>();
     auto uint256_col = std::make_shared<ColumnUInt256>();
 
-    // Int8 boundaries
     int8_col->Append(INT8_MIN);
     int8_col->Append(0);
     int8_col->Append(INT8_MAX);
 
-    // Int16 boundaries
     int16_col->Append(INT16_MIN);
     int16_col->Append(0);
     int16_col->Append(INT16_MAX);
 
-    // Int8 boundaries
     int32_col->Append(INT32_MIN);
     int32_col->Append(0);
     int32_col->Append(INT32_MAX);
 
-    // Int16 boundaries
     int64_col->Append(INT64_MIN);
     int64_col->Append(0);
     int64_col->Append(INT64_MAX);
 
-    // Int128 boundaries
     int128_col->Append(min_val_128);
     int128_col->Append(static_cast<Int128>(0));
     int128_col->Append(max_val_128);
 
-    // Int256 boundaries
     int256_col->Append(min_val_256);
     int256_col->Append(static_cast<Int256>(0));
     int256_col->Append(max_val_256);
 
-    // UInt128 boundaries
     uint128_col->Append(static_cast<UInt128>(0));
     uint128_col->Append(max_val_u128/2);
     uint128_col->Append(max_val_u128);
 
-    // UInt256 boundaries
     uint256_col->Append(static_cast<UInt256>(0));
     uint256_col->Append(max_val_u256/2);
     uint256_col->Append(max_val_u256);
 
 
-    // Append IDs
     id->Append(1);
     id->Append(2);
     id->Append(3);
@@ -85,7 +75,6 @@ void testDateTimeType(Client& client) {
     Block b;
 
     client.Execute("DROP STREAM IF EXISTS test_datetime");
-    /// Create a table.
     client.Execute("CREATE STREAM IF NOT EXISTS test_datetime (d date, d32 date32, dt32 datetime, dt64 datetime64) ENGINE = Memory");
     
     auto d = std::make_shared<ColumnDate>();
@@ -145,7 +134,6 @@ void testDecimalType(Client& client) {
     Block b;
 
     client.Execute("DROP STREAM IF EXISTS test_decimal");
-    /// Create a table.
     client.Execute(
         "CREATE STREAM IF NOT EXISTS "
         "test_decimal (id uint64, d1 decimal(9, 4), d2 decimal(18, 9), d3 decimal(38, 19), "
@@ -193,7 +181,6 @@ void testDecimalType(Client& client) {
     d7->Append(-999999999999999999);
     d8->Append(-999999999999999999);
 
-    // Check strings with decimal point
     id->Append(4);
     d1->Append(static_cast<std::string>("12345.6789"));
     d2->Append(static_cast<std::string>("123456789.012345678"));
@@ -205,13 +192,13 @@ void testDecimalType(Client& client) {
     d8->Append(static_cast<std::string>("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
 
     id->Append(5);
-    d1->Append(static_cast<std::string>("-12345.6789"));
-    d2->Append(static_cast<std::string>("-123456789.012345678"));
-    d3->Append(static_cast<std::string>("-1234567890123456789.0123456789012345678"));
-    d4->Append(static_cast<std::string>("-12345.6789"));
-    d5->Append(static_cast<std::string>("-123456789.012345678"));
-    d6->Append(static_cast<std::string>("-1234567890123456789.0123456789012345678"));
-    d7->Append(static_cast<std::string>("-12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d1->Append(static_cast<std::string>("-1234.56789"));
+    d2->Append(static_cast<std::string>("-1234.56789012345678"));
+    d3->Append(static_cast<std::string>("-1234.5678901234567890123456789012345678"));
+    d4->Append(static_cast<std::string>("-1234.56789"));
+    d5->Append(static_cast<std::string>("-1234.56789012345678"));
+    d6->Append(static_cast<std::string>("-1234.5678901234567890123456789012345678"));
+    d7->Append(static_cast<std::string>("-1234567890123456789012.345678901234567890123456789012345678901234567890123456"));
     d8->Append(static_cast<std::string>("-12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
 
 
@@ -240,10 +227,8 @@ void testDecimalType(Client& client) {
 void testEnumType(Client& client) {
 
     client.Execute("DROP STREAM IF EXISTS test_enums");
-    /// Create a table.
     client.Execute("CREATE STREAM IF NOT EXISTS test_enums (id uint64, e1 enum8('Min' = -128, 'Max' = 127), e2 enum16('Mn' = -32768, 'Mx' = 32767)) ENGINE = Memory");
 
-    /// Insert some values.
     {
         Block block;
 
@@ -266,7 +251,6 @@ void testEnumType(Client& client) {
         client.Insert("test_enums", block);
     }
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT id, e1, e2 FROM test_enums", [](const Block& block)
         {
             std::cout << PrettyPrintBlock{block} << std::endl;
@@ -277,11 +261,9 @@ void testEnumType(Client& client) {
 }
 
 void testFloatType(Client& client) {
-    /// Create a table.
     client.Execute("DROP STREAM IF EXISTS test_float");
     client.Execute("CREATE STREAM IF NOT EXISTS test_float (f32 float32, f64 float64) ENGINE = Memory");
 
-    /// Insert some values.
     {
         Block block;
 
@@ -305,7 +287,6 @@ void testFloatType(Client& client) {
         client.Insert("test_float", block);
     }
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT f32, f64 FROM test_float", [](const Block& block)
         {
             std::cout << PrettyPrintBlock{block} << std::endl;
@@ -316,11 +297,9 @@ void testFloatType(Client& client) {
 }
 
 void testIPType(Client & client) {
-    /// Create a table.
     client.Execute("DROP STREAM IF EXISTS test_ips");
     client.Execute("CREATE STREAM IF NOT EXISTS test_ips (id uint64, v4 ipv4, v6 ipv6) ENGINE = Memory");
 
-    /// Insert some values.
     {
         Block block;
 
@@ -346,7 +325,6 @@ void testIPType(Client & client) {
         client.Insert("test_ips", block);
     }
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT id, v4, v6 FROM test_ips", [&](const Block& block)
         {
             for (size_t i = 0; i < block.GetRowCount(); ++i) {
@@ -375,7 +353,6 @@ void testArrayType(Client& client) {
     auto arr_ip = std::make_shared<ColumnArray>(std::make_shared<ColumnIPv4>());
     auto arr_enum8 = std::make_shared<ColumnArray>(std::make_shared<ColumnEnum8>(Type::CreateEnum8({{"First", 1}, {"Second", 2}})));
 
-    // Append data to arrays
 
     auto i128 = std::make_shared<ColumnInt128>();
     i128->Append(1);
@@ -433,16 +410,13 @@ void testArrayType(Client& client) {
 }
 
 void testUUIDType(Client& client) {
-    /// Create a table.
     client.Execute("DROP STREAM IF EXISTS test_uuid");
     client.Execute("CREATE STREAM IF NOT EXISTS test_uuid (uu uuid) ENGINE = Memory");
 
-    /// Insert some values.
     {
         Block block;
         
 
-        // UUID maximum and minimum
         auto uuid_max = UUID({0xffffffffffffffffllu, 0xffffffffffffffffllu});
         auto uuid_min = UUID({0x0llu, 0x0llu});
 
@@ -456,7 +430,6 @@ void testUUIDType(Client& client) {
         client.Insert("test_uuid", block);
     }
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT uu FROM test_uuid", [](const Block& block)
         {
             std::cout << PrettyPrintBlock{block} << std::endl;
@@ -486,7 +459,6 @@ void testStringType(Client& client){
     client.Execute("CREATE STREAM IF NOT EXISTS test_string(s1 string, s2 fixed_string(1), s3 fixed_string(10000)) ENGINE = Memory");
     client.Insert("test_string", block);
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT * FROM test_string", [](const Block& block)
         {
             std::cout << PrettyPrintBlock{block} << std::endl;
@@ -499,13 +471,11 @@ void testStringType(Client& client){
 void testNullabletype(Client& client) {
 
     client.Execute("DROP STREAM IF EXISTS test_nullable");
-    /// Create a table.
     client.Execute("CREATE STREAM IF NOT EXISTS test_nullable (id nullable(uint64), i256 nullable(int256), "
     "date nullable(date), datetime nullable(datetime), deci nullable(decimal(9,4)), fl nullable(float32), "
     "e1 nullable(enum8('a' = 1, 'b' = 2)), ip nullable(ipv4), st nullable(string), fst nullable(fixed_string(4)), "
     "uu nullable(uuid)) ENGINE = Memory");
 
-    /// Insert some values.
     {
         Block block;
 
@@ -644,7 +614,6 @@ void testNullabletype(Client& client) {
         client.Insert("test_nullable", block);
     }
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT * FROM test_nullable", [](const Block& block)
         {
             std::cout << PrettyPrintBlock{block} << std::endl;
@@ -678,7 +647,6 @@ void testMultitesArrayType(Client& client) {
 
     client.Insert("test_multiarray", block);
 
-    /// Select values inserted in the previous step.
     client.Select("SELECT * FROM test_multiarray", [](const Block& block)
         {
             std::cout << PrettyPrintBlock{block} << std::endl;
