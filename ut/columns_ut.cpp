@@ -685,9 +685,36 @@ TEST(ColumnsCase, ColumnIPv6_construct_from_data)
     EXPECT_ANY_THROW(ColumnIPv6(ColumnRef(std::make_shared<ColumnString>())));
 }
 
+TEST(ColumnsCase, ColumnDecimal256_from_string) {
+    auto col = std::make_shared<ColumnDecimal>(76, 0);
+
+    const auto values = {
+        Int256(0),
+        Int256(-1),
+        Int256(1),
+        std::numeric_limits<Int256>::min() + 1,
+        std::numeric_limits<Int256>::max(),
+    };
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        const auto value = values.begin()[i];
+        SCOPED_TRACE(::testing::Message() << "# index: " << i << " int256 value: " << value);
+
+        {
+            std::stringstream sstr;
+            sstr << value;
+            const auto string_value = sstr.str();
+
+            EXPECT_NO_THROW(col->Append(string_value));
+        }
+
+        ASSERT_EQ(i + 1, col->Size());
+        EXPECT_EQ(value, col->At(i));
+    }
+}
 
 TEST(ColumnsCase, ColumnDecimal256_from_string_overflow) {
-    auto col = std::make_shared<ColumnDecimal>(38, 0);
+    auto col = std::make_shared<ColumnDecimal>(76, 0);
 
 
     // 2^256 overflows

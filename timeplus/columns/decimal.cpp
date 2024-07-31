@@ -141,7 +141,7 @@ void ColumnDecimal::Append(const std::string& value) {
 
             has_dot = true;
         } else if (*c >= '0' && *c <= '9') {
-            if (!has_dot && int_part_length >= precision - scale) {
+            if (int_part_length > precision - scale) {
                 throw std::runtime_error("value is too big for " + std::string(name));
             }
 
@@ -161,12 +161,6 @@ void ColumnDecimal::Append(const std::string& value) {
 
     if (c != end) {
         throw ValidationError("unexpected symbol '-' in decimal value");
-    }
-
-    if (!has_dot) {
-        if (int_part_length > precision - scale) {
-            throw std::runtime_error("value is too big for " + std::string(name));
-        }
     }
 
     while (zeros) {
