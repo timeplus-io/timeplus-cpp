@@ -182,24 +182,24 @@ void testDecimalType(Client& client) {
     d8->Append(-999999999999999999);
 
     id->Append(4);
-    d1->Append(static_cast<std::string>("12345.6789"));
-    d2->Append(static_cast<std::string>("123456789.012345678"));
-    d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-    d4->Append(static_cast<std::string>("12345.6789"));
-    d5->Append(static_cast<std::string>("123456789.012345678"));
-    d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-    d7->Append(static_cast<std::string>("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
-    d8->Append(static_cast<std::string>("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d1->Append(std::string("12345.6789"));
+    d2->Append(std::string("123456789.012345678"));
+    d3->Append(std::string("1234567890123456789.0123456789012345678"));
+    d4->Append(std::string("12345.6789"));
+    d5->Append(std::string("123456789.012345678"));
+    d6->Append(std::string("1234567890123456789.0123456789012345678"));
+    d7->Append(std::string("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d8->Append(std::string("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
 
     id->Append(5);
-    d1->Append(static_cast<std::string>("-1234.56789"));
-    d2->Append(static_cast<std::string>("-1234.56789012345678"));
-    d3->Append(static_cast<std::string>("-1234.5678901234567890123456789012345678"));
-    d4->Append(static_cast<std::string>("-1234.56789"));
-    d5->Append(static_cast<std::string>("-1234.56789012345678"));
-    d6->Append(static_cast<std::string>("-1234.5678901234567890123456789012345678"));
-    d7->Append(static_cast<std::string>("-1234567890123456789012.345678901234567890123456789012345678901234567890123456"));
-    d8->Append(static_cast<std::string>("-12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d1->Append(std::string("-1234.56789"));
+    d2->Append(std::string("-1234.56789012345678"));
+    d3->Append(std::string("-1234.5678901234567890123456789012345678"));
+    d4->Append(std::string("-1234.56789"));
+    d5->Append(std::string("-1234.56789012345678"));
+    d6->Append(std::string("-1234.5678901234567890123456789012345678"));
+    d7->Append(std::string("-1234567890123456789012.345678901234567890123456789012345678901234567890123456"));
+    d8->Append(std::string("-12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
 
 
     b.AppendColumn("id", id);

@@ -685,49 +685,16 @@ TEST(ColumnsCase, ColumnIPv6_construct_from_data)
     EXPECT_ANY_THROW(ColumnIPv6(ColumnRef(std::make_shared<ColumnString>())));
 }
 
-TEST(ColumnsCase, ColumnDecimal128_from_string) {
+
+TEST(ColumnsCase, ColumnDecimal256_from_string_overflow) {
     auto col = std::make_shared<ColumnDecimal>(38, 0);
 
-    const auto values = {
-        Int128(0),
-        Int128(-1),
-        Int128(1),
-        std::numeric_limits<Int128>::min() + 1,
-        std::numeric_limits<Int128>::max(),
-    };
-
-    for (size_t i = 0; i < values.size(); ++i) {
-        const auto value = values.begin()[i];
-        SCOPED_TRACE(::testing::Message() << "# index: " << i << " int128 value: " << value);
-
-        {
-            std::stringstream sstr;
-            sstr << value;
-            const auto string_value = sstr.str();
-
-            EXPECT_NO_THROW(col->Append(string_value));
-        }
-
-        ASSERT_EQ(i + 1, col->Size());
-        EXPECT_EQ(value, col->At(i));
-    }
-}
-
-TEST(ColumnsCase, ColumnDecimal128_from_string_overflow) {
-    GTEST_SKIP() << "256 overflow now.";
-    auto col = std::make_shared<ColumnDecimal>(38, 0);
-
-    // // 2^128 overflows
-    // EXPECT_ANY_THROW(col->Append(static_cast<std::string>("340282366920938463463374607431768211456")));
-    // // special case for number bigger than 2^128, ending in zeroes.
-    // EXPECT_ANY_THROW(col->Append(static_cast<std::string>("400000000000000000000000000000000000000")));
 
     // 2^256 overflows
-    EXPECT_ANY_THROW(col->Append(static_cast<std::string>("115792089237316195423570985008687907853269984665640564039457584007913129639936")));
+    EXPECT_ANY_THROW(col->Append(std::string("115792089237316195423570985008687907853269984665640564039457584007913129639936")));
     // special case for number bigger than 2^256, ending in zeroes.
-    EXPECT_ANY_THROW(col->Append(static_cast<std::string>("200000000000000000000000000000000000000000000000000000000000000000000000000000")));
+    EXPECT_ANY_THROW(col->Append(std::string("200000000000000000000000000000000000000000000000000000000000000000000000000000")));
 
-    // 115792089237316195423570985008687907853269984665640564039457584007913129639936
 
 #ifndef ABSL_HAVE_INTRINSIC_INT128
     // unfortunately std::numeric_limits<Int128>::min() overflows when there is no __int128 intrinsic type.

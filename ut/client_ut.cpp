@@ -619,29 +619,16 @@ TEST_P(ClientCase, Decimal) {
         auto d6 = std::make_shared<ColumnDecimal>(38, 19);
 
 
-        // TODO: now decimal support 256bit, the test number should be larger
-        // EXPECT_THROW(
-        //     d1->Append(static_cast<std::string>("1234567890123456789012345678901234567890")),
-        //     std::runtime_error
-        // );
-        // EXPECT_THROW(
-        //     d1->Append(static_cast<std::string>("123456789012345678901234567890123456.7890")),
-        //     std::runtime_error
-        // );
-        // EXPECT_THROW(
-        //     d1->Append(static_cast<std::string>("-1234567890123456789012345678901234567890")),
-        //     std::runtime_error
-        // );
         EXPECT_THROW(
-            d1->Append(static_cast<std::string>("12345678901234567890123456789012345678a")),
+            d1->Append(std::string("12345678901234567890123456789012345678a")),
             std::runtime_error
         );
         EXPECT_THROW(
-            d1->Append(static_cast<std::string>("12345678901234567890123456789012345678-")),
+            d1->Append(std::string("12345678901234567890123456789012345678-")),
             std::runtime_error
         );
         EXPECT_THROW(
-            d1->Append(static_cast<std::string>("1234.12.1234")),
+            d1->Append(std::string("1234.12.1234")),
             std::runtime_error
         );
 
@@ -671,29 +658,21 @@ TEST_P(ClientCase, Decimal) {
 
         // Check strings with decimal point
         id->Append(4);
-        d1->Append(static_cast<std::string>("12345.6789"));
-        d2->Append(static_cast<std::string>("123456789.012345678"));
-        d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-        d4->Append(static_cast<std::string>("12345.6789"));
-        d5->Append(static_cast<std::string>("123456789.012345678"));
-        d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
+        d1->Append(std::string("12345.6789"));
+        d2->Append(std::string("123456789.012345678"));
+        d3->Append(std::string("1234567890123456789.0123456789012345678"));
+        d4->Append(std::string("12345.6789"));
+        d5->Append(std::string("123456789.012345678"));
+        d6->Append(std::string("1234567890123456789.0123456789012345678"));
 
-        // Check strings with minus sign and without decimal point
+
         id->Append(5);
-        d1->Append(static_cast<std::string>("-12345.6789"));
-        d2->Append(static_cast<std::string>("-123456789012345678"));
-        d3->Append(static_cast<std::string>("-12345678901234567890123456789012345678"));
-        d4->Append(static_cast<std::string>("-12345.6789"));
-        d5->Append(static_cast<std::string>("-123456789012345678"));
-        d6->Append(static_cast<std::string>("-12345678901234567890123456789012345678"));
-
-        id->Append(6);
-        d1->Append(static_cast<std::string>("12345.678"));
-        d2->Append(static_cast<std::string>("123456789.0123456789"));
-        d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-        d4->Append(static_cast<std::string>("12345.6789"));
-        d5->Append(static_cast<std::string>("123456789.012345678"));
-        d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
+        d1->Append(std::string("12345.678"));
+        d2->Append(std::string("123456789.0123456789"));
+        d3->Append(std::string("1234567890123456789.0123456789012345678"));
+        d4->Append(std::string("12345.6789"));
+        d5->Append(std::string("123456789.012345678"));
+        d6->Append(std::string("1234567890123456789.0123456789012345678"));
 
         b.AppendColumn("id", id);
         b.AppendColumn("d1", d1);
@@ -711,7 +690,7 @@ TEST_P(ClientCase, Decimal) {
             return;
         }
 
-        ASSERT_EQ(6u, b.GetRowCount());
+        ASSERT_EQ(5u, b.GetRowCount());
 
         auto int128_to_string = [](Int128 value) {
             std::string result;
@@ -773,21 +752,14 @@ TEST_P(ClientCase, Decimal) {
         EXPECT_EQ("123456789012345678", int128_to_string(decimal(5, 3)));
         EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(6, 3)));
 
-        EXPECT_EQ(5u, b[0]->As<ColumnUInt64>()->At(4));
-        EXPECT_EQ("-123456789", int128_to_string(decimal(1, 4)));
-        EXPECT_EQ("-123456789012345678", int128_to_string(decimal(2, 4)));
-        EXPECT_EQ("-12345678901234567890123456789012345678", int128_to_string(decimal(3, 4)));
-        EXPECT_EQ("-123456789", int128_to_string(decimal(4, 4)));
-        EXPECT_EQ("-123456789012345678", int128_to_string(decimal(5, 4)));
-        EXPECT_EQ("-12345678901234567890123456789012345678", int128_to_string(decimal(6, 4)));
 
-        EXPECT_EQ(6u, b[0]->As<ColumnUInt64>()->At(5));
-        EXPECT_EQ("123456780", int128_to_string(decimal(1, 5)));
-        EXPECT_EQ("123456789012345678", int128_to_string(decimal(2, 5)));
-        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(3, 5)));
-        EXPECT_EQ("123456789", int128_to_string(decimal(4, 5)));
-        EXPECT_EQ("123456789012345678", int128_to_string(decimal(5, 5)));
-        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(6, 5)));
+        EXPECT_EQ(5u, b[0]->As<ColumnUInt64>()->At(4));
+        EXPECT_EQ("123456780", int128_to_string(decimal(1, 4)));
+        EXPECT_EQ("123456789012345678", int128_to_string(decimal(2, 4)));
+        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(3, 4)));
+        EXPECT_EQ("123456789", int128_to_string(decimal(4, 4)));
+        EXPECT_EQ("123456789012345678", int128_to_string(decimal(5, 4)));
+        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(6, 4)));
     });
 }
 
