@@ -127,6 +127,7 @@ TEST_P(RoundtripCase, MapUUID_Tuple_String_Array_Uint64) {
     EXPECT_TRUE(CompareRecursive(*map, *result_typed));
 }
 
+/// Geometric tests are not supported in Proton
 #ifdef GEOMETRIC_TESTS_ENABLED
 
 TEST_P(RoundtripCase, Point) {

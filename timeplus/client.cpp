@@ -7,8 +7,8 @@
 #include "base/wire_format.h"
 
 #include "columns/factory.h"
+#include "timeplus/macros.h"
 
-#include <assert.h>
 #include <system_error>
 #include <vector>
 #include <sstream>
@@ -153,7 +153,7 @@ public:
 
     void SendCancel();
 
-    void Insert(const std::string& table_name, const std::string& query_id, const Block& block);
+    void Insert(const std::string& table_name, const std::string& query_id, const Block& block, const std::string& idempotent_id);
 
     void Ping();
 
@@ -306,23 +306,41 @@ std::string NameToQueryString(const std::string &input)
     return output;
 }
 
-void Client::Impl::Insert(const std::string& table_name, const std::string& query_id, const Block& block) {
+void Client::Impl::Insert(const std::string& table_name, const std::string& query_id, const Block& block,
+                          const std::string& idempotent_id) {
     if (options_.ping_before_query) {
         RetryGuard([this]() { Ping(); });
     }
 
-    std::stringstream fields_section;
-        const auto num_columns = block.GetColumnCount();
+    constexpr std::string_view INSERT_INTO = "INSERT INTO ";
+    constexpr std::string_view LEFT_PAREN = " ( ";
+    constexpr std::string_view RIGHT_PAREN_VALUES = " ) VALUES";
 
-    for (unsigned int i = 0; i < num_columns; ++i) {
+    const size_t num_columns = block.GetColumnCount();
+    size_t fields_section_size = num_columns - 1; /// commas between column names
+    for (size_t i = 0; i < num_columns; ++i) {
+        fields_section_size += block.GetColumnName(i).size() + 2;
+    }
+    size_t query_text_size = INSERT_INTO.size() + table_name.size() + LEFT_PAREN.size() + fields_section_size + RIGHT_PAREN_VALUES.size();
+
+    std::string query_text;
+    query_text.reserve(query_text_size + query_text_size / 5);  /// pre-allocate with query_text_size * 1.2
+    query_text.append(INSERT_INTO).append(table_name).append(LEFT_PAREN);
+    for (size_t i = 0; i < num_columns; ++i) {
         if (i == num_columns - 1) {
-            fields_section << NameToQueryString(block.GetColumnName(i));
+            query_text.append(NameToQueryString(block.GetColumnName(i)));
         } else {
-            fields_section << NameToQueryString(block.GetColumnName(i)) << ",";
+            query_text.append(NameToQueryString(block.GetColumnName(i))).append(",");
         }
     }
+    query_text.append(RIGHT_PAREN_VALUES);
 
-    Query query("INSERT INTO " + table_name + " ( " + fields_section.str() + " ) VALUES", query_id);
+    Query query(std::move(query_text), query_id);
+
+    if (!idempotent_id.empty()) {
+        query.SetSetting("idempotent_id", {idempotent_id});
+    }
+
     SendQuery(query);
 
     uint64_t server_packet;
@@ -376,8 +394,10 @@ void Client::Impl::ResetConnection() {
     InitializeStreams(socket_factory_->connect(options_, current_endpoint_.value()));
 
     if (!Handshake()) {
+        TRACE("client reset connection: host=%s port=%d res=fail", current_endpoint_->host.c_str(), current_endpoint_->port);
         throw ProtocolError("fail to connect to " + options_.host);
     }
+    TRACE("client reset connection: host=%s port=%d res=success", current_endpoint_->host.c_str(), current_endpoint_->port);
 }
 
 void Client::Impl::ResetConnectionEndpoint() {
@@ -1038,12 +1058,12 @@ void Client::Select(const Query& query) {
     Execute(query);
 }
 
-void Client::Insert(const std::string& table_name, const Block& block) {
-    impl_->Insert(table_name, Query::default_query_id, block);
+void Client::Insert(const std::string& table_name, const Block& block, const std::string& idempotent_id) {
+    impl_->Insert(table_name, Query::default_query_id, block, idempotent_id);
 }
 
-void Client::Insert(const std::string& table_name, const std::string& query_id, const Block& block) {
-    impl_->Insert(table_name, query_id, block);
+void Client::Insert(const std::string& table_name, const std::string& query_id, const Block& block, const std::string& idempotent_id) {
+    impl_->Insert(table_name, query_id, block, idempotent_id);
 }
 
 void Client::Ping() {

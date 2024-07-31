@@ -16,15 +16,23 @@ OPTION (WITH_SYSTEM_ABSEIL "Use system ABSEIL" OFF)
 OPTION (WITH_SYSTEM_LZ4 "Use system LZ4" OFF)
 OPTION (WITH_SYSTEM_CITYHASH "Use system cityhash" OFF)
 OPTION (WITH_SYSTEM_ZSTD "Use system ZSTD" OFF)
-OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies duting build" ON)
+OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies during build" ON)
 OPTION (CHECK_VERSION "Check that version number corresponds to git tag, usefull in CI/CD to validate that new version published on GitHub has same version in sources" OFF)
 OPTION (BUILD_GTEST "Build Google Test" OFF)
 OPTION (ENABLE_GEOMETRIC_TEST "Enable geometric test" OFF)
+OPTION (ENABLE_TRACE_TIMEPLUS_CPP "Enable tracing log" OFF)
 
 PROJECT (TIMEPLUS-CLIENT
     VERSION "${TIMEPLUS_CPP_VERSION}"
     DESCRIPTION "Timeplus C++ client library"
 )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
+IF (ENABLE_TRACE_TIMEPLUS_CPP)
+    ADD_DEFINITIONS(-DTRACE_TIMEPLUS_CPP)
+ENDIF()
+
 
 USE_CXX17 ()
 USE_OPENSSL ()
@@ -127,6 +135,8 @@ IF (BUILD_TESTS)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
         tests/simple
+        tests/insert
+        tests/insert-async
     )
 ENDIF (BUILD_TESTS)
 

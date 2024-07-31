@@ -31,7 +31,9 @@ SET ( timeplus-cpp-lib-src
 
     block.cpp
     client.cpp
+    client_pool.cpp
     query.cpp
+    timeplus.cpp
 
     # Headers
     base/buffer.h
@@ -75,12 +77,16 @@ SET ( timeplus-cpp-lib-src
     types/types.h
 
     block.h
+    blocking_queue.h
     client.h
+    client_pool.h
     error_codes.h
     exceptions.h
     protocol.h
     query.h
     server_exception.h
+    timeplus.h
+    timeplus_config.h
 )
 
 if (MSVC)
@@ -159,12 +165,16 @@ INSTALL (TARGETS timeplus-cpp-lib
 
 # general
 INSTALL(FILES block.h DESTINATION include/timeplus/)
+INSTALL(FILES blocking_queue.h DESTINATION include/timeplus/)
 INSTALL(FILES client.h DESTINATION include/timeplus/)
+INSTALL(FILES client_pool.h DESTINATION include/timeplus/)
 INSTALL(FILES error_codes.h DESTINATION include/timeplus/)
 INSTALL(FILES exceptions.h DESTINATION include/timeplus/)
 INSTALL(FILES server_exception.h DESTINATION include/timeplus/)
 INSTALL(FILES protocol.h DESTINATION include/timeplus/)
 INSTALL(FILES query.h DESTINATION include/timeplus/)
+INSTALL(FILES timeplus.h DESTINATION include/timeplus/)
+INSTALL(FILES timeplus_config.h DESTINATION include/timeplus/)
 INSTALL(FILES version.h DESTINATION include/timeplus/)
 
 # base
@@ -175,6 +185,7 @@ INSTALL(FILES base/open_telemetry.h DESTINATION include/timeplus/base/)
 INSTALL(FILES base/output.h DESTINATION include/timeplus/base/)
 INSTALL(FILES base/platform.h DESTINATION include/timeplus/base/)
 INSTALL(FILES base/projected_iterator.h DESTINATION include/timeplus/base/)
+INSTALL(FILES base/scope_guard.h DESTINATION include/timeplus/base/)
 INSTALL(FILES base/singleton.h DESTINATION include/timeplus/base/)
 INSTALL(FILES base/socket.h DESTINATION include/timeplus/base/)
 INSTALL(FILES base/string_utils.h DESTINATION include/timeplus/base/)

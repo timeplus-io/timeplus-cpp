@@ -80,6 +80,10 @@ TEST(Socketcase, gaierror) {
 }
 
 TEST(Socketcase, connecttimeout) {
+#if defined(__APPLE__)
+    GTEST_SKIP() << "IPv6 address 100::1 is connectable on macOS";
+#endif
+
     using Clock = std::chrono::steady_clock;
 
     try {

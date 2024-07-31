@@ -105,4 +105,6 @@ private:
     size_t rows_;
 };
 
+using BlockPtr = std::shared_ptr<Block>;
+
 }

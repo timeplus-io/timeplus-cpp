@@ -21,10 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
-        compiler: [clang-10, clang-18, gcc-7, gcc-8, gcc-9]
+        compiler: [clang-10, clang-18, gcc-8, gcc-9]
         ssl: [ssl_ON, ssl_OFF]
         dependencies: [dependencies_BUILT_IN]
-        timeplusd: [2.3.22]
+        timeplusd: [2.3.23]
 
         include:
         - compiler: clang-10
@@ -36,11 +36,6 @@ jobs:
           LLVM_INSTALL: 18
           C_COMPILER: clang-18
           CXX_COMPILER: clang++-18
-
-        - compiler: gcc-7
-          COMPILER_INSTALL: gcc-7 g++-7
-          C_COMPILER: gcc-7
-          CXX_COMPILER: g++-7
 
         - compiler: gcc-8
           COMPILER_INSTALL: gcc-8 g++-8
@@ -58,7 +53,7 @@ jobs:
         - dependencies: dependencies_SYSTEM
           compiler: compiler_SYSTEM
           os: ubuntu-22.04
-          timeplusd: 2.3.22
+          timeplusd: 2.3.23
           COMPILER_INSTALL: gcc g++
           C_COMPILER: gcc
           CXX_COMPILER: g++

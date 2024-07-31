@@ -87,10 +87,9 @@ class Query : public QueryEvents {
 public:
      Query();
      Query(const char* query, const char* query_id = nullptr);
-     Query(const std::string& query, const std::string& query_id = default_query_id);
+     Query(std::string query, std::string query_id = default_query_id);
     ~Query() override;
 
-    ///
     inline const std::string& GetText() const {
         return query_;
     }
