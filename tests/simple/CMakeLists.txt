@@ -1,6 +1,7 @@
 ADD_EXECUTABLE (simple-test
     ../../ut/utils.cpp
     main.cpp
+    TestFunctions.cpp
 )
 
 TARGET_LINK_LIBRARIES (simple-test
