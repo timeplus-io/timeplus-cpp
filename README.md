@@ -152,3 +152,19 @@ $ ./build/example/timeplus-client 2
 $ ./build/example/timeplus-client 3
 ```
 
+## Known Issues
+
+Here is the current list of known issues with our product.
+
+We are working hard to address these problems and will provide fixes in future updates.
+
+- **low_cardinality(string)** column values can not be INSERTed from client as **ColumnString**
+  - When performing such operations, it will cause the server to crash, with the error message:
+
+  `<Fatal> : Logical error: 'Bad cast from type DB::ColumnString to DB::ColumnLowCardinality'.`
+
+- Currently timeplus-cpp does not support nullable modifiers for some external types.
+  
+  `DB::Exception: Nested type array(string) cannot be inside Nullable type.`
+   
+  `DB::Exception: Nested type low_cardinality(string) cannot be inside Nullable type.`
