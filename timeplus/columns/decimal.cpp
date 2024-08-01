@@ -99,12 +99,16 @@ ColumnDecimal::ColumnDecimal(TypeRef type, ColumnRef data)
 
 void ColumnDecimal::Append(const Int256& value) {
     if (data_->Type()->GetCode() == Type::Int32) {
+        assert(value >= std::numeric_limits<ColumnInt32::DataType>::min() && value <= std::numeric_limits<ColumnInt32::DataType>::max());
         data_->As<ColumnInt32>()->Append(static_cast<ColumnInt32::DataType>(value));
     } else if (data_->Type()->GetCode() == Type::Int64) {
+        assert(value >= std::numeric_limits<ColumnInt64::DataType>::min() && value <= std::numeric_limits<ColumnInt64::DataType>::max());
         data_->As<ColumnInt64>()->Append(static_cast<ColumnInt64::DataType>(value));
     } else if (data_->Type()->GetCode() == Type::Int128) {
+        assert(value >= std::numeric_limits<ColumnInt128::DataType>::min() && value <= std::numeric_limits<ColumnInt128::DataType>::max());
         data_->As<ColumnInt128>()->Append(static_cast<ColumnInt128::DataType>(value));
     } else {
+        assert(value >= std::numeric_limits<ColumnInt256::DataType>::min() && value <= std::numeric_limits<ColumnInt256::DataType>::max());
         data_->As<ColumnInt256>()->Append(static_cast<ColumnInt256::DataType>(value));
     }
 }

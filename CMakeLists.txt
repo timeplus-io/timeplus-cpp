@@ -19,6 +19,7 @@ OPTION (WITH_SYSTEM_ZSTD "Use system ZSTD" OFF)
 OPTION (DEBUG_DEPENDENCIES "Print debug info about dependencies duting build" ON)
 OPTION (CHECK_VERSION "Check that version number corresponds to git tag, usefull in CI/CD to validate that new version published on GitHub has same version in sources" OFF)
 OPTION (BUILD_GTEST "Build Google Test" ON)
+OPTION (ENABLE_GEOMETRIC_TESTS "Enable geometric tests" OFF)
 
 PROJECT (TIMEPLUS-CLIENT
     VERSION "${TIMEPLUS_CPP_VERSION}"
@@ -112,6 +113,9 @@ IF (BUILD_BENCHMARK)
 ENDIF (BUILD_BENCHMARK)
 
 IF (BUILD_GTEST)
+    IF (ENABLE_GEOMETRIC_TESTS)
+        ADD_DEFINITIONS(-DGEOMETRIC_TESTS_ENABLED)
+    ENDIF()
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
         contrib/gtest
@@ -131,6 +135,7 @@ IF (BUILD_EXAMPLES)
         examples
     )
 ENDIF (BUILD_EXAMPLES)
+
 
 if(DEBUG_DEPENDENCIES)
     function(print_target_properties target)
@@ -165,3 +170,4 @@ if(DEBUG_DEPENDENCIES)
     print_target_debug_info(lz4::lz4)
     print_target_debug_info(zstd::zstd)
 endif()
+

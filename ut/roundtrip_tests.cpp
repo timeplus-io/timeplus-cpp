@@ -129,7 +129,7 @@ TEST_P(RoundtripCase, MapUUID_Tuple_String_Array_Uint64) {
 
 TEST_P(RoundtripCase, Point) {
 
-    GTEST_SKIP() << "Point type is not allowed in Proton now.";
+    #ifdef GEOMETRIC_TESTS_ENABLED
 
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
@@ -141,11 +141,15 @@ TEST_P(RoundtripCase, Point) {
 
     auto result_typed = RoundtripColumnValues(*client_, col)->AsStrict<ColumnPoint>();
     EXPECT_TRUE(CompareRecursive(*col, *result_typed));
+
+    #else
+    GTEST_SKIP() << "ENABLE_GEOMETRIC_TESTS is OFF, skipping test.";
+    #endif
 }
 
 TEST_P(RoundtripCase, Ring) {
 
-    GTEST_SKIP() << "Ring type is not allowed in Proton now.";
+    #ifdef GEOMETRIC_TESTS_ENABLED
 
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
@@ -163,11 +167,15 @@ TEST_P(RoundtripCase, Ring) {
 
     auto result_typed = RoundtripColumnValues(*client_, col)->AsStrict<ColumnRing>();
     EXPECT_TRUE(CompareRecursive(*col, *result_typed));
+
+    #else
+    GTEST_SKIP() << "ENABLE_GEOMETRIC_TESTS is OFF, skipping test.";
+    #endif
 }
 
 TEST_P(RoundtripCase, Polygon) {
-
-    GTEST_SKIP() << "Polygon type is not allowed in Proton now.";
+    
+    #ifdef GEOMETRIC_TESTS_ENABLED
 
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
@@ -187,11 +195,15 @@ TEST_P(RoundtripCase, Polygon) {
 
     auto result_typed = RoundtripColumnValues(*client_, col)->AsStrict<ColumnPolygon>();
     EXPECT_TRUE(CompareRecursive(*col, *result_typed));
+
+    #else
+    GTEST_SKIP() << "ENABLE_GEOMETRIC_TESTS is OFF, skipping test.";
+    #endif
 }
 
 TEST_P(RoundtripCase, MultiPolygon) {
 
-    GTEST_SKIP() << "MultiPolygon type is not allowed in Proton now.";
+    #ifdef GEOMETRIC_TESTS_ENABLED
 
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
@@ -213,6 +225,10 @@ TEST_P(RoundtripCase, MultiPolygon) {
 
     auto result_typed = RoundtripColumnValues(*client_, col)->AsStrict<ColumnMultiPolygon>();
     EXPECT_TRUE(CompareRecursive(*col, *result_typed));
+
+    #else
+    GTEST_SKIP() << "ENABLE_GEOMETRIC_TESTS is OFF, skipping test.";
+    #endif
 }
 
 TEST_P(RoundtripCase, LowCardinalityTString) {

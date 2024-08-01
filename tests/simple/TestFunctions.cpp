@@ -68,6 +68,13 @@ void testIntType(Client& client) {
 
     client.Insert("test_insert_int", block);
 
+    client.Select("SELECT * FROM test_insert_int", [](const Block& block)
+    {
+        std::cout << PrettyPrintBlock{block} << std::endl;
+    }
+    );
+
+
 }
 
 

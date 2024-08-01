@@ -462,31 +462,13 @@ TEST(ColumnsCase, UUIDSlice) {
 }
 
 TEST(ColumnsCase, Int128) {
-    // auto col = std::make_shared<ColumnInt128>(std::vector<Int128>{
-    //         absl::MakeInt128(0xffffffffffffffffll, 0xffffffffffffffffll), // -1
-    //         absl::MakeInt128(0, 0xffffffffffffffffll),  // 2^64
-    //         absl::MakeInt128(0xffffffffffffffffll, 0),
-    //         absl::MakeInt128(0x8000000000000000ll, 0),
-    //         Int128(0)
-    // });
 
     auto col = std::make_shared<ColumnInt128>(std::vector<Int128>{
         Int128({0xffffffffffffffffll, 0xffffffffffffffffll}),
-        // Int128({0, 0xffffffffffffffffll}),
-        // Int128({0xffffffffffffffffll, 0}),
-        // Int128({0x8000000000000000ll, 0}),
         Int128(0)
     });
 
     EXPECT_EQ(-1, col->At(0));
-
-    // EXPECT_EQ(absl::MakeInt128(0, 0xffffffffffffffffll), col->At(1));
-    // EXPECT_EQ(0ll,                   absl::Int128High64(col->At(1)));
-    // EXPECT_EQ(0xffffffffffffffffull, absl::Int128Low64(col->At(1)));
-
-    // EXPECT_EQ(absl::MakeInt128(0xffffffffffffffffll, 0), col->At(2));
-    // EXPECT_EQ(static_cast<int64_t>(0xffffffffffffffffll),  absl::Int128High64(col->At(2)));
-    // EXPECT_EQ(0ull,                  absl::Int128Low64(col->At(2)));
 
     EXPECT_EQ(0, col->At(1));
 }
