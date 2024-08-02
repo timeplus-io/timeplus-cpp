@@ -526,11 +526,11 @@ private:
             HalfType a1 = lhs.items[little(1)];
 
             HalfType b01 = rhs;
-            uint64_t b0 = b01;
+            uint64_t b0 = static_cast<uint64_t>(b01);
             uint64_t b1 = 0;
             HalfType b23 = 0;
             if constexpr (sizeof(T) > 8)
-                b1 = b01 >> 64;
+                b1 = static_cast<uint64_t>(b01 >> 64);
             if constexpr (sizeof(T) > 16)
                 b23 = (HalfType(rhs.items[little(3)]) << 64) + rhs.items[little(2)];
 
@@ -540,8 +540,8 @@ private:
             HalfType r12_x = a1 * b0;
 
             integer<Bits, Signed> res;
-            res.items[little(0)] = r01;
-            res.items[little(3)] = r23 >> 64;
+            res.items[little(0)] = static_cast<base_type>(r01);
+            res.items[little(3)] = static_cast<base_type>(r23 >> 64);
 
             if constexpr (sizeof(T) > 8)
             {
@@ -555,8 +555,8 @@ private:
             if (r12 < r12_x)
                 ++res.items[little(3)];
 
-            res.items[little(1)] = r12;
-            res.items[little(2)] = r12 >> 64;
+            res.items[little(1)] = static_cast<base_type>(r12);
+            res.items[little(2)] = static_cast<base_type>(r12 >> 64);
             return res;
         }
         else if constexpr (Bits == 128 && sizeof(base_type) == 8)

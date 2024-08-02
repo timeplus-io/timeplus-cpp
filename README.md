@@ -151,4 +151,3 @@ $ ./build/example/timeplus-client 2
 # delete stream
 $ ./build/example/timeplus-client 3
 ```
-

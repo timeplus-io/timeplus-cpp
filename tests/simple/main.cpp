@@ -13,6 +13,10 @@ static void RunTests(Client& client) {
     testIPType(client);
     testMultitesArrayType(client);
     testNullabletype(client);
+    testLowCardinalityStringType(client);
+    testMapType(client);
+    testTupleType(client);
+    testNestedType(client);
 }
 
 int main()

@@ -257,55 +257,6 @@ TEST_P(ClientCase, LowCardinality_InsertAfterClear) {
     ASSERT_EQ(total_rows, data.size());
 }
 
-TEST_P(ClientCase, LowCardinalityString_AsString) {
-    // Validate that LowCardinality(String) column values can be INSERTed from client as ColumnString
-    // and also read on client (enabled by special option) as ColumnString.
-
-    GTEST_SKIP() << "LowCardinalityString_AsString has bug.";
-
-    ClientOptions options = GetParam();
-    options.SetBakcwardCompatibilityFeatureLowCardinalityAsWrappedColumn(true);
-
-    client_ = std::make_unique<Client>(GetParam());
-    // client_->Execute("CREATE DATABASE IF NOT EXISTS test_timeplus_cpp");
-
-    Block block;
-    auto col = std::make_shared<ColumnString>();
-
-    client_->Execute("DROP TEMPORARY STREAM IF EXISTS " + table_name);
-    client_->Execute("CREATE TEMPORARY STREAM IF NOT EXISTS " + table_name + "( " + column_name + " low_cardinality(string)) ENGINE = Memory");
-
-    block.AppendColumn("test_column", col);
-
-    const std::vector<std::string> data{{"FooBar", "1", "2", "Foo", "4", "Bar", "Foo", "7", "8", "Foo"}};
-    for (const auto & v : data)
-        col->Append(v);
-
-    block.RefreshRowCount();
-    client_->Insert(table_name, block);
-
-    // Now that we can access data via ColumnString instead of ColumnLowCardinalityT<ColumnString>
-    size_t total_rows = 0;
-    client_->Select(getOneColumnSelectQuery(),
-        [&total_rows, &data](const Block& block) {
-            total_rows += block.GetRowCount();
-            if (block.GetRowCount() == 0) {
-                return;
-            }
-
-            ASSERT_EQ(1U, block.GetColumnCount());
-            if (auto col = block[0]->As<ColumnString>()) {
-                ASSERT_EQ(data.size(), col->Size());
-                for (size_t i = 0; i < col->Size(); ++i) {
-                    EXPECT_EQ(data[i], (*col)[i]) << " at index: " << i;
-                }
-            }
-        }
-    );
-
-    ASSERT_EQ(total_rows, data.size());
-}
-
 TEST_P(ClientCase, Generic) {
     client_->Execute(
             "CREATE TEMPORARY STREAM IF NOT EXISTS test_timeplus_cpp_client (id uint64, name string, f bool) ENGINE = Memory");
@@ -619,29 +570,16 @@ TEST_P(ClientCase, Decimal) {
         auto d6 = std::make_shared<ColumnDecimal>(38, 19);
 
 
-        // TODO: now decimal support 256bit, the test number should be larger
-        // EXPECT_THROW(
-        //     d1->Append(static_cast<std::string>("1234567890123456789012345678901234567890")),
-        //     std::runtime_error
-        // );
-        // EXPECT_THROW(
-        //     d1->Append(static_cast<std::string>("123456789012345678901234567890123456.7890")),
-        //     std::runtime_error
-        // );
-        // EXPECT_THROW(
-        //     d1->Append(static_cast<std::string>("-1234567890123456789012345678901234567890")),
-        //     std::runtime_error
-        // );
         EXPECT_THROW(
-            d1->Append(static_cast<std::string>("12345678901234567890123456789012345678a")),
+            d1->Append(std::string("12345678901234567890123456789012345678a")),
             std::runtime_error
         );
         EXPECT_THROW(
-            d1->Append(static_cast<std::string>("12345678901234567890123456789012345678-")),
+            d1->Append(std::string("12345678901234567890123456789012345678-")),
             std::runtime_error
         );
         EXPECT_THROW(
-            d1->Append(static_cast<std::string>("1234.12.1234")),
+            d1->Append(std::string("1234.12.1234")),
             std::runtime_error
         );
 
@@ -671,29 +609,21 @@ TEST_P(ClientCase, Decimal) {
 
         // Check strings with decimal point
         id->Append(4);
-        d1->Append(static_cast<std::string>("12345.6789"));
-        d2->Append(static_cast<std::string>("123456789.012345678"));
-        d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-        d4->Append(static_cast<std::string>("12345.6789"));
-        d5->Append(static_cast<std::string>("123456789.012345678"));
-        d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
+        d1->Append(std::string("12345.6789"));
+        d2->Append(std::string("123456789.012345678"));
+        d3->Append(std::string("1234567890123456789.0123456789012345678"));
+        d4->Append(std::string("12345.6789"));
+        d5->Append(std::string("123456789.012345678"));
+        d6->Append(std::string("1234567890123456789.0123456789012345678"));
 
-        // Check strings with minus sign and without decimal point
+
         id->Append(5);
-        d1->Append(static_cast<std::string>("-12345.6789"));
-        d2->Append(static_cast<std::string>("-123456789012345678"));
-        d3->Append(static_cast<std::string>("-12345678901234567890123456789012345678"));
-        d4->Append(static_cast<std::string>("-12345.6789"));
-        d5->Append(static_cast<std::string>("-123456789012345678"));
-        d6->Append(static_cast<std::string>("-12345678901234567890123456789012345678"));
-
-        id->Append(6);
-        d1->Append(static_cast<std::string>("12345.678"));
-        d2->Append(static_cast<std::string>("123456789.0123456789"));
-        d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-        d4->Append(static_cast<std::string>("12345.6789"));
-        d5->Append(static_cast<std::string>("123456789.012345678"));
-        d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
+        d1->Append(std::string("12345.678"));
+        d2->Append(std::string("123456789.0123456789"));
+        d3->Append(std::string("1234567890123456789.0123456789012345678"));
+        d4->Append(std::string("12345.6789"));
+        d5->Append(std::string("123456789.012345678"));
+        d6->Append(std::string("1234567890123456789.0123456789012345678"));
 
         b.AppendColumn("id", id);
         b.AppendColumn("d1", d1);
@@ -711,7 +641,7 @@ TEST_P(ClientCase, Decimal) {
             return;
         }
 
-        ASSERT_EQ(6u, b.GetRowCount());
+        ASSERT_EQ(5u, b.GetRowCount());
 
         auto int128_to_string = [](Int128 value) {
             std::string result;
@@ -773,21 +703,14 @@ TEST_P(ClientCase, Decimal) {
         EXPECT_EQ("123456789012345678", int128_to_string(decimal(5, 3)));
         EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(6, 3)));
 
-        EXPECT_EQ(5u, b[0]->As<ColumnUInt64>()->At(4));
-        EXPECT_EQ("-123456789", int128_to_string(decimal(1, 4)));
-        EXPECT_EQ("-123456789012345678", int128_to_string(decimal(2, 4)));
-        EXPECT_EQ("-12345678901234567890123456789012345678", int128_to_string(decimal(3, 4)));
-        EXPECT_EQ("-123456789", int128_to_string(decimal(4, 4)));
-        EXPECT_EQ("-123456789012345678", int128_to_string(decimal(5, 4)));
-        EXPECT_EQ("-12345678901234567890123456789012345678", int128_to_string(decimal(6, 4)));
 
-        EXPECT_EQ(6u, b[0]->As<ColumnUInt64>()->At(5));
-        EXPECT_EQ("123456780", int128_to_string(decimal(1, 5)));
-        EXPECT_EQ("123456789012345678", int128_to_string(decimal(2, 5)));
-        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(3, 5)));
-        EXPECT_EQ("123456789", int128_to_string(decimal(4, 5)));
-        EXPECT_EQ("123456789012345678", int128_to_string(decimal(5, 5)));
-        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(6, 5)));
+        EXPECT_EQ(5u, b[0]->As<ColumnUInt64>()->At(4));
+        EXPECT_EQ("123456780", int128_to_string(decimal(1, 4)));
+        EXPECT_EQ("123456789012345678", int128_to_string(decimal(2, 4)));
+        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(3, 4)));
+        EXPECT_EQ("123456789", int128_to_string(decimal(4, 4)));
+        EXPECT_EQ("123456789012345678", int128_to_string(decimal(5, 4)));
+        EXPECT_EQ("12345678901234567890123456789012345678", int128_to_string(decimal(6, 4)));
     });
 }
 

@@ -40,3 +40,7 @@ void testEnumType(Client& client);
 void testIPType(Client& client);
 void testMultitesArrayType(Client& client);
 void testNullabletype(Client& client);
+void testLowCardinalityStringType(Client& client);
+void testMapType(Client& client);
+void testTupleType(Client& client);
+void testNestedType(Client& client);

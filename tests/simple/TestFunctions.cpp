@@ -68,6 +68,18 @@ void testIntType(Client& client) {
 
     client.Insert("test_insert_int", block);
 
+    client.Select("SELECT * FROM test_insert_int", [](const Block& block)
+    {
+        for (size_t c = 0; c < block.GetRowCount(); ++c) {
+            auto col0 = block[0]->As<ColumnUInt64>()->At(c);
+            std::cout<< col0 <<std::endl;
+            auto col1 = block[1]->As<ColumnInt8>()->At(c);
+            std::cout<< col1 <<std::endl;
+        }
+    }
+    );
+
+
 }
 
 
@@ -182,24 +194,24 @@ void testDecimalType(Client& client) {
     d8->Append(-999999999999999999);
 
     id->Append(4);
-    d1->Append(static_cast<std::string>("12345.6789"));
-    d2->Append(static_cast<std::string>("123456789.012345678"));
-    d3->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-    d4->Append(static_cast<std::string>("12345.6789"));
-    d5->Append(static_cast<std::string>("123456789.012345678"));
-    d6->Append(static_cast<std::string>("1234567890123456789.0123456789012345678"));
-    d7->Append(static_cast<std::string>("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
-    d8->Append(static_cast<std::string>("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d1->Append(std::string("12345.6789"));
+    d2->Append(std::string("123456789.012345678"));
+    d3->Append(std::string("1234567890123456789.0123456789012345678"));
+    d4->Append(std::string("12345.6789"));
+    d5->Append(std::string("123456789.012345678"));
+    d6->Append(std::string("1234567890123456789.0123456789012345678"));
+    d7->Append(std::string("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d8->Append(std::string("12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
 
     id->Append(5);
-    d1->Append(static_cast<std::string>("-1234.56789"));
-    d2->Append(static_cast<std::string>("-1234.56789012345678"));
-    d3->Append(static_cast<std::string>("-1234.5678901234567890123456789012345678"));
-    d4->Append(static_cast<std::string>("-1234.56789"));
-    d5->Append(static_cast<std::string>("-1234.56789012345678"));
-    d6->Append(static_cast<std::string>("-1234.5678901234567890123456789012345678"));
-    d7->Append(static_cast<std::string>("-1234567890123456789012.345678901234567890123456789012345678901234567890123456"));
-    d8->Append(static_cast<std::string>("-12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
+    d1->Append(std::string("-1234.56789"));
+    d2->Append(std::string("-1234.56789012345678"));
+    d3->Append(std::string("-1234.5678901234567890123456789012345678"));
+    d4->Append(std::string("-1234.56789"));
+    d5->Append(std::string("-1234.56789012345678"));
+    d6->Append(std::string("-1234.5678901234567890123456789012345678"));
+    d7->Append(std::string("-1234567890123456789012.345678901234567890123456789012345678901234567890123456"));
+    d8->Append(std::string("-12345678901234567890123456789012345678.90123456789012345678901234567890123456"));
 
 
     b.AppendColumn("id", id);
@@ -216,7 +228,12 @@ void testDecimalType(Client& client) {
 
     client.Select("SELECT * FROM test_decimal", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+            auto col0 = block[0]->As<ColumnUInt64>()->At(c);
+            std::cout<< col0 <<std::endl;
+            auto col1 = block[1]->As<ColumnDecimal>()->At(c);
+            std::cout<< col1 <<std::endl;
+        }
         }
     );
 
@@ -253,7 +270,14 @@ void testEnumType(Client& client) {
 
     client.Select("SELECT id, e1, e2 FROM test_enums", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col0 = block[0]->As<ColumnUInt64>()->At(c);
+                std::cout<< col0 <<std::endl;
+                auto col1 = block[1]->As<ColumnEnum8>()->At(c);
+                std::cout<< col1 <<std::endl;
+                auto col2 = block[2]->As<ColumnEnum16>()->At(c);
+                std::cout<< col2 <<std::endl;
+            }
         }
     );
 
@@ -289,7 +313,10 @@ void testFloatType(Client& client) {
 
     client.Select("SELECT f32, f64 FROM test_float", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col0 = block[0]->As<ColumnFloat32>()->At(c);
+                std::cout<< col0 <<std::endl;
+            }
         }
     );
 
@@ -327,8 +354,13 @@ void testIPType(Client & client) {
 
     client.Select("SELECT id, v4, v6 FROM test_ips", [&](const Block& block)
         {
-            for (size_t i = 0; i < block.GetRowCount(); ++i) {
-                std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col0 = block[0]->As<ColumnUInt64>()->At(c);
+                std::cout<< col0 <<std::endl;
+                auto col1 = block[1]->As<ColumnIPv4>()->At(c);
+                std::cout<< col1 <<std::endl;
+                auto col2 = block[2]->As<ColumnIPv6>()->At(c);
+                std::cout<< col2 <<std::endl;
             }
         }
     );
@@ -432,7 +464,10 @@ void testUUIDType(Client& client) {
 
     client.Select("SELECT uu FROM test_uuid", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col0 = block[0]->As<ColumnUUID>()->At(c);
+                std::cout<< col0 <<std::endl;
+            }
         }
     );
 
@@ -461,7 +496,14 @@ void testStringType(Client& client){
 
     client.Select("SELECT * FROM test_string", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col0 = block[0]->As<ColumnString>()->At(c);
+                std::cout<< col0 <<std::endl;
+                auto col1 = block[1]->As<ColumnFixedString>()->At(c);
+                std::cout<< col1 <<std::endl;
+                auto col2 = block[2]->As<ColumnFixedString>()->At(c);
+                std::cout<< col2 <<std::endl;
+            }
         }
     );
 
@@ -616,7 +658,10 @@ void testNullabletype(Client& client) {
 
     client.Select("SELECT * FROM test_nullable", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col_id   = block[0]->As<ColumnNullable>();
+                std::cout<< col_id->Nested()->As<ColumnUInt64>()->At(c) <<std::endl;
+            }
         }
     );
 
@@ -649,9 +694,181 @@ void testMultitesArrayType(Client& client) {
 
     client.Select("SELECT * FROM test_multiarray", [](const Block& block)
         {
-            std::cout << PrettyPrintBlock{block} << std::endl;
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                // auto col0 = block[0]->As<ColumnMapT>()->GetAsColumn(c);
+            }
         }
     );
 
     client.Execute("DROP STREAM IF EXISTS test_multiarray");
+}
+
+void testLowCardinalityStringType(Client& client){
+    Block block;
+
+    client.Execute("DROP STREAM IF EXISTS test_low_cardinality");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_low_cardinality(ls1 low_cardinality(fixed_string(10)), ls2 low_cardinality(string)) ENGINE = Memory");
+
+
+    auto ls1 = std::make_shared<ColumnLowCardinalityT<ColumnFixedString>>(10);
+
+    auto ls2 = std::make_shared<ColumnLowCardinalityT<ColumnString>>();
+
+    ls1->Append("1");
+
+    ls2->Append("2");
+
+    block.AppendColumn("ls1", ls1);
+    block.AppendColumn("ls2", ls2);
+
+
+    client.Insert("test_low_cardinality", block);
+
+    client.Select("SELECT * FROM test_low_cardinality", [](const Block& block)
+        {
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col1 = block[0]->As<ColumnLowCardinalityT<ColumnFixedString>>()->At(c);
+                std::cout<< col1 <<std::endl;
+                auto col2 = block[1]->As<ColumnLowCardinalityT<ColumnString>>()->At(c);
+                std::cout<< col2 <<std::endl;
+            }
+        }
+    );
+
+    client.Execute("DROP STREAM IF EXISTS test_low_cardinality");
+}
+
+void testMapType(Client& client){
+
+    client.Execute("DROP STREAM IF EXISTS map_example");
+    client.Execute("CREATE STREAM IF NOT EXISTS map_example "
+                   "(id uint64, mp map(uint64, string)) ENGINE = Memory");
+    using Mapt = ColumnMapT<ColumnUInt64, ColumnString>;
+    {
+        Block block;
+
+        auto id = std::make_shared<ColumnUInt64>();
+        id->Append(1);
+
+        auto mp = std::make_shared<Mapt>(std::make_shared<ColumnUInt64>(), std::make_shared<ColumnString>());
+
+        std::map<uint64_t, std::string> row;
+        row[1] = "hello";
+        row[2] = "world";
+        mp->Append(row);
+
+        block.AppendColumn("id", id);
+        block.AppendColumn("mp", mp);
+
+        client.Insert("map_example", block);
+    }
+
+    client.Select("SELECT * FROM map_example", [](const Block& block)
+        {
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col1 = block[0]->As<ColumnUInt64>()->At(c);
+                std::cout<< col1 <<std::endl;
+
+                auto col2 = block[1]->As<ColumnMap>();
+                const auto tuples = col2->GetAsColumn(c)->As<ColumnTuple>();
+                for(size_t i = 0; i < tuples->Size(); i++){
+                    std::cout<< (*tuples)[0]->As<ColumnUInt64>()->At(i)<<std::endl;
+                    std::cout<< (*tuples)[1]->As<ColumnString>()->At(i)<<std::endl;
+                }
+
+            }
+
+        }
+    );
+
+    client.Execute("DROP STREAM IF EXISTS map_example");
+}
+
+void testTupleType(Client& client){
+
+    client.Execute("DROP STREAM IF EXISTS tuple_example");
+    client.Execute("CREATE STREAM IF NOT EXISTS tuple_example "
+                   "(id uint64, tup tuple(uint64, string)) ENGINE = Memory");
+
+    {
+        Block block;
+
+        auto id = std::make_shared<ColumnUInt64>();
+        id->Append(1);
+
+
+        auto tupls = std::make_shared<ColumnTuple>(std::vector<ColumnRef>{
+            std::make_shared<ColumnUInt64>(),
+            std::make_shared<ColumnString>()}
+        );
+
+        (*tupls)[0]->As<ColumnUInt64>()->Append(1);
+        (*tupls)[1]->As<ColumnString>()->Append("good");
+
+        block.AppendColumn("id", id);
+        block.AppendColumn("tup", tupls);
+
+
+        client.Insert("tuple_example", block);
+    }
+
+    client.Select("SELECT * FROM tuple_example", [](const Block& block)
+        {
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto col1 = block[0]->As<ColumnUInt64>()->At(c);
+                std::cout<< col1 <<std::endl;
+
+                auto col2 = block[1]->As<ColumnTuple>();
+                for(size_t i = 0; i < col2->Size(); i++){
+                    std::cout<< (*col2)[0]->As<ColumnUInt64>()->At(i)<<std::endl;
+                    std::cout<< (*col2)[1]->As<ColumnString>()->At(i)<<std::endl;
+                }
+
+            }
+        }
+    );
+
+    client.Execute("DROP STREAM IF EXISTS tuple_example");
+}
+
+void testNestedType(Client& client){
+
+    client.Execute("DROP STREAM IF EXISTS nested_example");
+    client.Execute("CREATE STREAM IF NOT EXISTS nested_example(n nested(id uint64, f float32)) ENGINE = Memory");
+
+
+    {
+        Block block;
+        auto nested_id = std::make_shared<ColumnArray>(std::make_shared<ColumnUInt64>());
+        auto nested_f = std::make_shared<ColumnArray>(std::make_shared<ColumnFloat32>());
+
+        std::vector<uint64_t> id_values{1, 2};
+        nested_id->As<ColumnArray>()->AppendAsColumn(std::make_shared<ColumnUInt64>(id_values));
+
+        std::vector<float> f_values{1.1, 2.2};
+        nested_f->As<ColumnArray>()->AppendAsColumn(std::make_shared<ColumnFloat32>(f_values));
+
+        block.AppendColumn("n.id", nested_id);
+        block.AppendColumn("n.f", nested_f);
+
+        client.Insert("nested_example", block);
+    }
+
+    client.Select("SELECT * FROM nested_example", [](const Block& block)
+        {
+            for (size_t c = 0; c < block.GetRowCount(); ++c) {
+                auto colid = block[0]->As<ColumnArray>()->GetAsColumn(c)->As<ColumnUInt64>();
+                for(size_t i= 0; i<colid->Size(); ++i){
+                    std::cout<< colid->At(i) <<std::endl;
+                }
+
+                auto colf = block[1]->As<ColumnArray>()->GetAsColumn(c)->As<ColumnFloat32>();
+                for(size_t i= 0; i<colf->Size(); ++i){
+                    std::cout<< colf->At(i) <<std::endl;
+                }
+            }
+        }
+    );
+
+    client.Execute("DROP STREAM IF EXISTS nested_example");
 }

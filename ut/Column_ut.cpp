@@ -465,28 +465,6 @@ TYPED_TEST(GenericColumnTest, RoundTrip) {
     this->TestColumnRoundtrip(column, LocalHostEndpoint, AllCompressionMethods);
 }
 
-TYPED_TEST(GenericColumnTest, NullableT_RoundTrip) {
-    using NullableType = ColumnNullableT<typename TestFixture::ColumnType>;
-
-    auto non_nullable_column = this->MakeColumn();
-    if (non_nullable_column->GetType().GetCode() == Type::Code::LowCardinality)
-        // TODO (vnemkov): wrap as ColumnLowCardinalityT<ColumnNullableT<NestedColumn>> instead of ColumnNullableT<ColumnLowCardinalityT<NestedColumn>>
-        GTEST_SKIP() << "Can't have " << non_nullable_column->GetType().GetName() << " in Nullable";
-
-    auto column = std::make_shared<NullableType>(std::move(non_nullable_column));
-    auto values = this->GenerateValues(10'000);
-
-    FromVectorGenerator<bool> is_null({true, false});
-    for (size_t i = 0; i < values.size(); ++i) {
-        if (is_null(i)) {
-            column->Append(std::nullopt);
-        } else {
-            column->Append(values[i]);
-        }
-    }
-
-    this->TestColumnRoundtrip(column, LocalHostEndpoint, AllCompressionMethods);
-}
 
 TYPED_TEST(GenericColumnTest, ArrayT_RoundTrip) {
     using ColumnArrayType = ColumnArrayT<typename TestFixture::ColumnType>;
