@@ -8,8 +8,8 @@ INCLUDE (openssl)
 INCLUDE (version)
 
 OPTION (BUILD_BENCHMARK "Build benchmark" OFF)
-OPTION (BUILD_SIMPLE_TEST "Build simple test" ON)
-OPTION (BUILD_EXAMPLES "Build examples" ON)
+OPTION (BUILD_TESTS "Build tests" OFF)
+OPTION (BUILD_EXAMPLES "Build examples" OFF)
 OPTION (BUILD_SHARED_LIBS "Build shared libs" OFF)
 OPTION (WITH_OPENSSL "Use OpenSSL for TLS connections" OFF)
 OPTION (WITH_SYSTEM_ABSEIL "Use system ABSEIL" OFF)
@@ -123,19 +123,18 @@ IF (BUILD_GTEST)
     )
 ENDIF (BUILD_GTEST)
 
-IF (BUILD_SIMPLE_TEST)
+IF (BUILD_TESTS)
     INCLUDE_DIRECTORIES (contrib/gtest/include contrib/gtest)
     SUBDIRS (
         tests/simple
     )
-ENDIF (BUILD_SIMPLE_TEST)
+ENDIF (BUILD_TESTS)
 
 IF (BUILD_EXAMPLES)
     SUBDIRS (
         examples
     )
 ENDIF (BUILD_EXAMPLES)
-
 
 if(DEBUG_DEPENDENCIES)
     function(print_target_properties target)
@@ -170,4 +169,3 @@ if(DEBUG_DEPENDENCIES)
     print_target_debug_info(lz4::lz4)
     print_target_debug_info(zstd::zstd)
 endif()
-
