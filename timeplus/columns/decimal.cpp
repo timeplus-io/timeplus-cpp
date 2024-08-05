@@ -10,12 +10,12 @@ inline bool getSignBit(const T & v)
     return v < static_cast<T>(0);
 }
 
-inline bool getSignBit(const Int128 & v)
-{
-   static constexpr Int128 zero {};
-   return v < zero;
-
-}
+// inline bool getSignBit(const Int128 & v)
+// {
+//    static constexpr Int128 zero {};
+//    return v < zero;
+//
+// }
 
 inline bool getSignBit(const Int256 & v)
 {

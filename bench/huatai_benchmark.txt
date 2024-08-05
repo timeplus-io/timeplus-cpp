@@ -1,0 +1,66 @@
+# 2024-08-05
+
+## Test Environment
+
+MacBook Pro 2019
+Processor: 2.4 GHz 8-Core Intel Core i9
+Memory: 32 GB 2667 MHz DDR4
+Storage: SSD
+
+3 node containers: timeplus/timeplusd:2.3.21
+
+## Result
+
+======================================================
+
+❯ ./bench/huatai-benchmark 8473 1000000 1000
+Iteration 1 : 19.1495 sec	52220.6 eps
+Iteration 2 : 19.5955 sec	51032.1 eps
+Iteration 3 : 19.7249 sec	50697.4 eps
+Iteration 4 : 20.274 sec	49324.3 eps
+Iteration 5 : 20.2513 sec	49379.5 eps
+Iteration 6 : 19.5583 sec	51129.3 eps
+Iteration 7 : 19.5076 sec	51262.2 eps
+Iteration 8 : 21.5218 sec	46464.6 eps
+Iteration 9 : 20.3463 sec	49149.1 eps
+Iteration 10 : 19.7551 sec	50619.8 eps
+
+Total events: 1000000
+Batch size: 1000
+Throughtput: min = 46464.6 max = 52220.6 avg = 50079.1
+
+======================================================
+
+❯ ./bench/huatai-benchmark 8473 1000000 2000
+Iteration 1 : 7.75332 sec	128977 eps
+Iteration 2 : 8.07327 sec	123866 eps
+Iteration 3 : 7.90288 sec	126536 eps
+Iteration 4 : 7.91504 sec	126342 eps
+Iteration 5 : 8.52065 sec	117362 eps
+Iteration 6 : 8.63079 sec	115864 eps
+Iteration 7 : 8.44751 sec	118378 eps
+Iteration 8 : 7.86597 sec	127130 eps
+Iteration 9 : 8.4521 sec	118314 eps
+Iteration 10 : 8.99222 sec	111207 eps
+
+Total events: 1000000
+Batch size: 2000
+Throughtput: min = 111207 max = 128977 avg = 121133
+
+======================================================
+
+❯ ./bench/huatai-benchmark 8473 1000000 4000
+Iteration 1 : 6.11046 sec	163654 eps
+Iteration 2 : 6.46465 sec	154687 eps
+Iteration 3 : 5.78479 sec	172867 eps
+Iteration 4 : 5.86657 sec	170457 eps
+Iteration 5 : 6.30212 sec	158677 eps
+Iteration 6 : 5.9998 sec	166672 eps
+Iteration 7 : 6.38713 sec	156565 eps
+Iteration 8 : 7.32823 sec	136459 eps
+Iteration 9 : 8.32127 sec	120174 eps
+Iteration 10 : 9.90585 sec	100950 eps
+
+Total events: 1000000
+Batch size: 4000
+Throughtput: min = 100950 max = 172867 avg = 146048
