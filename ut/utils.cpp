@@ -348,3 +348,57 @@ std::string ToString(const timeplus::UUID& v) {
     }
     return result;
 }
+
+uint64_t getCurrentTimeNanoseconds(int precision) {
+    auto now = std::chrono::high_resolution_clock::now();
+    auto duration = now.time_since_epoch();
+
+    uint64_t current_time_nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+
+    uint64_t divisor = 1;
+    for (int i = precision; i < 9; ++i) {
+        divisor *= 10;
+    }
+    return current_time_nanoseconds / divisor;
+}
+
+std::string formatTimestamp(uint64_t timestamp, int precision) {
+
+    auto seconds = timestamp;
+
+    uint64_t multip = 1;
+    
+    if(precision > 0){
+        for (int i = 0; i < precision; ++i) {
+            multip *=10;
+        }
+    }
+    seconds /= multip;
+
+    auto remaining_nanoseconds = timestamp % multip;
+
+    std::time_t time_t_seconds = static_cast<std::time_t>(seconds);
+    std::tm* tm_time = std::localtime(&time_t_seconds);
+    std::ostringstream oss;
+    oss << std::put_time(tm_time, "%Y-%m-%d %H:%M:%S");
+
+    if (precision > 0 && precision <= 9) {
+        oss << "." << std::setfill('0');
+        uint64_t fraction = remaining_nanoseconds;
+        oss << std::setw(precision) << std::setfill('0') << fraction;
+    }
+    oss<<" "<< std::fixed;
+
+    return oss.str();
+}
+
+
+std::string formatTimestamp(uint64_t timestamp){
+    std::time_t time_t_seconds = static_cast<std::time_t>(timestamp);
+    std::tm* tm_time = std::localtime(&time_t_seconds);
+    std::ostringstream oss;
+    oss << std::put_time(tm_time, "%Y-%m-%d");
+    oss<<" "<< std::fixed;
+
+    return oss.str();
+}

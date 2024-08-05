@@ -207,3 +207,9 @@ inline uint64_t versionNumber(
 uint64_t versionNumber(const timeplus::ServerInfo & server_info);
 
 std::string ToString(const timeplus::UUID& v);
+
+uint64_t getCurrentTimeNanoseconds(int precision);
+
+std::string formatTimestamp(uint64_t timestamp, int precision);
+
+std::string formatTimestamp(uint64_t timestamp);

@@ -13,7 +13,6 @@
 #if defined(_MSC_VER)
 #   pragma warning(disable : 4996)
 #endif
-using namespace std;
 
 using namespace timeplus;
 
@@ -24,7 +23,7 @@ void IntTypeExample(Client& client) {
 
     client.Execute("DROP STREAM IF EXISTS int_example");
     client.Execute("CREATE STREAM IF NOT EXISTS int_example "
-    "(id uint64, int8_val int8) ENGINE = Memory");
+    "(id uint64, int8_val int8)");
 
     Block block;
 
@@ -44,7 +43,7 @@ void IntTypeExample(Client& client) {
 
     client.Insert("int_example", block);
 
-    client.Select("SELECT * FROM int_example", [](const Block& block)
+    client.Select("SELECT id, int8_val FROM int_example", [](const Block& block)
     {
         for (size_t c = 0; c < block.GetRowCount(); ++c) {
             auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -65,7 +64,7 @@ void DecimalTypeExample(Client& client) {
 
     client.Execute("DROP STREAM IF EXISTS decimal_example");
     client.Execute("CREATE STREAM IF NOT EXISTS decimal_example "
-    "(id uint64, decimal_col decimal(9, 4)) ENGINE = Memory");
+    "(id uint64, decimal_col decimal(9, 4))");
 
     Block block;
 
@@ -83,7 +82,7 @@ void DecimalTypeExample(Client& client) {
 
     client.Insert("decimal_example", block);
 
-    client.Select("SELECT * FROM decimal_example", [](const Block& block)
+    client.Select("SELECT id, decimal_col FROM decimal_example", [](const Block& block)
     {
         for (size_t c = 0; c < block.GetRowCount(); ++c) {
             auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -103,7 +102,7 @@ void DecimalTypeExample(Client& client) {
 void FloatTypeExample(Client& client) {
     client.Execute("DROP STREAM IF EXISTS float_example");
     client.Execute("CREATE STREAM IF NOT EXISTS float_example "
-    "(id uint64, f32 float32) ENGINE = Memory");
+    "(id uint64, f32 float32)");
 
     {
         Block block;
@@ -126,7 +125,7 @@ void FloatTypeExample(Client& client) {
         client.Insert("float_example", block);
     }
 
-    client.Select("SELECT * FROM float_example", [](const Block& block)
+    client.Select("SELECT id, f32 FROM float_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -146,7 +145,7 @@ void FloatTypeExample(Client& client) {
 void UUIDTypeExample(Client& client) {
     client.Execute("DROP STREAM IF EXISTS uuid_example");
     client.Execute("CREATE STREAM IF NOT EXISTS uuid_example "
-    "(id uint64, uuid_col uuid) ENGINE = Memory");
+    "(id uint64, uuid_col uuid)");
 
     {
         Block block;
@@ -169,7 +168,7 @@ void UUIDTypeExample(Client& client) {
         client.Insert("uuid_example", block);
     }
 
-    client.Select("SELECT * FROM uuid_example", [](const Block& block)
+    client.Select("SELECT id, uuid_col FROM uuid_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -189,7 +188,7 @@ void UUIDTypeExample(Client& client) {
 void StringTypeExample(Client& client) {
     client.Execute("DROP STREAM IF EXISTS string_example");
     client.Execute("CREATE STREAM IF NOT EXISTS string_example "
-    "(id uint64, s_col string, fs_col fixed_string(10)) ENGINE = Memory");
+    "(id uint64, s_col string, fs_col fixed_string(10))");
 
     {
         Block block;
@@ -214,7 +213,7 @@ void StringTypeExample(Client& client) {
         client.Insert("string_example", block);
     }
 
-    client.Select("SELECT * FROM string_example", [](const Block& block)
+    client.Select("SELECT id, s_col, fs_col FROM string_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -236,7 +235,7 @@ void StringTypeExample(Client& client) {
 void EnumTypeExample(Client& client) {
 
     client.Execute("DROP STREAM IF EXISTS enum_example");
-    client.Execute("CREATE STREAM IF NOT EXISTS enum_example (id uint64, e1 enum8('Min' = -128, 'Max' = 127), e2 enum16('Mn' = -32768, 'Mx' = 32767)) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS enum_example (id uint64, e1 enum8('Min' = -128, 'Max' = 127), e2 enum16('Mn' = -32768, 'Mx' = 32767))");
 
     {
         Block block;
@@ -280,7 +279,7 @@ void EnumTypeExample(Client& client) {
 /// @param client 
 void IPTypeExample(Client & client) {
     client.Execute("DROP STREAM IF EXISTS ip_example");
-    client.Execute("CREATE STREAM IF NOT EXISTS ip_example (id uint64, v4 ipv4, v6 ipv6) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS ip_example (id uint64, v4 ipv4, v6 ipv6)");
 
     {
         Block block;
@@ -329,7 +328,7 @@ void IPTypeExample(Client & client) {
 void DateTimeTypeExample(Client& client){
 
     client.Execute("DROP STREAM IF EXISTS datetime_example");
-    client.Execute("CREATE STREAM IF NOT EXISTS datetime_example (id uint64, d date, dt datetime,) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS datetime_example (id uint64, d date, dt datetime, dt64 datetime64(3,'Asia/Shanghai'))");
 
     {
         Block block;
@@ -337,6 +336,7 @@ void DateTimeTypeExample(Client& client){
         auto id = std::make_shared<ColumnUInt64>();
         auto d = std::make_shared<ColumnDate>();
         auto dt = std::make_shared<ColumnDateTime>();
+        auto dt64 = std::make_shared<ColumnDateTime64>(3);
 
         id->Append(1);
         id->Append(2);
@@ -347,14 +347,21 @@ void DateTimeTypeExample(Client& client){
         dt->Append(0);
         dt->Append(std::time(nullptr));
 
+        auto now = getCurrentTimeNanoseconds(3);
+
+        dt64->Append(0);
+        dt64->Append(now);
+
+
         block.AppendColumn("id", id);
         block.AppendColumn("d", d);
         block.AppendColumn("dt", dt);
+        block.AppendColumn("dt64", dt64);
 
         client.Insert("datetime_example", block);
     }
 
-    client.Select("SELECT * FROM datetime_example", [&](const Block& block)
+    client.Select("SELECT id, d, dt, dt64 FROM datetime_example", [&](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -363,6 +370,9 @@ void DateTimeTypeExample(Client& client){
                 std::cout<< col1 <<std::endl;
                 auto col2 = block[2]->As<ColumnDateTime>()->At(c);
                 std::cout<< col2 <<std::endl;
+                auto col3 = block[3]->As<ColumnDateTime64>();
+                auto t = col3->At(c);
+                std::cout<< formatTimestamp(t, 3) << col3->Timezone() << std::endl;
             }
         }
     );

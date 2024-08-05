@@ -3,6 +3,8 @@
 #include <timeplus/types/type_parser.h>
 #include <timeplus/base/socket.h>
 
+#include <ut/utils.h>
+
 #include <stdexcept>
 #include <iostream>
 #include <cmath>
@@ -20,11 +22,15 @@ void createAndSelect(Client& client) {
     client.Execute("CREATE STREAM IF NOT EXISTS default.numbers (id uint64, name string)");
 
     /// Select values inserted in the previous step.
-    client.Select("SELECT id, name FROM default.numbers", [] (const Block& block)
+    client.Select("SELECT id, name, _tp_time FROM default.numbers", [] (const Block& block)
         {
             for (size_t i = 0; i < block.GetRowCount(); ++i) {
                 std::cout << block[0]->As<ColumnUInt64>()->At(i) << " "
                           << block[1]->As<ColumnString>()->At(i) << "\n";
+                auto colt = block[2]->As<ColumnDateTime64>();
+                std::time_t t = colt->At(i);
+                std::cout << formatTimestamp(t, 3);
+                std::cout << colt->Timezone() << std::endl;
             }
         }
     );
