@@ -349,7 +349,13 @@ std::string ToString(const timeplus::UUID& v) {
     return result;
 }
 
-uint64_t getCurrentTimeNanoseconds(int precision) {
+// Return the current time unit based on the specified precision.When precision is set to 0, return seconds.
+// eg: for 123456789 nanoseconds:
+// if precision = 3 => return 123 (milliseconds)
+// if precision = 6 => return 123456 (microseconds)
+// if precision = 9 => return 123456789 (nanoseconds)
+
+uint64_t getCurrentTimeByPrecision(int precision) {
     auto now = std::chrono::high_resolution_clock::now();
     auto duration = now.time_since_epoch();
 

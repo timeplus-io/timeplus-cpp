@@ -347,7 +347,7 @@ void DateTimeTypeExample(Client& client){
         dt->Append(0);
         dt->Append(std::time(nullptr));
 
-        auto now = getCurrentTimeNanoseconds(3);
+        auto now = getCurrentTimeByPrecision(3);
 
         dt64->Append(0);
         dt64->Append(now);

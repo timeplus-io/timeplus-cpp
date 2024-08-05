@@ -94,7 +94,7 @@ void testDateTimeType(Client& client) {
     auto dt32 = std::make_shared<ColumnDateTime>();
     auto dt64 = std::make_shared<ColumnDateTime64>(6);
 
-    auto now = getCurrentTimeNanoseconds(6);
+    auto now = getCurrentTimeByPrecision(6);
 
     d->Append(std::time(nullptr));
     d32->Append(std::time(nullptr));
