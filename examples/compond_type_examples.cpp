@@ -24,7 +24,7 @@ using namespace timeplus;
 void ArrayTypeExample(Client& client){
     client.Execute("DROP STREAM IF EXISTS array_example");
     client.Execute("CREATE STREAM IF NOT EXISTS array_example "
-                   "(id uint64, arr_int128 array(int128)) ENGINE = Memory");
+                   "(id uint64, arr_int128 array(int128))");
 
     {
         Block block;
@@ -44,7 +44,7 @@ void ArrayTypeExample(Client& client){
         client.Insert("array_example", block);
     }
 
-    client.Select("SELECT * FROM array_example", [](const Block& block)
+    client.Select("SELECT id, arr_int128 FROM array_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col0 = block[0]->As<ColumnUInt64>()->At(c);
@@ -68,14 +68,14 @@ void ArrayTypeExample(Client& client){
 void SimpleAggregateFunctionTypeExample(Client& client){
     client.Execute("DROP STREAM IF EXISTS saf_example");
     client.Execute("CREATE STREAM IF NOT EXISTS saf_example "
-                   "(saf simple_aggregate_function(sum, uint64)) ENGINE = Memory");
+                   "(saf simple_aggregate_function(sum, uint64))");
 
     {
         constexpr size_t EXPECTED_ROWS = 10;
         client->Execute("INSERT INTO saf_example (saf) VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)");
     }
 
-    client->Select("Select * FROM saf_example", [&total_rows](const Block & block) {
+    client->Select("Select saf FROM saf_example", [&total_rows](const Block & block) {
         auto col = block[0]->As<ColumnUInt64>();
         for (size_t r = 0; r < col->Size(); ++r) {
             std::cout<< r <<std::endl;
@@ -91,7 +91,7 @@ void SimpleAggregateFunctionTypeExample(Client& client){
 /// @param client 
 void NullableTypeExample(Client& client){
    client.Execute("DROP STREAM IF EXISTS nullable_example");
-    client.Execute("CREATE STREAM IF NOT EXISTS nullable_example (id nullable(uint64)) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS nullable_example (id nullable(uint64))");
 
     {
         Block block;
@@ -110,7 +110,7 @@ void NullableTypeExample(Client& client){
 
         client.Insert("nullable_example", block);
     }
-    client.Select("SELECT * FROM nullable_example", [](const Block& block)
+    client.Select("SELECT id FROM nullable_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col_id = block[0]->As<ColumnNullable>();
@@ -130,7 +130,7 @@ void MapTypeExample(Client& client){
 
     client.Execute("DROP STREAM IF EXISTS map_example");
     client.Execute("CREATE STREAM IF NOT EXISTS map_example "
-                   "(id uint64, mp map(uint64, string)) ENGINE = Memory");
+                   "(id uint64, mp map(uint64, string))");
 
     {
         Block block;
@@ -152,7 +152,7 @@ void MapTypeExample(Client& client){
         client.Insert("map_example", block);
     }
 
-    client.Select("SELECT * FROM map_example", [](const Block& block)
+    client.Select("SELECT id, mp FROM map_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col1 = block[0]->As<ColumnUInt64>()->At(c);
@@ -178,7 +178,7 @@ void TupleTypeExample(Client& client){
 
     client.Execute("DROP STREAM IF EXISTS tuple_example");
     client.Execute("CREATE STREAM IF NOT EXISTS tuple_example "
-                   "(id uint64, tup tuple(uint64, string)) ENGINE = Memory");
+                   "(id uint64, tup tuple(uint64, string))");
 
     {
         Block block;
@@ -201,7 +201,7 @@ void TupleTypeExample(Client& client){
         client.Insert("tuple_example", block);
     }
 
-    client.Select("SELECT * FROM tuple_example", [](const Block& block)
+    client.Select("SELECT id, tup FROM tuple_example", [](const Block& block)
         {
                 for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto col1 = block[0]->As<ColumnUInt64>()->At(c);
@@ -225,7 +225,7 @@ void TupleTypeExample(Client& client){
 void NestedTypeExample(Client& client){
 
     client.Execute("DROP STREAM IF EXISTS nested_example");
-    client.Execute("CREATE STREAM IF NOT EXISTS nested_example(n nested(id uint64, f float32)) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS nested_example(n nested(id uint64, f float32))");
 
 
     {
@@ -245,7 +245,7 @@ void NestedTypeExample(Client& client){
         client.Insert("nested_example", block);
     }
 
-    client.Select("SELECT * FROM nested_example", [](const Block& block)
+    client.Select("SELECT n.id, n.f FROM nested_example", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
                 auto colid = block[0]->As<ColumnArray>()->GetAsColumn(c)->As<ColumnUInt64>();

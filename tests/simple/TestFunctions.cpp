@@ -87,17 +87,20 @@ void testDateTimeType(Client& client) {
     Block b;
 
     client.Execute("DROP STREAM IF EXISTS test_datetime");
-    client.Execute("CREATE STREAM IF NOT EXISTS test_datetime (d date, d32 date32, dt32 datetime, dt64 datetime64) ENGINE = Memory");
+    client.Execute("CREATE STREAM IF NOT EXISTS test_datetime (d date, d32 date32, dt32 datetime, dt64 datetime64(6, 'Asia/Shanghai')) ENGINE = Memory");
     
     auto d = std::make_shared<ColumnDate>();
     auto d32 = std::make_shared<ColumnDate32>();
     auto dt32 = std::make_shared<ColumnDateTime>();
-    auto dt64 = std::make_shared<ColumnDateTime64>();
+    auto dt64 = std::make_shared<ColumnDateTime64>(6);
+
+    auto now = getCurrentTimeByPrecision(6);
 
     d->Append(std::time(nullptr));
     d32->Append(std::time(nullptr));
     dt32->Append(std::time(nullptr));
-    dt64->Append(std::time(nullptr) * 1000000 + 123456);
+    dt64->Append(now);
+
 
     d->Append(0);
     d32->Append(0);
@@ -107,7 +110,7 @@ void testDateTimeType(Client& client) {
     d->Append(100);
     d32->Append(4294967295);
     dt32->Append(4294967295);
-    dt64->Append(9223372036854775807);
+    dt64->Append(95178239999999);
 
     b.AppendColumn("d", d);
     b.AppendColumn("d32", d32);
@@ -119,21 +122,25 @@ void testDateTimeType(Client& client) {
     client.Select("SELECT d, d32, dt32, dt64 FROM test_datetime", [](const Block& block)
         {
                 for (size_t c = 0; c < block.GetRowCount(); ++c) {
-
-                    auto print_value_date = [&](const auto& col){
+                    auto print_value = [&](const auto& col){
                         std::time_t t = col->At(c);
-                        std::cerr << std::asctime(std::localtime(&t)) << std::endl;
+                        std::cerr << formatTimestamp(t) << std::endl;
                     };
-                    auto print_value = [&](const auto& col) {
+                    auto print_value_dt = [&](const auto& col) {
                         std::time_t t = col->At(c);
-                        std::cerr << std::asctime(std::localtime(&t));
+                        std::cerr << formatTimestamp(t, 0);
+                        std::cerr << col->Timezone() << std::endl;
+                    };
+                    auto print_value_dt64 = [&](const auto& col) {
+                        std::time_t t = col->At(c);
+                        std::cerr << formatTimestamp(t, 6);
                         std::cerr << col->Timezone() << std::endl;
                     };
 
-                    print_value_date(block[0]->As<ColumnDate>());
-                    print_value_date(block[1]->As<ColumnDate32>());
-                    print_value(block[2]->As<ColumnDateTime>());
-                    print_value(block[3]->As<ColumnDateTime64>());
+                    print_value(block[0]->As<ColumnDate>());
+                    print_value(block[1]->As<ColumnDate32>());
+                    print_value_dt(block[2]->As<ColumnDateTime>());
+                    print_value_dt64(block[3]->As<ColumnDateTime64>());
 
             }
         }
@@ -229,11 +236,11 @@ void testDecimalType(Client& client) {
     client.Select("SELECT * FROM test_decimal", [](const Block& block)
         {
             for (size_t c = 0; c < block.GetRowCount(); ++c) {
-            auto col0 = block[0]->As<ColumnUInt64>()->At(c);
-            std::cout<< col0 <<std::endl;
-            auto col1 = block[1]->As<ColumnDecimal>()->At(c);
-            std::cout<< col1 <<std::endl;
-        }
+                auto col0 = block[0]->As<ColumnUInt64>()->At(c);
+                std::cout<< col0 <<std::endl;
+                auto col1 = block[1]->As<ColumnDecimal>()->At(c);
+                std::cout<< col1 <<std::endl;
+            }       
         }
     );
 

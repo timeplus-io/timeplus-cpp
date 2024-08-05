@@ -270,10 +270,6 @@ ItemView ColumnDateTime::GetItem(size_t index) const {
     return ItemView(Type::DateTime, data_->GetItem(index));
 }
 
-ColumnDateTime64::ColumnDateTime64()
-    : ColumnDateTime64(Type::CreateDateTime64(3ul), std::make_shared<ColumnDecimal>(18ul, 3ul))
-{}
-
 ColumnDateTime64::ColumnDateTime64(size_t precision)
     : ColumnDateTime64(Type::CreateDateTime64(precision), std::make_shared<ColumnDecimal>(18ul, precision))
 {}
