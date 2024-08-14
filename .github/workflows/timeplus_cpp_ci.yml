@@ -58,7 +58,6 @@ jobs:
         - dependencies: dependencies_SYSTEM
           compiler: compiler_SYSTEM
           os: ubuntu-22.04
-          timeplusd: 2.3.22
           COMPILER_INSTALL: gcc g++
           C_COMPILER: gcc
           CXX_COMPILER: g++
