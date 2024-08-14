@@ -59,7 +59,6 @@ jobs:
         - dependencies: dependencies_SYSTEM
           compiler: compiler_SYSTEM
           os: ubuntu-22.04
-          timeplusd: ${{env.DEFAULT_TIMEPLUSD_VERSION}}
           COMPILER_INSTALL: gcc g++
           C_COMPILER: gcc
           CXX_COMPILER: g++
@@ -116,8 +115,8 @@ jobs:
 
       - name: Test - Start timeplusd server in background
         run: |
-          docker pull timeplus/timeplusd:${{matrix.timeplusd}}
-          docker run -d --name timeplusd -p 8463:8463 timeplus/timeplusd:${{matrix.timeplusd}}
+          docker pull timeplus/timeplusd:${{matrix.timeplusd || ${{env.DEFAULT_TIMEPLUSD_VERSION}} }}
+          docker run -d --name timeplusd -p 8463:8463 timeplus/timeplusd:${{matrix.timeplusd || ${{env.DEFAULT_TIMEPLUSD_VERSION}} }}
           docker ps -a
           docker stats -a --no-stream
           ## Check and wait until CH is ready to accept connections
