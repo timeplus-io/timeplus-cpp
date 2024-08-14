@@ -32,11 +32,6 @@ jobs:
           C_COMPILER: clang-10
           CXX_COMPILER: clang++-10
 
-        - compiler: clang-18
-          COMPILER_INSTALL: clang-18 libc++-dev
-          C_COMPILER: clang-18
-          CXX_COMPILER: clang++-18
-
         - compiler: gcc-7
           COMPILER_INSTALL: gcc-7 g++-7
           C_COMPILER: gcc-7
@@ -58,6 +53,7 @@ jobs:
         - dependencies: dependencies_SYSTEM
           compiler: compiler_SYSTEM
           os: ubuntu-22.04
+          timeplusd: 2.3.22
           COMPILER_INSTALL: gcc g++
           C_COMPILER: gcc
           CXX_COMPILER: g++
