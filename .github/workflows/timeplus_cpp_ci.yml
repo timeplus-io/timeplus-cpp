@@ -7,16 +7,16 @@ on:
       - reopened
       - opened
       - ready_for_review
+      - closed
     branches:
       - master
-    paths-ignore:
-      - '**.md'
 
 env:
   BUILD_TYPE: Release
 
 jobs:
   build:
+    if: ${{ github.event.action != 'closed' || github.event.pull_request.merged == true }}
     strategy:
       fail-fast: false
       matrix:
