@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
-        compiler: [clang-10, gcc-7, gcc-8, gcc-9]
+        compiler: [clang-10, clang-18, gcc-7, gcc-8, gcc-9]
         ssl: [ssl_ON, ssl_OFF]
         dependencies: [dependencies_BUILT_IN]
         timeplusd: [2.3.22]
