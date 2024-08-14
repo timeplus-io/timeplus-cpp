@@ -14,6 +14,7 @@ on:
 
 env:
   BUILD_TYPE: Release
+  DEFAULT_TIMEPLUSD_VERSION: 2.3.22
 
 jobs:
   build:
@@ -21,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
-        compiler: [clang-10, clang-18, gcc-7, gcc-8, gcc-9]
+        compiler: [clang-10, gcc-7, gcc-8, gcc-9]
         ssl: [ssl_ON, ssl_OFF]
         dependencies: [dependencies_BUILT_IN]
         timeplusd: [2.3.22]
@@ -58,6 +59,7 @@ jobs:
         - dependencies: dependencies_SYSTEM
           compiler: compiler_SYSTEM
           os: ubuntu-22.04
+          timeplusd: ${{env.DEFAULT_TIMEPLUSD_VERSION}}
           COMPILER_INSTALL: gcc g++
           C_COMPILER: gcc
           CXX_COMPILER: g++
@@ -114,8 +116,8 @@ jobs:
 
       - name: Test - Start timeplusd server in background
         run: |
-          docker pull timeplus/timeplusd:${{matrix.timeplusd || 'latest'}}
-          docker run -d --name timeplusd -p 8463:8463 timeplus/timeplusd:${{matrix.timeplusd || 'latest'}}
+          docker pull timeplus/timeplusd:${{matrix.timeplusd}}
+          docker run -d --name timeplusd -p 8463:8463 timeplus/timeplusd:${{matrix.timeplusd}}
           docker ps -a
           docker stats -a --no-stream
           ## Check and wait until CH is ready to accept connections
