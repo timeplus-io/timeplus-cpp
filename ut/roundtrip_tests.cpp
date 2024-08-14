@@ -130,9 +130,6 @@ TEST_P(RoundtripCase, MapUUID_Tuple_String_Array_Uint64) {
 #ifdef GEOMETRIC_TESTS_ENABLED
 
 TEST_P(RoundtripCase, Point) {
-
-    #ifdef GEOMETRIC_TESTS_ENABLED
-
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -147,9 +144,6 @@ TEST_P(RoundtripCase, Point) {
 }
 
 TEST_P(RoundtripCase, Ring) {
-
-    #ifdef GEOMETRIC_TESTS_ENABLED
-
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
@@ -170,9 +164,6 @@ TEST_P(RoundtripCase, Ring) {
 }
 
 TEST_P(RoundtripCase, Polygon) {
-    
-    #ifdef GEOMETRIC_TESTS_ENABLED
-
     if (GetSettingValue("allow_experimental_geo_types") != "1") {
        GTEST_SKIP() << "Test is skipped because experimental geo types are not allowed. Set setting allow_experimental_geo_types = 1 in order to allow it." << std::endl;
     }
