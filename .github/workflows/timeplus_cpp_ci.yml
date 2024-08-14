@@ -32,6 +32,11 @@ jobs:
           C_COMPILER: clang-10
           CXX_COMPILER: clang++-10
 
+        - compiler: clang-18
+          LLVM_INSTALL: 18
+          C_COMPILER: clang-18
+          CXX_COMPILER: clang++-18
+
         - compiler: gcc-7
           COMPILER_INSTALL: gcc-7 g++-7
           C_COMPILER: gcc-7
@@ -78,6 +83,13 @@ jobs:
             ${{matrix.COMPILER_INSTALL}} \
             ${{matrix.DEPENDENCIES_INSTALL}}
 
+      - name: Install LLVM
+        if: ${{matrix.LLVM_INSTALL != ""}}
+        run: |
+          wget https://apt.llvm.org/llvm.sh && \
+          chmod u+x llvm.sh \
+          sudo ./llvm.sh ${{matrix.LLVM_INSTALL}}
+
       - name: Install dependencies - Docker
         run: |
           sudo apt remove -y docker docker-engine docker.io containerd runc
@@ -114,8 +126,8 @@ jobs:
           docker run -d --name timeplusd -p 8463:8463 timeplus/timeplusd:${{matrix.timeplusd}}
           docker ps -a
           docker stats -a --no-stream
-          ## Check and wait until CH is ready to accept connections
-          docker exec timeplusd bash -c 'for i in {1..10}; do echo checking if timeplusd server is started  attempt \#$i; if ( grep -q "<Information> Application: Ready for connections." /var/log/timeplusd-server/timeplusd-server.log ); then echo seems like timeplusd server is started; exit 0; fi; sleep 1; done; exit -1'
+          ## Check and wait until timeplusd is ready to accept connections
+          docker exec timeplusd bash -c 'for i in {1..60}; do echo checking if timeplusd server is started  attempt \#$i; if ( grep -q "<Information> Application: Ready for connections." /var/log/timeplusd-server/timeplusd-server.log ); then echo seems like timeplusd server is started; exit 0; fi; sleep 1; done; exit -1'
 
       - name: Unit test
         working-directory: ${{github.workspace}}/build/ut
