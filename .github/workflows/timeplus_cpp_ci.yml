@@ -87,7 +87,7 @@ jobs:
         if: ${{ matrix.LLVM_INSTALL != '' }}
         run: |
           wget https://apt.llvm.org/llvm.sh && \
-          chmod u+x llvm.sh \
+          chmod u+x llvm.sh && \
           sudo ./llvm.sh ${{matrix.LLVM_INSTALL}}
 
       - name: Install dependencies - Docker
