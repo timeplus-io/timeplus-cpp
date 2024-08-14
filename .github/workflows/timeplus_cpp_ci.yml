@@ -84,7 +84,7 @@ jobs:
             ${{matrix.DEPENDENCIES_INSTALL}}
 
       - name: Install LLVM
-        if: ${{matrix.LLVM_INSTALL != ""}}
+        if: ${{ matrix.LLVM_INSTALL != '' }}
         run: |
           wget https://apt.llvm.org/llvm.sh && \
           chmod u+x llvm.sh \
