@@ -39,7 +39,7 @@ Optional dependencies:
 ```sh
 $ mkdir build .
 $ cd build
-$ cmake -D CMAKE_BUILD_TYPE=Release ..
+$ cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_TESTS=ON -D BUILD_EXAMPLES=ON -D BUILD_GTEST=ON ..
 $ make
 ```
 

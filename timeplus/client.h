@@ -252,8 +252,9 @@ public:
     void Select(const Query& query);
 
     /// Intends for insert block of data into a table \p table_name.
-    void Insert(const std::string& table_name, const Block& block);
-    void Insert(const std::string& table_name, const std::string& query_id, const Block& block);
+    /// Insertion will be idempotent when `idempotent_id` is not empty.
+    void Insert(const std::string& table_name, const Block& block, const std::string & idempotent_id = "");
+    void Insert(const std::string& table_name, const std::string & query_id, const Block& block, const std::string & idempotent_id = "");
 
     /// Ping server for aliveness.
     void Ping();

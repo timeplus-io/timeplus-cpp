@@ -37,6 +37,14 @@ class CompressionError : public Error {
     using Error::Error;
 };
 
+class ConnectionError : public Error {
+    using Error::Error;
+};
+
+class TimeoutError : public Error {
+    using Error::Error;
+};
+
 // Exception received from server.
 class ServerException : public Error {
 public:

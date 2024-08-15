@@ -72,6 +72,7 @@ private:
 
 // using Int128 = absl::int128;
 using Int64 = int64_t;
+using UInt64 = uint64_t;
 
 using Int128 = wide::integer<128, signed>;
 using UInt128 = wide::integer<128, unsigned>;

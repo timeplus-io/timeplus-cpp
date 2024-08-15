@@ -2,10 +2,11 @@ Language: Cpp
 BasedOnStyle: Google
 
 AccessModifierOffset: -4
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: false
 AllowShortFunctionsOnASingleLine: InlineOnly
 ColumnLimit: 140
 DerivePointerAlignment: false
 FixNamespaceComments: true
+IncludeBlocks: Preserve
 IndentWidth: 4
 PointerAlignment: Left
