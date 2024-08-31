@@ -1,6 +1,6 @@
-Timeplus C++ client 
+C++ client for [Timeplus Enterprise](https://www.timeplus.com/) and [Timeplus Proton](https://github.com/timeplus-io/proton). The code is based on [clickhouse-cpp](https://github.com/ClickHouse/clickhouse-cpp/), with data type changes and other enhancements.
 
-C++ client for [Timeplus](https://www.timeplus.com/).
+You can run DDL, streaming SQL, or data ingestion with this C++ client.
 
 ## Supported data types
 
