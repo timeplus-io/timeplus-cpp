@@ -1,6 +1,6 @@
 C++ client for [Timeplus Enterprise](https://www.timeplus.com/) and [Timeplus Proton](https://github.com/timeplus-io/proton). The code is based on [clickhouse-cpp](https://github.com/ClickHouse/clickhouse-cpp/), with data type changes and other enhancements.
 
-You can run DDL, streaming SQL, or data ingestion with this C++ client.
+You can run DDL, streaming queries, or data ingestion with this C++ client. Both sync and async inserts are supported, with idempotent_id support.
 
 ## Supported data types
 
@@ -47,11 +47,7 @@ $ make
 ## Example application build with timeplus-cpp
 
 ### sample code
-
-
-```
-timeplus-cpp/examples/main.cpp
-``` 
+Please check the examples in https://github.com/timeplus-io/timeplus-cpp/tree/master/examples folder.
 
 ```cpp
 #include <iostream>
@@ -80,23 +76,49 @@ void createAndSelect(Client& client) {
 
 void insertStream(Client& client) {
 
+    TimeplusConfig config;
+    config.client_options.endpoints.push_back({"localhost", 8463});
+    config.max_connections = 3;
+    config.max_retries = 10;
+    config.wait_time_before_retry_ms = 1000;
+    config.task_executors = 1;
 
-    /// Insert some values.
-    {
-        Block block;
+    Timeplus tp{std::move(config)};
 
-        auto id = std::make_shared<ColumnUInt64>();
-        id->Append(1);
-        id->Append(7);
+    auto block = std::make_shared<Block>();
 
-        auto name = std::make_shared<ColumnString>();
-        name->Append("one");
-        name->Append("seven");
+    auto col_i = std::make_shared<ColumnUInt64>();
+    col_i->Append(5);
+    col_i->Append(7);
+    block->AppendColumn("i", col_i);
 
-        block.AppendColumn("id"  , id);
-        block.AppendColumn("name", name);
+    auto col_v = std::make_shared<ColumnString>();
+    col_v->Append("five");
+    col_v->Append("seven");
+    block->AppendColumn("v", col_v);
 
-        client.Insert("default.numbers", block);
+    /// Use synchronous insert API.
+    auto insert_result = tp.Insert(TABLE_NAME, block, /*idempotent_id=*/"block-1");
+    if (insert_result.ok()) {
+        std::cout << "Synchronous insert suceeded." << std::endl;
+    } else {
+        std::cout << "Synchronous insert failed: code=" << insert_result.err_code << " msg=" << insert_result.err_msg << std::endl;
+    }
+
+    /// Use asynchrounous insert API.
+    std::atomic<bool> done = false;
+    tp.InsertAsync(TABLE_NAME, block, /*idempotent_id=*/"block-2", [&done](const BaseResult& result) {
+        const auto& async_insert_result = static_cast<const InsertResult&>(result);
+        if (async_insert_result.ok()) {
+            std::cout << "Asynchronous insert suceeded." << std::endl;
+        } else {
+            std::cout << "Asynchronous insert failed: code=" << async_insert_result.err_code << " msg=" << async_insert_result.err_msg
+                      << std::endl;
+        }
+        done = true;
+    });
+
+    while (!done) {
     }
 }
 
