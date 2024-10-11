@@ -15,6 +15,7 @@
 #include <timeplus/columns/string.h>
 #include <timeplus/columns/tuple.h>
 #include <timeplus/columns/uuid.h>
+#include <timeplus/columns/nullable.h>
 
 #include <timeplus/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 
@@ -52,10 +53,14 @@ std::ostream& operator<<(std::ostream & ostr, const DateTimeValue & time) {
 template <typename ColumnType, typename AsType = decltype(std::declval<ColumnType>().At(0)) >
 bool doPrintValue(const ColumnRef & c, const size_t row, std::ostream & ostr) {
     if (const auto & casted_c = c->As<ColumnType>()) {
-        if constexpr (is_container_v<std::decay_t<AsType>>
-                && !std::is_same_v<ColumnType, ColumnString>
-                && !std::is_same_v<ColumnType, ColumnFixedString>) {
+        if constexpr (is_container_v<std::decay_t<AsType>> && !std::is_same_v<ColumnType, ColumnString> &&
+                      !std::is_same_v<ColumnType, ColumnFixedString> && !std::is_same_v<ColumnType, ColumnLowCardinalityT<ColumnString>> &&
+                      !std::is_same_v<ColumnType, ColumnLowCardinalityT<ColumnFixedString>>) {
             ostr << PrintContainer{static_cast<AsType>(casted_c->At(row))};
+        } else if constexpr (std::is_same_v<ColumnType, ColumnFixedString>) {
+            ostr << static_cast<std::string_view>(casted_c->At(row).data()).substr(0, casted_c->FixedSize());
+        } else if constexpr (std::is_same_v<ColumnType, ColumnLowCardinalityT<ColumnFixedString>>) {
+            ostr << static_cast<std::string_view>(casted_c->At(row).data()).substr(0, casted_c->At(row).size());
         } else {
             ostr << static_cast<AsType>(casted_c->At(row));
         }
@@ -111,15 +116,16 @@ bool doPrintValue<ColumnArray, void>(const ColumnRef & c, const size_t row, std:
 template <>
 bool doPrintValue<ColumnTuple, void>(const ColumnRef & c, const size_t row, std::ostream & ostr) {
     if (const auto & tupple_col = c->As<ColumnTuple>()) {
-        ostr << "(";
+        std::stringstream sstr;
+        sstr << "(";
         for (size_t i = 0; i < tupple_col->TupleSize(); ++i) {
             const auto & nested_col = (*tupple_col)[i];
-            printColumnValue(nested_col, row, ostr);
-
+            printColumnValue(nested_col, row, sstr);
             if (i < tupple_col->TupleSize() - 1)
-                ostr << ", ";
+                sstr << ", ";
         }
-        ostr << ")";
+        sstr << ")";
+        ostr << sstr.str();
         return true;
     }
     return false;
@@ -143,7 +149,6 @@ bool doPrintValue<ColumnMap, void>(const ColumnRef & c, const size_t row, std::o
         const auto tuples = map_col->GetAsColumn(row);
         for (size_t i = 0; i < tuples->Size(); ++i) {
             printColumnValue(tuples, i, sstr);
-
             if (i < tuples->Size() - 1)
                 sstr << ", ";
         }
@@ -155,8 +160,20 @@ bool doPrintValue<ColumnMap, void>(const ColumnRef & c, const size_t row, std::o
     return false;
 }
 
-std::ostream & printColumnValue(const ColumnRef& c, const size_t row, std::ostream & ostr) {
+template <>
+bool doPrintValue<ColumnNullable, void>(const ColumnRef& c, const size_t row, std::ostream& ostr) {
+    if (const auto& col = c->As<ColumnNullable>()) {
+        if (col->IsNull(row)) {
+            ostr << "null";
+        } else {
+            printColumnValue(col->Nested(), row, ostr);
+        }
+        return true;
+    }
+    return false;
+}
 
+std::ostream & printColumnValue(const ColumnRef& c, const size_t row, std::ostream & ostr) {
     const auto r = false
         || doPrintValue<ColumnString>(c, row, ostr)
         || doPrintValue<ColumnFixedString>(c, row, ostr)
@@ -168,6 +185,8 @@ std::ostream & printColumnValue(const ColumnRef& c, const size_t row, std::ostre
         || doPrintValue<ColumnInt32>(c, row, ostr)
         || doPrintValue<ColumnInt16>(c, row, ostr)
         || doPrintValue<ColumnInt64>(c, row, ostr)
+        || doPrintValue<ColumnInt128>(c, row, ostr)
+        || doPrintValue<ColumnInt256>(c, row, ostr)
         || doPrintValue<ColumnFloat32>(c, row, ostr)
         || doPrintValue<ColumnFloat64>(c, row, ostr)
         || doPrintValue<ColumnEnum8>(c, row, ostr)
@@ -185,7 +204,10 @@ std::ostream & printColumnValue(const ColumnRef& c, const size_t row, std::ostre
         || doPrintValue<ColumnPoint>(c, row, ostr)
         || doPrintValue<ColumnRing>(c, row, ostr)
         || doPrintValue<ColumnPolygon>(c, row, ostr)
-        || doPrintValue<ColumnMultiPolygon>(c, row, ostr);
+        || doPrintValue<ColumnMultiPolygon>(c, row, ostr)
+        || doPrintValue<ColumnLowCardinalityT<ColumnString>>(c, row, ostr)
+        || doPrintValue<ColumnLowCardinalityT<ColumnFixedString>>(c, row, ostr)
+        || doPrintValue<ColumnNullable, void>(c, row, ostr);
     if (!r)
         ostr << "Unable to print value of type " << c->GetType().GetName();
 
@@ -213,7 +235,7 @@ std::ostream& operator<<(std::ostream & ostr, const PrettyPrintBlock & pretty_pr
     if (block.GetRowCount() == 0 || block.GetColumnCount() == 0)
         return ostr;
 
-    std::vector<int> column_width(block.GetColumnCount());
+    std::vector<size_t> column_width(block.GetColumnCount());
     const auto horizontal_bar = '|';
     const auto cross = '+';
     const auto vertical_bar = '-';
@@ -221,6 +243,11 @@ std::ostream& operator<<(std::ostream & ostr, const PrettyPrintBlock & pretty_pr
     std::stringstream sstr;
     for (auto i = block.begin(); i != block.end(); ++i) {
         auto width = column_width[i.ColumnIndex()] = std::max(i.Type()->GetName().size(), i.Name().size());
+        for (size_t j = 0; j < block.GetRowCount(); ++j) {
+            std::stringstream tmp_stream;
+            printColumnValue(i.Column(), j, tmp_stream);
+            width = column_width[i.ColumnIndex()] = std::max(width, tmp_stream.str().size());
+        }
         sstr << cross << std::setw(width + 2) << std::setfill(vertical_bar) << vertical_bar;
     }
     sstr << cross;
@@ -240,7 +267,7 @@ std::ostream& operator<<(std::ostream & ostr, const PrettyPrintBlock & pretty_pr
         auto width = column_width[i.ColumnIndex()];
         ostr << horizontal_bar << ' ' << std::setw(width) << i.Type()->GetName() << ' ';
     }
-    ostr << horizontal_bar << std::endl;;
+    ostr << horizontal_bar << std::endl;
     ostr << split_line << std::endl;
 
     // values
