@@ -17,6 +17,7 @@ static void RunTests(Client& client) {
     testMapType(client);
     testTupleType(client);
     testNestedType(client);
+    testJsonType(client);
 }
 
 int main()

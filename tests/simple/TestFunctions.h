@@ -43,3 +43,4 @@ void testLowCardinalityStringType(Client& client);
 void testMapType(Client& client);
 void testTupleType(Client& client);
 void testNestedType(Client& client);
+void testJsonType(Client& client);

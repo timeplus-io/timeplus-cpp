@@ -879,3 +879,38 @@ void testNestedType(Client& client){
 
     client.Execute("DROP STREAM IF EXISTS nested_example");
 }
+
+void testJsonType(Client& client) {
+    client.Execute("DROP STREAM IF EXISTS json_example");
+    client.Execute("CREATE STREAM IF NOT EXISTS json_example (j json)");
+
+    {
+        Block block;
+
+        auto json_col = std::make_shared<ColumnJson>();
+
+        auto f1 = std::make_shared<ColumnFloat64>(std::vector<double>{3.1415, 9898.5679});
+        auto f2 = std::make_shared<ColumnFloat64>(std::vector<double>{23.123, 0.999754});
+
+        auto json1 = std::unordered_map<std::string, ColumnRef>{{"a.b.b.c", f1}, {"`a.b.b`.c", f2}};
+
+        json_col->Append(json1);
+
+        block.AppendColumn("j", json_col);
+
+        client.Insert("json_example", block);
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    client.Select("SELECT j::json FROM table(json_example)", [](const Block& block) {
+        for (size_t c = 0; c < block.GetRowCount(); ++c) {
+            auto json = block[0]->As<ColumnJson>();
+
+            auto a_b_b_c = (*json)["a.b.b.c"]->As<ColumnFloat64>();
+            auto abb_c = (*json)["`a.b.b`.c"]->As<ColumnFloat64>();
+            std::cout << "a.b.b.c[" << c << "]: " << a_b_b_c->At(c) << "\n";
+            std::cout << "`a.b.b`.c[" << c << "]: " << abb_c->At(c) << "\n";
+        }
+    });
+}

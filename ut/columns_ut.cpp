@@ -972,3 +972,131 @@ TEST(ColumnsCase, ColumnMapT_Wrap) {
     EXPECT_EQ("123", map_view.At(1));
     EXPECT_EQ("abc", map_view.At(2));
 }
+
+TEST(ColumnsCase, ColumnJsonAppend) {
+    auto col = std::make_shared<ColumnJson>();
+    EXPECT_EQ(0u, col->Size());
+    auto data = MakeJson();
+    for (auto& json : data) {
+        col->Append(json);
+    }
+    EXPECT_EQ(2u, col->Size());
+
+    auto check = [](std::shared_ptr<ColumnJson> col) {
+        auto obj_a = (*col)["obj.a"]->As<ColumnUInt32>();
+        auto obj_b = (*col)["obj.b"]->As<ColumnString>();
+        auto obj_c_e = (*col)["obj.c.e"]->As<ColumnArrayT<ColumnString>>();
+        auto obj_c_f = (*col)["obj.c.f"]->As<ColumnArrayT<ColumnInt64>>();
+        auto abb_c = (*col)["`a.b.b`.c"]->As<ColumnFloat64>();
+        auto a_b_b_c = (*col)["a.b.b.c"]->As<ColumnFloat64>();
+        EXPECT_NE(obj_a, nullptr);
+        EXPECT_NE(obj_a, nullptr);
+        EXPECT_NE(obj_c_e, nullptr);
+        EXPECT_NE(obj_c_f, nullptr);
+        EXPECT_NE(abb_c, nullptr);
+        EXPECT_NE(a_b_b_c, nullptr);
+
+        EXPECT_EQ(obj_a->Size(), 2u);
+        EXPECT_EQ(obj_a->Size(), 2u);
+        EXPECT_EQ(obj_c_f->Size(), 2u);
+        EXPECT_EQ(obj_c_f->Size(), 2u);
+        EXPECT_EQ(obj_c_e->At(0).At(0), "timeplus");
+        EXPECT_EQ(obj_c_e->At(0).At(1), "proton");
+        EXPECT_EQ(obj_c_f->At(0).At(0), 123544);
+        EXPECT_EQ(obj_c_f->At(0).At(1), 123546);
+        EXPECT_EQ(obj_c_e->At(1).Size(), 0u);
+        EXPECT_EQ(obj_c_f->At(1).Size(), 0u);
+        EXPECT_EQ(abb_c->At(0), 0.0);
+        EXPECT_EQ(a_b_b_c->At(0), 0.0);
+        EXPECT_EQ(abb_c->At(1), 23.123);
+        EXPECT_EQ(a_b_b_c->At(1), 3.1415);
+    };
+
+    check(col);
+
+    auto new_col = col->CloneEmpty();
+    new_col->Append(col);
+    col->Clear();
+    EXPECT_EQ(col->Size(), 0u);
+    EXPECT_EQ(new_col->Size(), 2u);
+
+    check(new_col->As<ColumnJson>());
+}
+
+TEST(ColumnsCase, ColumnJsonSlice) {
+    auto col = std::make_shared<ColumnJson>(MakeJson());
+    EXPECT_EQ(col->Size(), 2u);
+
+    auto slice_col = col->Slice(0, 1)->As<ColumnJson>();
+    EXPECT_NE(slice_col, nullptr);
+
+    auto check = [](std::shared_ptr<ColumnJson> col) {
+        auto obj_a = (*col)["obj.a"]->As<ColumnUInt32>();
+        auto obj_b = (*col)["obj.b"]->As<ColumnString>();
+        auto obj_c_e = (*col)["obj.c.e"]->As<ColumnArrayT<ColumnString>>();
+        auto obj_c_f = (*col)["obj.c.f"]->As<ColumnArrayT<ColumnInt64>>();
+        auto abb_c = (*col)["`a.b.b`.c"]->As<ColumnFloat64>();
+        auto a_b_b_c = (*col)["a.b.b.c"]->As<ColumnFloat64>();
+        EXPECT_NE(obj_a, nullptr);
+        EXPECT_NE(obj_a, nullptr);
+        EXPECT_NE(obj_c_e, nullptr);
+        EXPECT_NE(obj_c_f, nullptr);
+        EXPECT_NE(abb_c, nullptr);
+        EXPECT_NE(a_b_b_c, nullptr);
+
+        EXPECT_EQ(obj_a->Size(), 1u);
+        EXPECT_EQ(obj_a->Size(), 1u);
+        EXPECT_EQ(obj_c_f->Size(), 1u);
+        EXPECT_EQ(obj_c_f->Size(), 1u);
+        EXPECT_EQ(abb_c->Size(), 1u);
+        EXPECT_EQ(a_b_b_c->Size(), 1u);
+
+        EXPECT_EQ(obj_a->At(0), (1u << 19));
+        EXPECT_EQ(obj_b->At(0), "timeplus");
+        EXPECT_EQ(obj_c_e->At(0).At(0), "timeplus");
+        EXPECT_EQ(obj_c_e->At(0).At(1), "proton");
+        EXPECT_EQ(obj_c_f->At(0).At(0), 123544);
+        EXPECT_EQ(obj_c_f->At(0).At(1), 123546);
+        EXPECT_EQ(abb_c->At(0), 0.0);
+        EXPECT_EQ(a_b_b_c->At(0), 0.0);
+    };
+
+    check(slice_col);
+
+    auto new_col = slice_col->CloneEmpty();
+    new_col->Swap(*slice_col);
+    EXPECT_EQ(slice_col->Size(), 0u);
+    EXPECT_EQ(new_col->Size(), 1u);
+
+    check(new_col->As<ColumnJson>());
+}
+
+TEST(ColumnsCase, ColumnJsonHelper) {
+    EXPECT_EQ("`x.y`", EscapeJsonPath("x.y"));
+    EXPECT_EQ("`\\`x.y\\`.a`", EscapeJsonPath("`x.y`.a"));
+    EXPECT_EQ("`\\`x.y\\`\\`.a`", EscapeJsonPath("`x.y``.a"));
+    EXPECT_EQ("x", EscapeJsonPath("x"));
+    EXPECT_EQ("`x.y`", EscapeJsonPath("`x.y`"));
+    EXPECT_EQ("`x.y`a", EscapeJsonPath("`x.y`a"));
+
+    EXPECT_EQ("x.y", UnescapeJsonPath("`x.y`"));
+    EXPECT_EQ("`x.y`.a", UnescapeJsonPath("`\\`x.y\\`.a`"));
+    EXPECT_EQ("x", UnescapeJsonPath("x"));
+    EXPECT_EQ("`x.y`.a", UnescapeJsonPath("`x.y`.a"));
+    EXPECT_EQ("\\`x.y\\`.a", UnescapeJsonPath("\\`x.y\\`.a"));
+    EXPECT_EQ("`x.y`.a`", UnescapeJsonPath("`x.y`.a`"));
+    EXPECT_EQ("``", UnescapeJsonPath("``"));
+
+    auto parts1 = SplitJsonPath("id");
+    auto parts2 = SplitJsonPath("id.a");
+    auto parts3 = SplitJsonPath("`x.y`.z");
+    EXPECT_EQ("id", parts1[0]);
+    EXPECT_EQ("id", parts2[0]);
+    EXPECT_EQ("a", parts2[1]);
+    EXPECT_EQ("x.y", parts3[0]);
+    EXPECT_EQ("z", parts3[1]);
+
+    EXPECT_EQ("id", BuildJsonPath(parts1));
+    EXPECT_EQ("id.a", BuildJsonPath(parts2));
+    EXPECT_EQ("`x.y`.z", BuildJsonPath(parts3));
+}

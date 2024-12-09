@@ -17,6 +17,7 @@
 #include "columns/string.h"
 #include "columns/tuple.h"
 #include "columns/uuid.h"
+#include "columns/json.h"
 
 #include <chrono>
 #include <cstdint>

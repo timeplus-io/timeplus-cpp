@@ -23,6 +23,7 @@ SET ( timeplus-cpp-lib-src
     columns/string.cpp
     columns/tuple.cpp
     columns/uuid.cpp
+    columns/json.cpp
 
     columns/itemview.cpp
 
@@ -72,6 +73,7 @@ SET ( timeplus-cpp-lib-src
     columns/tuple.h
     columns/utils.h
     columns/uuid.h
+    columns/json.h
 
     types/type_parser.h
     types/types.h
@@ -213,6 +215,7 @@ INSTALL(FILES columns/string.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/tuple.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/utils.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/uuid.h DESTINATION include/timeplus/columns/)
+INSTALL(FILES columns/json.h DESTINATION include/timeplus/columns/)
 
 # types
 INSTALL(FILES types/type_parser.h DESTINATION include/timeplus/types/)
