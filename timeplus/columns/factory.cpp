@@ -94,7 +94,7 @@ static ColumnRef CreateTerminalColumn(const TypeAst& ast) {
     case Type::String:
         return std::make_shared<ColumnString>();
     case Type::FixedString:
-        return std::make_shared<ColumnFixedString>(GetASTChildElement(ast, 0).value)
+        return std::make_shared<ColumnFixedString>(GetASTChildElement(ast, 0).value);
 
     case Type::Json:
         return std::make_shared<ColumnJson>();
