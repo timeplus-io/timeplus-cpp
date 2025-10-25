@@ -14,6 +14,7 @@
 #include "nullable.h"
 #include "numeric.h"
 #include "string.h"
+#include "json.h"
 #include "tuple.h"
 #include "uuid.h"
 
@@ -93,7 +94,10 @@ static ColumnRef CreateTerminalColumn(const TypeAst& ast) {
     case Type::String:
         return std::make_shared<ColumnString>();
     case Type::FixedString:
-        return std::make_shared<ColumnFixedString>(GetASTChildElement(ast, 0).value);
+        return std::make_shared<ColumnFixedString>(GetASTChildElement(ast, 0).value)
+
+    case Type::Json:
+        return std::make_shared<ColumnJson>();
 
     case Type::DateTime:
         if (ast.elements.empty()) {
@@ -209,6 +213,8 @@ static ColumnRef CreateColumnFromAst(const TypeAst& ast, CreateColumnByTypeSetti
                         return std::make_shared<LowCardinalitySerializationAdaptor<ColumnString>>();
                     case Type::FixedString:
                         return std::make_shared<LowCardinalitySerializationAdaptor<ColumnFixedString>>(GetASTChildElement(nested, 0).value);
+                    case Type::Json:
+                        return std::make_shared<LowCardinalitySerializationAdaptor<ColumnJson>>();
                     case Type::Nullable:
                         throw UnimplementedError("LowCardinality(" + nested.name + ") is not supported with LowCardinalityAsWrappedColumn on");
                     default:
@@ -222,6 +228,8 @@ static ColumnRef CreateColumnFromAst(const TypeAst& ast, CreateColumnByTypeSetti
                         return std::make_shared<ColumnLowCardinalityT<ColumnString>>();
                     case Type::FixedString:
                         return std::make_shared<ColumnLowCardinalityT<ColumnFixedString>>(GetASTChildElement(nested, 0).value);
+                    case Type::Json:
+                        return std::make_shared<ColumnLowCardinalityT<ColumnJson>>();
                     case Type::Nullable:
                         return std::make_shared<ColumnLowCardinality>(
                             std::make_shared<ColumnNullable>(

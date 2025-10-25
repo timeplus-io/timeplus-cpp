@@ -12,6 +12,8 @@
 
 #include <cassert>
 
+#include "json.h"
+
 namespace {
 using namespace timeplus;
 
@@ -142,6 +144,9 @@ inline void AppendToDictionary(Column& dictionary, const ItemView & item) {
             return;
         case Type::String:
             column_down_cast<ColumnString>(dictionary).Append(item.get<std::string_view>());
+            return;
+        case Type::Json:
+            column_down_cast<ColumnJson>(dictionary).Append(item.get<std::string_view>());
             return;
         case Type::Nullable:
             AppendNullableToDictionary(column_down_cast<ColumnNullable>(dictionary), item);

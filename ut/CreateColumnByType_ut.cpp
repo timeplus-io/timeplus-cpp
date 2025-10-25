@@ -2,9 +2,10 @@
 #include <timeplus/columns/date.h>
 #include <timeplus/columns/numeric.h>
 #include <timeplus/columns/string.h>
+#include <timeplus/columns/json.h>
+#include <timeplus/columns/nullable.h>
 
 #include <gtest/gtest.h>
-
 namespace {
 using namespace timeplus;
 }
@@ -31,6 +32,20 @@ TEST(CreateColumnByType, UnmatchedBrackets) {
     ASSERT_EQ(nullptr, CreateColumnByType("array(low_cardinality(nullable(fixed_string(10000)))"));
 }
 
+TEST(CreateColumnByType, JsonType) {
+    auto col = CreateColumnByType("json");
+    ASSERT_NE(nullptr, col);
+    EXPECT_EQ(Type::Json, col->GetType().GetCode());
+    EXPECT_NE(nullptr, col->As<ColumnJson>());
+
+    auto nullable_json = CreateColumnByType("nullable(json)");
+    ASSERT_NE(nullptr, nullable_json);
+    ASSERT_EQ(Type::Nullable, nullable_json->GetType().GetCode());
+    auto nested = nullable_json->As<ColumnNullable>()->Nested();
+    EXPECT_EQ(Type::Json, nested->GetType().GetCode());
+    EXPECT_NE(nullptr, nested->As<ColumnJson>());
+}
+
 TEST(CreateColumnByType, LowCardinalityAsWrappedColumn) {
     CreateColumnByTypeSettings create_column_settings;
     create_column_settings.low_cardinality_as_wrapped_column = true;
@@ -40,6 +55,9 @@ TEST(CreateColumnByType, LowCardinalityAsWrappedColumn) {
 
     ASSERT_EQ(Type::FixedString, CreateColumnByType("low_cardinality(fixed_string(10000))", create_column_settings)->GetType().GetCode());
     ASSERT_EQ(Type::FixedString, CreateColumnByType("low_cardinality(fixed_string(10000))", create_column_settings)->As<ColumnFixedString>()->GetType().GetCode());
+
+    ASSERT_EQ(Type::Json, CreateColumnByType("low_cardinality(json)", create_column_settings)->GetType().GetCode());
+    ASSERT_EQ(Type::Json, CreateColumnByType("low_cardinality(json)", create_column_settings)->As<ColumnJson>()->GetType().GetCode());
 }
 
 TEST(CreateColumnByType, DateTime) {
@@ -75,7 +93,7 @@ TEST_P(CreateColumnByTypeWithName, CreateColumnByType)
 INSTANTIATE_TEST_SUITE_P(Basic, CreateColumnByTypeWithName, ::testing::Values(
     "int8", "int16", "int32", "int64",
     "uint8", "uint16", "uint32", "uint64",
-    "string", "date", "datetime",
+    "string", "json", "date", "datetime",
     "uuid", "int128"
 ));
 
@@ -92,5 +110,6 @@ INSTANTIATE_TEST_SUITE_P(Nested, CreateColumnByTypeWithName, ::testing::Values(
     "nullable(fixed_string(10000))",
     "nullable(low_cardinality(fixed_string(10000)))",
     "array(nullable(low_cardinality(fixed_string(10000))))",
-    "array(enum8('ONE' = 1, 'TWO' = 2))"
+    "array(enum8('ONE' = 1, 'TWO' = 2))",
+    "nullable(json)"
 ));
