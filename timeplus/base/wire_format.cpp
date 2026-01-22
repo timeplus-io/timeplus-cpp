@@ -5,6 +5,7 @@
 
 #include "../exceptions.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace {
@@ -64,6 +65,79 @@ bool WireFormat::ReadVarint64(InputStream& input, uint64_t* value) {
 
     // TODO skip invalid
     return false;
+}
+
+inline const char* find_quoted_chars(const char* start, const char* end)
+{
+    static constexpr char quoted_chars[] = {'\0', '\b', '\t', '\n', '\'', '\\'};
+    const auto first  = std::find_first_of(start, end, std::begin(quoted_chars), std::end(quoted_chars));
+
+    return (first == end) ? nullptr : first;
+}
+
+void WireFormat::WriteQuotedString(OutputStream& output, std::string_view value) {
+    auto size               = value.size();
+    const char* start       = value.data();
+    const char* end         = start + size;
+    const char* quoted_char = find_quoted_chars(start, end);
+    if (quoted_char == nullptr) {
+        WriteVarint64(output, size + 2);
+        WriteAll(output, "'", 1);
+        WriteAll(output, start, size);
+        WriteAll(output, "'", 1);
+        return;
+    }
+
+    // calculate quoted chars count
+    int quoted_count             = 1;
+    const char* next_quoted_char = quoted_char + 1;
+    while ((next_quoted_char = find_quoted_chars(next_quoted_char, end))) {
+        quoted_count++;
+        next_quoted_char++;
+    }
+    WriteVarint64(output, size + 2 + 3 * quoted_count);  // length
+
+    WriteAll(output, "'", 1);
+
+    do {
+        auto write_size = quoted_char - start;
+        WriteAll(output, start, write_size);
+        WriteAll(output, "\\", 1);
+        char c = quoted_char[0];
+        switch (c) {
+            case '\0':
+                WriteAll(output, "x00", 3);
+                break;
+            case '\b':
+                WriteAll(output, "x08", 3);
+                break;
+            case '\t':
+                WriteAll(output, R"(\\t)", 3);
+                break;
+            case '\n':
+                WriteAll(output, R"(\\n)", 3);
+                break;
+            case '\'':
+                WriteAll(output, "x27", 3);
+                break;
+            case '\\':
+                WriteAll(output, R"(\\\)", 3);
+                break;
+            default:
+                break;
+        }
+        start       = quoted_char + 1;
+        quoted_char = find_quoted_chars(start, end);
+    } while (quoted_char);
+
+    WriteAll(output, start, end - start);
+    WriteAll(output, "'", 1);
+}
+
+void WireFormat::WriteParamNullRepresentation(OutputStream& output) {
+    const std::string NULL_REPRESENTATION(R"('\\N')");
+    WriteVarint64(output, NULL_REPRESENTATION.size());
+    WriteAll(output, NULL_REPRESENTATION.data(), NULL_REPRESENTATION.size());
 }
 
 void WireFormat::WriteVarint64(OutputStream& output, uint64_t value) {

@@ -39,8 +39,10 @@
 #define DBMS_MIN_REVISION_WITH_DISTRIBUTED_DEPTH        54448
 #define DBMS_MIN_REVISION_WITH_INITIAL_QUERY_START_TIME 54449
 #define DBMS_MIN_REVISION_WITH_INCREMENTAL_PROFILE_EVENTS 54451
+#define DBMS_MIN_PROTOCOL_VERSION_WITH_ADDENDUM         54458
+#define DBMS_MIN_PROTOCOL_VERSION_WITH_PARAMETERS       54459
 
-#define DMBS_PROTOCOL_REVISION  DBMS_MIN_REVISION_WITH_INCREMENTAL_PROFILE_EVENTS
+#define DMBS_PROTOCOL_REVISION  DBMS_MIN_PROTOCOL_VERSION_WITH_PARAMETERS
 
 namespace timeplus {
 
@@ -175,6 +177,8 @@ private:
     void SendData(const Block& block);
 
     bool SendHello();
+
+    bool SendAddendum();
 
     bool ReadBlock(InputStream& input, Block* block);
 
@@ -452,6 +456,9 @@ bool Client::Impl::Handshake() {
         return false;
     }
     if (!ReceiveHello()) {
+        return false;
+    }
+    if (!SendAddendum()) {
         return false;
     }
     return true;
@@ -845,6 +852,19 @@ void Client::Impl::SendQuery(const Query& query) {
     WireFormat::WriteUInt64(*output_, compression_);
     WireFormat::WriteString(*output_, query.GetText());
 
+    // Send params after query text
+    if (server_info_.revision >= DBMS_MIN_PROTOCOL_VERSION_WITH_PARAMETERS) {
+        for (const auto& [name, value] : query.GetParams()) {
+            WireFormat::WriteString(*output_, name);
+            const uint64_t Custom = 2;
+            WireFormat::WriteVarint64(*output_, Custom);
+            if (value)
+                WireFormat::WriteQuotedString(*output_, *value);
+            else
+                WireFormat::WriteParamNullRepresentation(*output_);
+        }
+        WireFormat::WriteString(*output_, std::string());
+    }
 
     // Send empty block as marker of
     // end of data
@@ -919,6 +939,18 @@ bool Client::Impl::SendHello() {
     WireFormat::WriteString(*output_, options_.user);
     WireFormat::WriteString(*output_, options_.password);
 
+    output_->Flush();
+
+    return true;
+}
+
+bool Client::Impl::SendAddendum() {
+    if (server_info_.revision < DBMS_MIN_PROTOCOL_VERSION_WITH_ADDENDUM ||
+        DMBS_PROTOCOL_REVISION < DBMS_MIN_PROTOCOL_VERSION_WITH_ADDENDUM) {
+        return true;
+    }
+
+    WireFormat::WriteString(*output_, std::string());
     output_->Flush();
 
     return true;
