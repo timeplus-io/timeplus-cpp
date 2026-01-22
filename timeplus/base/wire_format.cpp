@@ -70,7 +70,7 @@ bool WireFormat::ReadVarint64(InputStream& input, uint64_t* value) {
 inline const char* find_quoted_chars(const char* start, const char* end)
 {
     static constexpr char quoted_chars[] = {'\0', '\b', '\t', '\n', '\'', '\\'};
-    const auto first  = std::find_first_of(start, end, std::begin(quoted_chars), std::end(quoted_chars));
+    const auto* first  = std::find_first_of(start, end, std::begin(quoted_chars), std::end(quoted_chars));
 
     return (first == end) ? nullptr : first;
 }
