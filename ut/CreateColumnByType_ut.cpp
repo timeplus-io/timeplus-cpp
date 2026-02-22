@@ -1,5 +1,6 @@
 #include <timeplus/columns/factory.h>
 #include <timeplus/columns/date.h>
+#include <timeplus/columns/dynamic.h>
 #include <timeplus/columns/numeric.h>
 #include <timeplus/columns/string.h>
 
@@ -55,6 +56,28 @@ TEST(CreateColumnByType, AggregateFunction) {
     EXPECT_EQ(nullptr, CreateColumnByType("aggregate_function(argMax, fixed_string(10), datetime64(3, 'UTC'))"));
 }
 
+TEST(CreateColumnByType, Dynamic) {
+    auto dynamic_default = CreateColumnByType("dynamic");
+    ASSERT_NE(nullptr, dynamic_default);
+    ASSERT_EQ(Type::Dynamic, dynamic_default->GetType().GetCode());
+    ASSERT_EQ("dynamic", dynamic_default->GetType().GetName());
+    ASSERT_NE(nullptr, dynamic_default->As<ColumnDynamic>());
+
+    auto dynamic_max_types = CreateColumnByType("dynamic(max_types=5)");
+    ASSERT_NE(nullptr, dynamic_max_types);
+    ASSERT_EQ(Type::Dynamic, dynamic_max_types->GetType().GetCode());
+    ASSERT_EQ("dynamic(max_types=5)", dynamic_max_types->GetType().GetName());
+    ASSERT_NE(nullptr, dynamic_max_types->As<ColumnDynamic>());
+}
+
+TEST(CreateColumnByType, DynamicInvalidArguments) {
+    EXPECT_THROW(CreateColumnByType("dynamic(max_types=255)"), ValidationError);
+    EXPECT_THROW(CreateColumnByType("dynamic(max_types=-1)"), ValidationError);
+    EXPECT_THROW(CreateColumnByType("dynamic(max_types='5')"), ValidationError);
+    EXPECT_THROW(CreateColumnByType("dynamic(max_type=5)"), ValidationError);
+    EXPECT_THROW(CreateColumnByType("dynamic(max_types=5, foo=1)"), ValidationError);
+}
+
 
 class CreateColumnByTypeWithName : public ::testing::TestWithParam<const char* /*Column Type String*/>
 {};
@@ -75,13 +98,14 @@ TEST_P(CreateColumnByTypeWithName, CreateColumnByType)
 INSTANTIATE_TEST_SUITE_P(Basic, CreateColumnByTypeWithName, ::testing::Values(
     "int8", "int16", "int32", "int64",
     "uint8", "uint16", "uint32", "uint64",
-    "string", "date", "datetime",
+    "string", "date", "datetime", "dynamic",
     "uuid", "int128"
 ));
 
 INSTANTIATE_TEST_SUITE_P(Parametrized, CreateColumnByTypeWithName, ::testing::Values(
     "fixed_string(0)", "fixed_string(10000)",
     "datetime('UTC')", "datetime64(3, 'UTC')",
+    "dynamic(max_types=5)",
     "decimal(9,3)", "decimal(18,3)",
     "enum8('ONE' = 1, 'TWO' = 2)",
     "enum16('ONE' = 1, 'TWO' = 2, 'THREE' = 3, 'FOUR' = 4)"

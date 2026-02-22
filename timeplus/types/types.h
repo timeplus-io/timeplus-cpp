@@ -64,7 +64,8 @@ public:
         UInt128,
         Int256,
         UInt256,
-        Decimal256
+        Decimal256,
+        Dynamic
     };
 
     using EnumItem = std::pair<std::string /* name */, int16_t /* value */>;
@@ -101,6 +102,10 @@ public:
 
     /// Simple name, doesn't depend on parameters and\or nested types, caller MUST NOT free returned value.
     static const char* TypeName(Code);
+
+public:
+    static constexpr size_t DEFAULT_DYNAMIC_MAX_TYPES = 32;
+    static constexpr size_t MAX_DYNAMIC_TYPES_LIMIT = 254;
 
 public:
     static TypeRef CreateArray(TypeRef item_type);
@@ -141,6 +146,8 @@ public:
     static TypeRef CreateLowCardinality(TypeRef item_type);
 
     static TypeRef CreateMap(TypeRef key_type, TypeRef value_type);
+
+    static TypeRef CreateDynamic(size_t max_dynamic_types = DEFAULT_DYNAMIC_MAX_TYPES);
 
     static TypeRef CreatePoint();
 
@@ -322,6 +329,18 @@ public:
 private:
     TypeRef key_type_;
     TypeRef value_type_;
+};
+
+class DynamicType : public Type {
+public:
+    explicit DynamicType(size_t max_dynamic_types);
+
+    std::string GetName() const;
+
+    inline size_t GetMaxDynamicTypes() const { return max_dynamic_types_; }
+
+private:
+    const size_t max_dynamic_types_;
 };
 
 template <>

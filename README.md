@@ -9,6 +9,7 @@ You can run DDL, streaming queries, or data ingestion with this C++ client. Both
 * datetime, datetime64
 * datetime([timezone]), datetime64(N, [timezone])
 * decimal32, decimal64, decimal128, decimal256
+* dynamic, dynamic(max_types=N)
 * enum8, enum16
 * fixed_string(N)
 * float32, float64

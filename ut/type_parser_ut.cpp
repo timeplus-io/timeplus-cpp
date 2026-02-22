@@ -240,6 +240,33 @@ TEST(TypeParserCase, ParseMap) {
     ASSERT_EQ(ast.elements[1].name, "string");
 }
 
+TEST(TypeParserCase, ParseDynamic) {
+    TypeAst ast;
+    ASSERT_TRUE(TypeParser("dynamic").Parse(&ast));
+    ASSERT_EQ(ast.meta, TypeAst::Terminal);
+    ASSERT_EQ(ast.name, "dynamic");
+    ASSERT_EQ(ast.code, Type::Dynamic);
+    ASSERT_EQ(ast.elements.size(), 0u);
+}
+
+TEST(TypeParserCase, ParseDynamicWithMaxTypes) {
+    TypeAst ast;
+    ASSERT_TRUE(TypeParser("dynamic(max_types=5)").Parse(&ast));
+    ASSERT_EQ(ast.meta, TypeAst::Terminal);
+    ASSERT_EQ(ast.name, "dynamic");
+    ASSERT_EQ(ast.code, Type::Dynamic);
+    ASSERT_EQ(ast.elements.size(), 2u);
+    ASSERT_EQ(ast.elements[0].meta, TypeAst::Terminal);
+    ASSERT_EQ(ast.elements[0].name, "max_types");
+    ASSERT_EQ(ast.elements[1].meta, TypeAst::Number);
+    ASSERT_EQ(ast.elements[1].value, 5);
+}
+
+TEST(TypeParserCase, ParseDynamicMalformed) {
+    TypeAst ast;
+    EXPECT_FALSE(TypeParser("dynamic(max_types=5").Parse(&ast));
+}
+
 TEST(TypeParser, EmptyName) {
     {
         TypeAst ast;

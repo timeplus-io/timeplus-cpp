@@ -1,4 +1,5 @@
 #include <timeplus/client.h>
+#include <timeplus/columns/dynamic.h>
 
 #include "utils.h"
 #include "roundtrip_column.h"
@@ -125,6 +126,75 @@ TEST_P(RoundtripCase, MapUUID_Tuple_String_Array_Uint64) {
 
     auto result_typed = Map::Wrap(RoundtripColumnValues(*client_, map));
     EXPECT_TRUE(CompareRecursive(*map, *result_typed));
+}
+
+TEST_P(RoundtripCase, DynamicReadPathSharedVariant) {
+    if (GetParam().compression_method != CompressionMethod::None) {
+        GTEST_SKIP() << "Skipping compressed variant: Proton 3.x server uses compression framing unsupported by this client yet.";
+    }
+
+    client_->Execute("DROP TEMPORARY STREAM IF EXISTS temporary_dynamic_read_path;");
+
+    struct DynamicDialect {
+        const char* type_name;
+        bool use_cast_as;
+    };
+
+    const DynamicDialect dialects[] = {
+        {"dynamic(max_types=1)", false},
+        {"dynamic(max_types=1)", true},
+    };
+
+    auto make_cast_expr = [](const std::string& value_expr, const DynamicDialect& dialect) {
+        if (dialect.use_cast_as) {
+            return "CAST(" + value_expr + " AS " + dialect.type_name + ")";
+        }
+
+        return "CAST(" + value_expr + ", '" + std::string(dialect.type_name) + "')";
+    };
+
+    bool configured = false;
+    std::string last_error_message;
+    for (const auto& dialect : dialects) {
+        client_->Execute("DROP TEMPORARY STREAM IF EXISTS temporary_dynamic_read_path;");
+
+        try {
+            client_->Execute("CREATE TEMPORARY STREAM temporary_dynamic_read_path (id uint32, d " + std::string(dialect.type_name) + ") ENGINE = Memory;");
+            client_->Execute("INSERT INTO temporary_dynamic_read_path SELECT 0, " + make_cast_expr("42", dialect));
+            client_->Execute("INSERT INTO temporary_dynamic_read_path SELECT 1, " + make_cast_expr("'hello'", dialect));
+            client_->Execute("INSERT INTO temporary_dynamic_read_path SELECT 2, " + make_cast_expr("43", dialect));
+            configured = true;
+            break;
+        } catch (const std::exception& e) {
+            last_error_message = e.what();
+        }
+    }
+
+    if (!configured) {
+        GTEST_SKIP() << "Server doesn't support Dynamic integration test query: " << last_error_message;
+    }
+
+    size_t total_rows = 0;
+    size_t shared_rows = 0;
+    client_->Select("SELECT d FROM temporary_dynamic_read_path ORDER BY id", [&total_rows, &shared_rows](const Block& block) {
+        if (block.GetRowCount() == 0) {
+            return;
+        }
+
+        ASSERT_EQ(1u, block.GetColumnCount());
+        auto col = block[0]->As<ColumnDynamic>();
+        ASSERT_NE(nullptr, col);
+
+        total_rows += col->Size();
+        for (size_t i = 0; i < col->Size(); ++i) {
+            if (col->IsSharedVariant(i)) {
+                ++shared_rows;
+            }
+        }
+    });
+
+    EXPECT_EQ(3u, total_rows);
+    EXPECT_GT(shared_rows, 0u);
 }
 
 /// Geometric tests are not supported in Proton

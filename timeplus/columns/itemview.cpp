@@ -78,6 +78,7 @@ void ItemView::ValidateData(Type::Code type, DataType data) {
         case Type::Code::Tuple:
         case Type::Code::LowCardinality:
         case Type::Code::Map:
+        case Type::Code::Dynamic:
             throw AssertionError("Unsupported type in ItemView: " + std::string(Type::TypeName(type)));
 
         case Type::Code::IPv6:
