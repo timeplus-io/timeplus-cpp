@@ -30,15 +30,17 @@ ClientPool::ClientPtr ClientPool::Acquire(int64_t timeout_ms) {
 }
 
 void ClientPool::GuardedClient::TestConnection() noexcept {
+    if (!client) {
+        valid = false;
+        return;
+    }
+
     try {
         client->Ping();
         valid = true;
     } catch (...) {
         valid = false;
     }
-
-    TRACE("test connection: host=%s port=%d valid=%s", client->GetCurrentEndpoint()->host.c_str(), client->GetCurrentEndpoint()->port,
-          valid ? "true" : "false");
 }
 
 }  // namespace timeplus

@@ -36,7 +36,7 @@ public:
         GuardedClient(ClientPool* pool, ClientPtr client, bool valid) : client(std::move(client)), valid(valid), pool_(pool) {}
 
         ~GuardedClient() {
-            if (pool_) {
+            if (pool_ && client) {
                 pool_->Release(std::move(client), valid);
             }
         }

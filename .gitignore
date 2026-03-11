@@ -278,3 +278,9 @@ BUCKAROO_DEPS
 # Vim
 *.swp
 *.swo
+
+# clangd
+.cache/
+
+# Claude Code
+.claude/settings.local.json
