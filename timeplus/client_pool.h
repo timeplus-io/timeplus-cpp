@@ -47,7 +47,7 @@ public:
 
         GuardedClient& operator=(GuardedClient&& other) noexcept {
             if (this != &other) {
-                if (pool_ && client) {
+                if (pool_) {
                     pool_->Release(std::move(client), valid);
                 }
                 pool_ = other.pool_;
