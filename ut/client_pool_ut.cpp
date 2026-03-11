@@ -44,3 +44,18 @@ TEST(ClientPool, BadHost) {
 
     ASSERT_THROW(pool.Acquire(1000), std::system_error);
 }
+
+TEST(ClientPool, GuardedClientResetStillReturnsSlot) {
+    ClientOptions client_options;
+    client_options.host = "localhost";
+    ClientPool pool{client_options, /*pool_size=*/1};
+
+    {
+        auto guarded = pool.GetGuardedClient(1000);
+        ASSERT_NE(guarded.client, nullptr);
+        guarded.client.reset();
+    }
+
+    auto client = pool.Acquire(100);
+    ASSERT_NE(client, nullptr);
+}
