@@ -48,6 +48,7 @@ const char* Type::TypeName(Type::Code code) {
         case Type::Code::DateTime64:     return "datetime64";
         case Type::Code::Date32:         return "date32";
         case Type::Code::Map:            return "map";
+        case Type::Code::Dynamic:        return "dynamic";
         case Type::Code::Point:          return "point";
         case Type::Code::Ring:           return "ring";
         case Type::Code::Polygon:        return "polygon";
@@ -113,6 +114,8 @@ std::string Type::GetName() const {
             return As<LowCardinalityType>()->GetName();
         case Map:
             return As<MapType>()->GetName();
+        case Dynamic:
+            return As<DynamicType>()->GetName();
     }
 
     // XXX: NOT REACHED!
@@ -166,7 +169,8 @@ uint64_t Type::GetTypeUniqueId() const {
         case Decimal128:
         case Decimal256:
         case LowCardinality:
-        case Map: {
+        case Map:
+        case Dynamic: {
             // For complex types, exact unique ID depends on nested types and/or parameters,
             // the easiest way is to lazy-compute unique ID from name once.
             // Here we do not care if multiple threads are computing value simultaneosly since it is both:
@@ -255,6 +259,10 @@ TypeRef Type::CreateLowCardinality(TypeRef item_type) {
 
 TypeRef Type::CreateMap(TypeRef key_type, TypeRef value_type) {
     return std::make_shared<MapType>(key_type, value_type);
+}
+
+TypeRef Type::CreateDynamic(size_t max_dynamic_types) {
+    return std::make_shared<DynamicType>(max_dynamic_types);
 }
 
 TypeRef Type::CreatePoint() {
@@ -463,6 +471,24 @@ MapType::MapType(TypeRef key_type, TypeRef value_type)
 
 std::string MapType::GetName() const {
     return std::string("map(") + key_type_->GetName() + ", " +value_type_->GetName() + ")";
+}
+
+/// class DynamicType
+DynamicType::DynamicType(size_t max_dynamic_types)
+    : Type(Dynamic)
+    , max_dynamic_types_(max_dynamic_types)
+{
+    if (max_dynamic_types_ > Type::MAX_DYNAMIC_TYPES_LIMIT) {
+        throw ValidationError("dynamic max_types is > " + std::to_string(Type::MAX_DYNAMIC_TYPES_LIMIT));
+    }
+}
+
+std::string DynamicType::GetName() const {
+    if (max_dynamic_types_ == Type::DEFAULT_DYNAMIC_MAX_TYPES) {
+        return "dynamic";
+    }
+
+    return "dynamic(max_types=" + std::to_string(max_dynamic_types_) + ")";
 }
 
 }  // namespace timeplus

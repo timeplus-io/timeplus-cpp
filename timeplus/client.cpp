@@ -609,6 +609,31 @@ bool Client::Impl::ReceivePacket(uint64_t* server_packet) {
         return true;
     }
 
+    case ServerCodes::Totals:
+    case ServerCodes::Extremes: {
+        // These packets carry an additional block payload.
+        // Parse and discard it to keep protocol stream aligned.
+        if constexpr (DMBS_PROTOCOL_REVISION >= DBMS_MIN_REVISION_WITH_TEMPORARY_TABLES) {
+            if (!WireFormat::SkipString(*input_)) {
+                return false;
+            }
+        }
+
+        Block ignored_block;
+        if (compression_ == CompressionState::Enable) {
+            CompressedInput compressed(input_.get());
+            if (!ReadBlock(compressed, &ignored_block)) {
+                return false;
+            }
+        } else {
+            if (!ReadBlock(*input_, &ignored_block)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     default:
         throw UnimplementedError("unimplemented " + std::to_string((int)packet_type));
         break;
@@ -618,24 +643,49 @@ bool Client::Impl::ReceivePacket(uint64_t* server_packet) {
 bool Client::Impl::ReadBlock(InputStream& input, Block* block) {
     // Additional information about block.
     if constexpr (DMBS_PROTOCOL_REVISION >= DBMS_MIN_REVISION_WITH_BLOCK_INFO) {
-        uint64_t num;
         BlockInfo info;
+        while (true) {
+            uint64_t field_num = 0;
+            if (!WireFormat::ReadUInt64(input, &field_num)) {
+                return false;
+            }
 
-        // BlockInfo
-        if (!WireFormat::ReadUInt64(input, &num)) {
-            return false;
-        }
-        if (!WireFormat::ReadFixed(input, &info.is_overflows)) {
-            return false;
-        }
-        if (!WireFormat::ReadUInt64(input, &num)) {
-            return false;
-        }
-        if (!WireFormat::ReadFixed(input, &info.bucket_num)) {
-            return false;
-        }
-        if (!WireFormat::ReadUInt64(input, &num)) {
-            return false;
+            if (field_num == 0) {
+                break;
+            }
+
+            switch (field_num) {
+                case 1: {
+                    if (!WireFormat::ReadFixed(input, &info.is_overflows)) {
+                        return false;
+                    }
+                    break;
+                }
+                case 2: {
+                    if (!WireFormat::ReadFixed(input, &info.bucket_num)) {
+                        return false;
+                    }
+                    break;
+                }
+                // Proton internal block-info fields.
+                case 100: {
+                    uint64_t ignored_flags = 0;
+                    if (!WireFormat::ReadFixed(input, &ignored_flags)) {
+                        return false;
+                    }
+                    break;
+                }
+                case 101:
+                case 102: {
+                    int64_t ignored_internal = 0;
+                    if (!WireFormat::ReadFixed(input, &ignored_internal)) {
+                        return false;
+                    }
+                    break;
+                }
+                default:
+                    throw ProtocolError("Unknown block info field number: " + std::to_string(field_num));
+            }
         }
 
         block->SetInfo(std::move(info));

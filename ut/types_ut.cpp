@@ -34,6 +34,8 @@ TEST(TypesCase, TypeName) {
     );
 
     ASSERT_EQ(Type::CreateMap(Type::CreateSimple<int32_t>(), Type::CreateString())->GetName(), "map(int32, string)");
+    ASSERT_EQ(Type::CreateDynamic()->GetName(), "dynamic");
+    ASSERT_EQ(Type::CreateDynamic(5)->GetName(), "dynamic(max_types=5)");
 }
 
 TEST(TypesCase, NullableType) {
@@ -97,14 +99,14 @@ TEST(TypesCase, IsEqual) {
         "array(uint8)",
         "array(string)",
         "array(nullable(low_cardinality(fixed_string(10000))))",
-        "array(enum8('ONE' = 1, 'TWO' = 2))"
+        "array(enum8('ONE' = 1, 'TWO' = 2))",
         "tuple(string, int8, date, datetime)",
         "nullable(tuple(string, int8, date, datetime))",
         "array(nullable(tuple(string, int8, date, datetime)))",
         "array(array(nullable(tuple(string, int8, date, datetime))))",
         "array(array(array(nullable(tuple(string, int8, date, datetime)))))",
-        "array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC')))))))"
-        "array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC'), tuple(low_cardinality(String), enum8('READ'=1, 'WRITE'=0))))))))",
+        "array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC')))))))",
+        "array(array(array(array(nullable(tuple(string, int8, date, datetime('UTC'), tuple(low_cardinality(string), enum8('READ'=1, 'WRITE'=0))))))))",
         "map(string, int8)",
         "map(string, tuple(string, int8, date, datetime))",
         "map(uuid, array(tuple(string, int8, date, datetime)))",
@@ -113,7 +115,9 @@ TEST(TypesCase, IsEqual) {
         "point",
         "ring",
         "polygon",
-        "multi_polygon"
+        "multi_polygon",
+        "dynamic",
+        "dynamic(max_types=5)"
     };
 
     // Check that Type::IsEqual returns true only if:

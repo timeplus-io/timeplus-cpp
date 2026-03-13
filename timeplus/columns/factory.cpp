@@ -3,6 +3,7 @@
 #include "array.h"
 #include "date.h"
 #include "decimal.h"
+#include "dynamic.h"
 #include "enum.h"
 #include "geo.h"
 #include "ip4.h"
@@ -41,6 +42,29 @@ const auto& GetASTChildElement(const TypeAst & ast, int position) {
         position = static_cast<int>(ast.elements.size() + position);
 
     return ast.elements[static_cast<size_t>(position)];
+}
+
+size_t ParseDynamicMaxTypes(const TypeAst& ast) {
+    if (ast.elements.empty()) {
+        return Type::DEFAULT_DYNAMIC_MAX_TYPES;
+    }
+
+    if (ast.elements.size() != 2) {
+        throw ValidationError(ast.name + " content is not correct");
+    }
+
+    const auto& key = GetASTChildElement(ast, 0);
+    const auto& value = GetASTChildElement(ast, 1);
+
+    if (key.meta != TypeAst::Terminal || key.name != "max_types" || value.meta != TypeAst::Number) {
+        throw ValidationError(ast.name + " content is not correct");
+    }
+
+    if (value.value < 0 || value.value > static_cast<int64_t>(Type::MAX_DYNAMIC_TYPES_LIMIT)) {
+        throw ValidationError("dynamic max_types is out of range");
+    }
+
+    return static_cast<size_t>(value.value);
 }
 
 static ColumnRef CreateTerminalColumn(const TypeAst& ast) {
@@ -122,6 +146,9 @@ static ColumnRef CreateTerminalColumn(const TypeAst& ast) {
 
     case Type::UUID:
         return std::make_shared<ColumnUUID>();
+
+    case Type::Dynamic:
+        return std::make_shared<ColumnDynamic>(ParseDynamicMaxTypes(ast));
 
     case Type::Point:
         return std::make_shared<ColumnPoint>();

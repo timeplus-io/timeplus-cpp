@@ -21,6 +21,7 @@ SET ( timeplus-cpp-ut-src
     connection_failed_client_test.cpp
     array_of_low_cardinality_tests.cpp
     CreateColumnByType_ut.cpp
+    column_dynamic_ut.cpp
     Column_ut.cpp
     roundtrip_column.cpp
     roundtrip_tests.cpp

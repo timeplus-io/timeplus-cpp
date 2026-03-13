@@ -64,6 +64,7 @@ static const std::unordered_map<std::string, Type::Code> kTypeCode = {
     { "decimal256",  Type::Decimal256 },
     { "low_cardinality", Type::LowCardinality },
     { "map",         Type::Map },
+    { "dynamic",     Type::Dynamic },
     { "point",       Type::Point },
     { "ring",        Type::Ring },
     { "polygon",     Type::Polygon },

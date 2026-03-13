@@ -81,6 +81,7 @@ TEST(ItemView, ErrorTypes) {
     EXPECT_ITEMVIEW_ERROR(Type::Code::Tuple, int);
     EXPECT_ITEMVIEW_ERROR(Type::Code::LowCardinality, int);
     EXPECT_ITEMVIEW_ERROR(Type::Code::Map, int);
+    EXPECT_ITEMVIEW_ERROR(Type::Code::Dynamic, int);
 }
 
 TEST(ItemView, TypeSizeMismatch) {
@@ -186,4 +187,3 @@ TEST(ItemView, TypeSizeMismatch) {
     EXPECT_ITEMVIEW_ERROR(Type::Code::Enum16, int64_t);
     EXPECT_ITEMVIEW_ERROR(Type::Code::Enum16, Int128);
 }
-
