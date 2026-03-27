@@ -3,11 +3,13 @@
 #include <timeplus/base/socket.h> // for ipv4-ipv6 platform-specific stuff
 #include <timeplus/columns/numeric.h>
 #include <timeplus/columns/uuid.h>
+#include <timeplus/columns/json.h>
 
 #include "utils.h"
 
 #include <vector>
 #include <random>
+#include <map>
 
 inline in_addr MakeIPv4(uint32_t ip) {
     static_assert(sizeof(in_addr) == sizeof(ip));
@@ -40,6 +42,7 @@ std::vector<in6_addr> MakeIPv6s();
 std::vector<timeplus::UUID> MakeUUIDs();
 // std::vector<timeplus::Int128> MakeInt128s();
 std::vector<timeplus::Int128> MakeDecimals(size_t precision, size_t scale);
+std::vector<std::unordered_map<std::string, timeplus::ColumnRef>> MakeJson();
 
 template <typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 inline std::vector<T> MakeNumbers() {

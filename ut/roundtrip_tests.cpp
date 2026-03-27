@@ -1,11 +1,14 @@
 #include <timeplus/client.h>
 
-#include "utils.h"
 #include "roundtrip_column.h"
+#include "utils.h"
+#include "value_generators.h"
 
 #include <gtest/gtest.h>
+#include <chrono>
 #include <map>
 #include <optional>
+#include <thread>
 
 using namespace timeplus;
 
@@ -321,6 +324,37 @@ TEST_P(RoundtripCase, RoundtripArrayLowCardinalityTString) {
 
     auto result_typed = RoundtripColumnValues(*client_, array)->As<TestColumn>();
     EXPECT_TRUE(CompareRecursive(*array, *result_typed));
+}
+
+TEST_P(RoundtripCase, RoundtripJson) {
+    client_->Execute("DROP STREAM IF EXISTS roundtrip_json");
+    client_->Execute("CREATE STREAM roundtrip_json (j json)");
+
+    Block block;
+    auto json = std::make_shared<ColumnJson>(MakeJson());
+    block.AppendColumn("j", json);
+
+    client_->Insert("roundtrip_json", block);
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    client_->Select("SELECT j::json FROM table(roundtrip_json)", [&json](const Block& block) {
+        if (block.GetRowCount() == 0) return;
+        auto rv = block[0]->As<ColumnJson>();
+        EXPECT_NE(rv, nullptr);
+
+        EXPECT_EQ(rv->Size(), 2u);
+
+        EXPECT_TRUE(CompareRecursive(*json->At("obj.c.e")->As<ColumnArrayT<ColumnString>>(),
+                                     *ColumnArrayT<ColumnString>::Wrap(std::move(rv->At("obj.c.e")))));
+        EXPECT_TRUE(CompareRecursive(*json->At("obj.c.f")->As<ColumnArrayT<ColumnInt64>>(),
+                                     *ColumnArrayT<ColumnInt64>::Wrap(std::move(rv->At("obj.c.f")))));
+        EXPECT_TRUE(CompareRecursive(*json->At("obj.a")->As<ColumnUInt32>(), *rv->At("obj.a")->As<ColumnUInt32>()));
+        EXPECT_TRUE(CompareRecursive(*json->At("obj.b")->As<ColumnString>(), *rv->At("obj.b")->As<ColumnString>()));
+        EXPECT_TRUE(CompareRecursive(*json->At("a.b.b.c")->As<ColumnFloat64>(), *rv->At("a.b.b.c")->As<ColumnFloat64>()));
+        EXPECT_TRUE(CompareRecursive(*json->At("`a.b.b`.c")->As<ColumnFloat64>(), *rv->At("`a.b.b`.c")->As<ColumnFloat64>()));
+    });
+
+    client_->Execute("DROP STREAM IF EXISTS roundtrip_json");
 }
 
 const auto LocalHostEndpoint = ClientOptions()

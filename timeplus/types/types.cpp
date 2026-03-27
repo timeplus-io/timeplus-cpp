@@ -55,6 +55,7 @@ const char* Type::TypeName(Type::Code code) {
         case Type::Code::UInt128:        return "uint128";
         case Type::Code::Int256:         return "int256";
         case Type::Code::UInt256:        return "uint256";
+        case Type::Code::Json:           return "json";
     }
 
     return "Unknown type";
@@ -87,6 +88,7 @@ std::string Type::GetName() const {
         case UInt128:
         case Int256:
         case UInt256:
+        case Json:
             return TypeName(code_);
         case FixedString:
             return As<FixedStringType>()->GetName();
@@ -149,6 +151,7 @@ uint64_t Type::GetTypeUniqueId() const {
         case UInt128:
         case Int256:
         case UInt256:
+        case Json:
             // For simple types, unique ID is the same as Type::Code
             return code_;
 
@@ -271,6 +274,10 @@ TypeRef Type::CreatePolygon() {
 
 TypeRef Type::CreateMultiPolygon() {
     return TypeRef(new Type(Type::MultiPolygon));
+}
+
+TypeRef Type::CreateJson() {
+    return TypeRef(new Type(Type::Json));
 }
 
 /// class ArrayType

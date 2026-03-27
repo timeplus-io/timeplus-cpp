@@ -111,6 +111,22 @@ std::vector<timeplus::Int64> MakeDateTimes() {
 //     };
 // }
 
+std::vector<std::unordered_map<std::string, ColumnRef>> MakeJson() {
+    auto ui = std::make_shared<ColumnUInt32>(std::vector<uint32_t>{(1u << 19)});
+    auto str = std::make_shared<ColumnString>(std::vector<std::string>{"timeplus"});
+    auto f1 = std::make_shared<ColumnFloat64>(std::vector<double>{3.1415});
+    auto f2 = std::make_shared<ColumnFloat64>(std::vector<double>{23.123});
+    auto arr1 = std::make_shared<ColumnArrayT<ColumnString>>(std::make_shared<ColumnString>());
+    arr1->Append(std::vector<std::string>{"timeplus", "proton"});
+    auto arr2 = std::make_shared<ColumnArrayT<ColumnInt64>>(std::make_shared<ColumnInt64>());
+    arr2->Append(std::vector<uint64_t>{123544, 123546});
+
+    auto j1 = std::unordered_map<std::string, ColumnRef>{{"obj.a", ui}, {"obj.b", str}, {"obj.c.e", arr1}, {"obj.c.f", arr2}};
+
+    auto j2 = std::unordered_map<std::string, ColumnRef>{{"a.b.b.c", f1}, {"`a.b.b`.c", f2}};
+    return {j1, j2};
+}
+
 std::vector<timeplus::Int128> MakeDecimals(size_t /*precision*/, size_t scale) {
     const auto scale_multiplier = static_cast<size_t>(std::pow(10, scale));
     const long long int rhs_value = 12345678910;

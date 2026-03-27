@@ -16,6 +16,7 @@
 #include "string.h"
 #include "tuple.h"
 #include "uuid.h"
+#include "json.h"
 
 
 #include "../types/type_parser.h"
@@ -134,6 +135,9 @@ static ColumnRef CreateTerminalColumn(const TypeAst& ast) {
 
     case Type::MultiPolygon:
         return std::make_shared<ColumnMultiPolygon>();
+
+    case Type::Json:
+        return std::make_shared<ColumnJson>();
 
     default:
         return nullptr;

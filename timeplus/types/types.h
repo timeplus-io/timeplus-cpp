@@ -64,7 +64,8 @@ public:
         UInt128,
         Int256,
         UInt256,
-        Decimal256
+        Decimal256,
+        Json
     };
 
     using EnumItem = std::pair<std::string /* name */, int16_t /* value */>;
@@ -149,6 +150,8 @@ public:
     static TypeRef CreatePolygon();
 
     static TypeRef CreateMultiPolygon();
+
+    static TypeRef CreateJson();
 
 private:
     uint64_t GetTypeUniqueId() const;
