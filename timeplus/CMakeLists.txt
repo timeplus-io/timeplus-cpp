@@ -21,6 +21,7 @@ SET ( timeplus-cpp-lib-src
     columns/numeric.cpp
     columns/map.cpp
     columns/string.cpp
+    columns/json.cpp
     columns/tuple.cpp
     columns/uuid.cpp
 
@@ -69,6 +70,7 @@ SET ( timeplus-cpp-lib-src
     columns/nullable.h
     columns/numeric.h
     columns/string.h
+    columns/json.h
     columns/tuple.h
     columns/utils.h
     columns/uuid.h
@@ -210,6 +212,7 @@ INSTALL(FILES columns/nullable.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/numeric.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/map.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/string.h DESTINATION include/timeplus/columns/)
+INSTALL(FILES columns/json.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/tuple.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/utils.h DESTINATION include/timeplus/columns/)
 INSTALL(FILES columns/uuid.h DESTINATION include/timeplus/columns/)

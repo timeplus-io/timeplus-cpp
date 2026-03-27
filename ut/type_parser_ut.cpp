@@ -14,6 +14,15 @@ TEST(TypeParserCase, ParseTerminals) {
     ASSERT_EQ(ast.code, Type::UInt8);
 }
 
+TEST(TypeParserCase, ParseJson) {
+    TypeAst ast;
+    ASSERT_TRUE(TypeParser("json").Parse(&ast));
+
+    ASSERT_EQ(ast.meta, TypeAst::Terminal);
+    ASSERT_EQ(ast.name, "json");
+    ASSERT_EQ(ast.code, Type::Json);
+}
+
 TEST(TypeParserCase, ParseFixedString) {
     TypeAst ast;
     TypeParser("fixed_string(24)").Parse(&ast);
@@ -196,6 +205,17 @@ TEST(TypeParserCase, LowCardinality_FixedString) {
     ASSERT_EQ(ast.elements[0].elements.size(), 1u);
     auto param = TypeAst{TypeAst::Number, Type::Void, "", 10, {}, {}};
     ASSERT_EQ(ast.elements[0].elements[0], param);
+}
+
+TEST(TypeParserCase, LowCardinality_Json) {
+    TypeAst ast;
+    ASSERT_TRUE(TypeParser("low_cardinality(json)").Parse(&ast));
+    ASSERT_EQ(ast.meta, TypeAst::LowCardinality);
+    ASSERT_EQ(ast.code, Type::LowCardinality);
+    ASSERT_EQ(ast.elements.size(), 1u);
+    ASSERT_EQ(ast.elements[0].meta, TypeAst::Terminal);
+    ASSERT_EQ(ast.elements[0].code, Type::Json);
+    ASSERT_EQ(ast.elements[0].name, "json");
 }
 
 TEST(TypeParserCase, SimpleAggregateFunction_UInt64) {

@@ -55,6 +55,7 @@ const char* Type::TypeName(Type::Code code) {
         case Type::Code::UInt128:        return "uint128";
         case Type::Code::Int256:         return "int256";
         case Type::Code::UInt256:        return "uint256";
+        case Type::Code::Json:           return "json";
     }
 
     return "Unknown type";
@@ -76,6 +77,7 @@ std::string Type::GetName() const {
         case Float32:
         case Float64:
         case String:
+        case Json:
         case IPv4:
         case IPv6:
         case Date:
@@ -138,6 +140,7 @@ uint64_t Type::GetTypeUniqueId() const {
         case Float32:
         case Float64:
         case String:
+        case Json:
         case IPv4:
         case IPv6:
         case Date:
@@ -233,6 +236,9 @@ TypeRef Type::CreateString(size_t n) {
     return TypeRef(new FixedStringType(n));
 }
 
+TypeRef Type::CreateJson() {
+    return TypeRef(new Type(Type::Json));
+}
 TypeRef Type::CreateTuple(const std::vector<TypeRef>& item_types) {
     return TypeRef(new TupleType(item_types));
 }
